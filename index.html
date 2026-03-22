@@ -279,19 +279,96 @@
                     </h2>
 
                     <div class="space-y-4">
-                        <div>
-                            <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">Bütçeniz</label>
-                            <div class="relative">
-                                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400">₺</span>
-                                <input type="number" id="budgetAmount" placeholder="0" step="0.01"
-                                    class="pl-10 w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 dark:text-white transition-all text-sm font-bold">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">Ay</label>
+                                <input type="month" id="budgetMonth"
+                                    class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 dark:text-white transition-all text-sm font-bold">
                             </div>
-                            <div class="text-[11px] text-slate-500 dark:text-slate-400 mt-2">Bu tutar, erken kapama planını hesaplamak için kullanılır.</div>
+
+                            <div class="sm:col-span-2 grid grid-cols-2 gap-3">
+                                <div class="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-700">
+                                    <div class="text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider">Bugün Kullanılabilir</div>
+                                    <div class="text-xl font-black text-slate-800 dark:text-slate-100 mt-1" id="budgetAvailableNow">0 ₺</div>
+                                </div>
+                                <div class="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-700">
+                                    <div class="text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider">Ay Sonu</div>
+                                    <div class="text-xl font-black text-slate-800 dark:text-slate-100 mt-1" id="budgetMonthEnd">0 ₺</div>
+                                </div>
+                            </div>
                         </div>
 
-                        <button onclick="saveBudget()" class="w-full flex justify-center items-center py-4 px-4 border border-transparent rounded-xl shadow-lg shadow-blue-600/20 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 transition-all active:scale-[0.98]">
-                            <i class="fa-solid fa-check mr-2"></i> Kaydet
-                        </button>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div class="bg-emerald-50 dark:bg-emerald-900/10 p-4 rounded-2xl border border-emerald-100 dark:border-emerald-900/30">
+                                <div class="text-[11px] font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">Toplam Gelir</div>
+                                <div class="text-lg font-black text-emerald-800 dark:text-emerald-300 mt-1" id="budgetTotalIncome">0 ₺</div>
+                            </div>
+                            <div class="bg-red-50 dark:bg-red-900/10 p-4 rounded-2xl border border-red-100 dark:border-red-900/30">
+                                <div class="text-[11px] font-black text-red-700 dark:text-red-400 uppercase tracking-wider">Toplam Gider</div>
+                                <div class="text-lg font-black text-red-700 dark:text-red-300 mt-1" id="budgetTotalExpense">0 ₺</div>
+                            </div>
+                        </div>
+
+                        <div class="bg-purple-50 dark:bg-purple-900/10 p-4 rounded-2xl border border-purple-100 dark:border-purple-900/30">
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="text-xs font-black text-purple-700 dark:text-purple-300 uppercase tracking-wider">Tavsiye</div>
+                                <button onclick="updateBudgetUI()" class="text-xs font-bold text-purple-700 dark:text-purple-300 hover:underline">Yenile</button>
+                            </div>
+                            <div id="budgetAdviceList" class="space-y-2"></div>
+                            <div id="noBudgetAdvice" class="hidden text-center py-4 text-purple-600/70 dark:text-purple-300/70 text-sm">
+                                Henüz tavsiye yok.
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-700">
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="text-xs font-black text-slate-600 dark:text-slate-300 uppercase tracking-wider">Gelir / Gider Planı</div>
+                                <div class="flex items-center gap-3">
+                                    <button onclick="importInstallmentsForSelectedMonth()" class="text-xs font-bold text-slate-600 dark:text-slate-300 hover:underline">Taksitleri Ekle</button>
+                                    <button onclick="selectCurrentMonth()" class="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline">Bu Ay</button>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-6 gap-3 mb-3">
+                                <div class="sm:col-span-2">
+                                    <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1">Tarih</label>
+                                    <input type="date" id="budgetTxDate"
+                                        class="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 dark:text-white transition-all text-sm font-bold">
+                                </div>
+                                <div class="sm:col-span-1">
+                                    <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1">Tür</label>
+                                    <select id="budgetTxType"
+                                        class="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 dark:text-white transition-all text-sm font-bold">
+                                        <option value="income">Gelir</option>
+                                        <option value="expense">Gider</option>
+                                    </select>
+                                </div>
+                                <div class="sm:col-span-2">
+                                    <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1">Tutar</label>
+                                    <div class="relative">
+                                        <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400">₺</span>
+                                        <input type="number" id="budgetTxAmount" placeholder="0" step="0.01"
+                                            class="pl-10 w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 dark:text-white transition-all text-sm font-bold">
+                                    </div>
+                                </div>
+                                <div class="sm:col-span-1 flex items-end">
+                                    <button onclick="addBudgetTransaction()" class="w-full flex justify-center items-center h-[46px] px-4 rounded-xl text-sm font-bold bg-blue-600 hover:bg-blue-700 text-white transition-all active:scale-[0.98]">
+                                        Ekle
+                                    </button>
+                                </div>
+                                <div class="sm:col-span-6">
+                                    <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1">Açıklama</label>
+                                    <input type="text" id="budgetTxNote" placeholder="Örn: Maaş, Kira, Taksit"
+                                        class="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 dark:text-white transition-all text-sm font-bold">
+                                </div>
+                            </div>
+
+                            <div id="budgetTxList" class="space-y-2"></div>
+
+                            <div id="noBudgetTx" class="hidden text-center py-6 text-slate-400 dark:text-slate-500 text-sm">
+                                Henüz gelir / gider eklenmedi.
+                            </div>
+                        </div>
 
                         <button onclick="switchScreen('recommendations')" class="w-full flex justify-center items-center py-3 px-4 rounded-xl text-sm font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 transition-colors">
                             Önerilere Git
@@ -317,7 +394,10 @@
                     
                     <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:w-auto">
                         <button onclick="switchScreen('budget')" class="flex items-center justify-between gap-3 w-full sm:w-auto bg-slate-50 dark:bg-slate-900/50 px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700">
-                            <span class="text-xs text-slate-500 dark:text-slate-400 font-semibold">Bütçe</span>
+                            <div class="min-w-0">
+                                <div class="text-xs text-slate-500 dark:text-slate-400 font-semibold">Bütçe</div>
+                                <div class="text-[11px] font-bold text-slate-500 dark:text-slate-400 truncate" id="currentBudgetMonthLabel">-</div>
+                            </div>
                             <span class="text-sm font-black text-slate-800 dark:text-slate-100" id="currentBudgetLabel">0 ₺</span>
                         </button>
                         <button onclick="calculateSmartRecommendations()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-3 rounded-xl shadow-sm text-sm font-bold transition-all active:scale-95 whitespace-nowrap">
@@ -586,7 +666,7 @@
                 navRecs.className = "flex flex-col items-center justify-center w-full h-full text-purple-600 dark:text-purple-400 transition-all transform scale-105";
                 
                 // Auto calculate if budget exists
-                const budget = getBudget();
+                const budget = getBudgetForRecommendations();
                 if (budget > 0) {
                     try {
                         calculateSmartRecommendations();
@@ -640,7 +720,12 @@
         };
 
         const backupData = () => {
-            const dataStr = JSON.stringify(loans, null, 2);
+            const payload = {
+                loans,
+                budgetTransactions: getBudgetTransactionsStore(),
+                budgetSelectedMonth: getSelectedBudgetMonth()
+            };
+            const dataStr = JSON.stringify(payload, null, 2);
             
             // Android Integration
             if (window.Android && window.Android.saveBackup) {
@@ -669,12 +754,21 @@
             const reader = new FileReader();
             reader.onload = (e) => {
                 try {
-                    const importedLoans = JSON.parse(e.target.result);
+                    const imported = JSON.parse(e.target.result);
+                    const importedLoans = Array.isArray(imported) ? imported : (imported && Array.isArray(imported.loans) ? imported.loans : null);
+                    const importedBudgetTransactions = imported && imported.budgetTransactions && typeof imported.budgetTransactions === 'object' ? imported.budgetTransactions : null;
+                    const importedBudgetPlan = imported && Array.isArray(imported.budgetPlan) ? imported.budgetPlan : null;
+                    const importedSelectedMonth = imported && typeof imported.budgetSelectedMonth === 'string' ? imported.budgetSelectedMonth : null;
+
                     if (Array.isArray(importedLoans)) {
                         toggleSettingsModal(); // Close settings first
                         showConfirmModal('Verileri Geri Yükle', 'Mevcut veriler SİLİNECEK ve yedekten geri yüklenecek. Bu işlem geri alınamaz. Devam edilsin mi?', () => {
                             loans = importedLoans;
                             localStorage.setItem('loans', JSON.stringify(loans));
+                            if (importedBudgetTransactions) localStorage.setItem('budgetTransactions', JSON.stringify(importedBudgetTransactions));
+                            if (importedBudgetPlan) localStorage.setItem('budgetPlan', JSON.stringify(importedBudgetPlan));
+                            if (importedSelectedMonth) localStorage.setItem('budgetSelectedMonth', importedSelectedMonth);
+                            updateBudgetUI();
                             updateUI(); // Function to refresh charts and list
                             render(); // Make sure render is called
                             showConfirmModal('Başarılı', 'Veriler başarıyla geri yüklendi.', () => {}, 'success');
@@ -808,32 +902,515 @@
             localStorage.setItem('loans', JSON.stringify(loans));
         };
 
-        const getBudget = () => {
-            const value = parseFloat(localStorage.getItem('budget'));
-            return Number.isFinite(value) ? value : 0;
+        const toMonthKey = (date = new Date()) => {
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            return `${y}-${m}`;
+        };
+
+        const formatMonthKey = (monthKey) => {
+            try {
+                const [y, m] = monthKey.split('-').map((x) => parseInt(x, 10));
+                if (!y || !m) return monthKey;
+                const d = new Date(y, m - 1, 1);
+                return new Intl.DateTimeFormat('tr-TR', { month: 'long', year: 'numeric' }).format(d);
+            } catch {
+                return monthKey;
+            }
+        };
+
+        const makeId = () => `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+
+        const toISODate = (date = new Date()) => date.toISOString().slice(0, 10);
+
+        const getBudgetTransactionsStore = () => {
+            try {
+                const raw = localStorage.getItem('budgetTransactions');
+                const parsed = raw ? JSON.parse(raw) : {};
+                return parsed && typeof parsed === 'object' ? parsed : {};
+            } catch {
+                return {};
+            }
+        };
+
+        const setBudgetTransactionsStore = (store) => {
+            localStorage.setItem('budgetTransactions', JSON.stringify(store));
+        };
+
+        const getLegacyBudgetAmountForMonth = (monthKey) => {
+            try {
+                const raw = localStorage.getItem('budgetPlan');
+                const parsed = raw ? JSON.parse(raw) : null;
+                if (Array.isArray(parsed)) {
+                    const item = parsed.find((x) => x && x.month === monthKey);
+                    const amount = item ? parseFloat(item.amount) : NaN;
+                    if (Number.isFinite(amount) && amount > 0) return amount;
+                }
+            } catch {}
+
+            if (monthKey === toMonthKey()) {
+                const legacy = parseFloat(localStorage.getItem('budget'));
+                if (Number.isFinite(legacy) && legacy > 0) return legacy;
+            }
+            return 0;
+        };
+
+        const normalizeBudgetTx = (tx) => {
+            const type = tx && tx.type === 'expense' ? 'expense' : 'income';
+            const date = tx && typeof tx.date === 'string' ? tx.date.slice(0, 10) : toISODate();
+            const amount = Math.max(0, parseFloat(tx && tx.amount) || 0);
+            const note = tx && typeof tx.note === 'string' ? tx.note : '';
+            const id = tx && typeof tx.id === 'string' ? tx.id : makeId();
+            return { id, date, type, amount, note };
+        };
+
+        const ensureBudgetMonthInitialized = (monthKey) => {
+            const store = getBudgetTransactionsStore();
+            if (!Array.isArray(store[monthKey])) store[monthKey] = [];
+            if (store[monthKey].length === 0) {
+                const legacyAmount = getLegacyBudgetAmountForMonth(monthKey);
+                if (legacyAmount > 0) {
+                    store[monthKey].push(normalizeBudgetTx({
+                        id: `legacy-${monthKey}`,
+                        date: `${monthKey}-01`,
+                        type: 'income',
+                        amount: legacyAmount,
+                        note: 'Gelir'
+                    }));
+                    setBudgetTransactionsStore(store);
+                }
+            }
+            return store;
+        };
+
+        const getSelectedBudgetMonth = () => {
+            const month = localStorage.getItem('budgetSelectedMonth');
+            return month && month.length >= 7 ? month : toMonthKey();
+        };
+
+        const setSelectedBudgetMonth = (monthKey) => {
+            if (!monthKey || monthKey.length < 7) return;
+            localStorage.setItem('budgetSelectedMonth', monthKey);
+        };
+
+        const getTransactionsForMonth = (monthKey) => {
+            const store = ensureBudgetMonthInitialized(monthKey);
+            const list = Array.isArray(store[monthKey]) ? store[monthKey] : [];
+            return list.map(normalizeBudgetTx);
+        };
+
+        const setTransactionsForMonth = (monthKey, txs) => {
+            const store = getBudgetTransactionsStore();
+            store[monthKey] = Array.isArray(txs) ? txs.map(normalizeBudgetTx) : [];
+            setBudgetTransactionsStore(store);
+        };
+
+        const addTransactionToMonth = (monthKey, tx) => {
+            const txs = getTransactionsForMonth(monthKey);
+            txs.push(normalizeBudgetTx(tx));
+            setTransactionsForMonth(monthKey, txs);
+        };
+
+        const deleteTransactionFromMonth = (monthKey, txId) => {
+            const txs = getTransactionsForMonth(monthKey).filter((x) => x.id !== txId);
+            setTransactionsForMonth(monthKey, txs);
+        };
+
+        const computeBudgetMonth = (monthKey) => {
+            const txs = getTransactionsForMonth(monthKey)
+                .filter((x) => x.date && x.date.length === 10)
+                .sort((a, b) => (a.date > b.date ? 1 : a.date < b.date ? -1 : 0));
+
+            const todayMonth = toMonthKey();
+            const todayISO = toISODate();
+            const isCurrentMonth = monthKey === todayMonth;
+
+            let totalIncome = 0;
+            let totalExpense = 0;
+            let balance = 0;
+            let balanceNow = 0;
+
+            const rows = txs.map((tx) => {
+                const signed = tx.type === 'expense' ? -Math.abs(tx.amount) : Math.abs(tx.amount);
+                if (signed >= 0) totalIncome += signed;
+                else totalExpense += Math.abs(signed);
+
+                balance += signed;
+                if (!isCurrentMonth || tx.date <= todayISO) {
+                    balanceNow += signed;
+                }
+                return { ...tx, signed, balanceAfter: balance };
+            });
+
+            return {
+                monthKey,
+                rows,
+                totalIncome,
+                totalExpense,
+                monthEndBalance: balance,
+                availableNow: isCurrentMonth ? balanceNow : balance
+            };
+        };
+
+        const renderBudgetTxList = (monthKey) => {
+            const list = document.getElementById('budgetTxList');
+            const empty = document.getElementById('noBudgetTx');
+            if (!list || !empty) return;
+
+            const { rows } = computeBudgetMonth(monthKey);
+            list.innerHTML = '';
+
+            if (rows.length === 0) {
+                empty.classList.remove('hidden');
+                return;
+            }
+            empty.classList.add('hidden');
+
+            rows.forEach((row) => {
+                const el = document.createElement('div');
+                const isIncome = row.type === 'income';
+                const amountClass = isIncome ? 'text-emerald-700 dark:text-emerald-300' : 'text-red-700 dark:text-red-300';
+                const badgeClass = isIncome ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300' : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300';
+
+                el.className = 'flex items-center justify-between gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white/60 dark:bg-slate-800/40';
+                el.innerHTML = `
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-2">
+                            <div class="text-xs font-black text-slate-700 dark:text-slate-200">${formatDate(row.date)}</div>
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-black ${badgeClass}">${isIncome ? 'Gelir' : 'Gider'}</span>
+                        </div>
+                        <div class="text-[11px] text-slate-500 dark:text-slate-400 font-bold truncate">${row.note || '-'}</div>
+                        <div class="text-[11px] text-slate-500 dark:text-slate-400 font-bold">Bakiye: ${formatCurrency(row.balanceAfter)}</div>
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0">
+                        <div class="text-sm font-black ${amountClass}">${formatCurrency(row.signed)}</div>
+                        <button onclick="deleteBudgetTransaction('${row.id}')" class="w-9 h-9 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-200 flex items-center justify-center" title="Sil">
+                            <i class="fa-solid fa-trash text-xs"></i>
+                        </button>
+                    </div>
+                `;
+                list.appendChild(el);
+            });
+        };
+
+        function computeSmartPlans(budget) {
+            if (!Number.isFinite(budget) || budget <= 0) {
+                return {
+                    profitPlan: { selected: [], totalCost: 0, totalProfit: 0 },
+                    reliefPlan: { selected: [], totalCost: 0, totalRelief: 0 }
+                };
+            }
+
+            const activeLoans = loans
+                .filter((l) => !l.isEarlyClosed)
+                .map((loan) => {
+                    const totalInst = loan.totalInstallments > 0 ? loan.totalInstallments : 1;
+                    const remainingInst = loan.remainingInstallments || 0;
+                    const monthly = parseFloat(loan.monthlyPayment) || 0;
+                    const loanAmount = parseFloat(loan.loanAmount) || 0;
+
+                    const remainingPrincipal = (remainingInst / totalInst) * loanAmount;
+
+                    let cost = remainingPrincipal;
+                    if (
+                        loan.earlyCloseAmount !== undefined &&
+                        loan.earlyCloseAmount !== null &&
+                        !isNaN(parseFloat(loan.earlyCloseAmount)) &&
+                        parseFloat(loan.earlyCloseAmount) > 0
+                    ) {
+                        cost = parseFloat(loan.earlyCloseAmount);
+                    }
+
+                    const totalFuturePayment = remainingInst * monthly;
+                    const profit = totalFuturePayment - cost;
+                    const relief = monthly;
+
+                    return {
+                        ...loan,
+                        cost,
+                        profit,
+                        relief,
+                        originalIndex: loans.indexOf(loan)
+                    };
+                });
+
+            const profitSorted = [...activeLoans].sort((a, b) => b.profit - a.profit);
+            const profitPlan = { selected: [], totalCost: 0, totalProfit: 0 };
+            let currentBudgetProfit = budget;
+
+            profitSorted.forEach((loan) => {
+                if (loan.cost <= currentBudgetProfit && loan.profit > 0) {
+                    profitPlan.selected.push(loan);
+                    profitPlan.totalCost += loan.cost;
+                    profitPlan.totalProfit += loan.profit;
+                    currentBudgetProfit -= loan.cost;
+                }
+            });
+
+            const reliefSorted = [...activeLoans].sort((a, b) => {
+                const costA = a.cost > 0 ? a.cost : 0.01;
+                const costB = b.cost > 0 ? b.cost : 0.01;
+                const efficiencyA = a.relief / costA;
+                const efficiencyB = b.relief / costB;
+                return efficiencyB - efficiencyA;
+            });
+
+            const reliefPlan = { selected: [], totalCost: 0, totalRelief: 0 };
+            let currentBudgetRelief = budget;
+
+            reliefSorted.forEach((loan) => {
+                if (loan.cost <= currentBudgetRelief) {
+                    reliefPlan.selected.push(loan);
+                    reliefPlan.totalCost += loan.cost;
+                    reliefPlan.totalRelief += loan.relief;
+                    currentBudgetRelief -= loan.cost;
+                }
+            });
+
+            return { profitPlan, reliefPlan };
+        }
+
+        const renderBudgetAdvice = (monthKey) => {
+            const list = document.getElementById('budgetAdviceList');
+            const empty = document.getElementById('noBudgetAdvice');
+            if (!list || !empty) return;
+
+            const summary = computeBudgetMonth(monthKey);
+            const rows = summary.rows || [];
+
+            const items = [];
+
+            if (rows.length > 0) {
+                let minRow = rows[0];
+                let maxRow = rows[0];
+                rows.forEach((r) => {
+                    if (r.balanceAfter < minRow.balanceAfter) minRow = r;
+                    if (r.balanceAfter > maxRow.balanceAfter) maxRow = r;
+                });
+
+                if (minRow.balanceAfter < 0) {
+                    items.push({
+                        tone: 'warn',
+                        title: 'Açık Uyarısı',
+                        text: `${formatDate(minRow.date)} tarihinde bakiye ${formatCurrency(minRow.balanceAfter)} oluyor. Bu tarihe kadar en az ${formatCurrency(Math.abs(minRow.balanceAfter))} ek gelir veya gider azaltımı gerekir.`
+                    });
+                }
+
+                const nowBudget = summary.availableNow;
+                const nowPlans = computeSmartPlans(nowBudget);
+                if (nowPlans.profitPlan.selected.length > 0) {
+                    const top = nowPlans.profitPlan.selected[0];
+                    items.push({
+                        tone: 'ok',
+                        title: 'Bugün Erken Kapama',
+                        text: `Bugün kullanılabilir ${formatCurrency(nowBudget)} ile en kârlı seçenek: ${top.bankName} (tahmini kâr ${formatCurrency(top.profit)}).`
+                    });
+                } else if (nowPlans.reliefPlan.selected.length > 0) {
+                    const top = nowPlans.reliefPlan.selected[0];
+                    items.push({
+                        tone: 'ok',
+                        title: 'Bugün Rahatlama',
+                        text: `Bugün kullanılabilir ${formatCurrency(nowBudget)} ile aylık en çok düşüren seçenek: ${top.bankName} (${formatCurrency(top.relief)}/Ay).`
+                    });
+                }
+
+                if (maxRow.balanceAfter > nowBudget && maxRow.date) {
+                    const futureBudget = maxRow.balanceAfter;
+                    const futurePlans = computeSmartPlans(futureBudget);
+                    if (futurePlans.profitPlan.selected.length > 0) {
+                        const top = futurePlans.profitPlan.selected[0];
+                        items.push({
+                            tone: 'info',
+                            title: 'Ay İçi Fırsat',
+                            text: `${formatDate(maxRow.date)} tarihinde bakiye ${formatCurrency(futureBudget)} seviyesine çıkıyor. O gün en kârlı seçenek: ${top.bankName} (tahmini kâr ${formatCurrency(top.profit)}).`
+                        });
+                    } else if (futurePlans.reliefPlan.selected.length > 0) {
+                        const top = futurePlans.reliefPlan.selected[0];
+                        items.push({
+                            tone: 'info',
+                            title: 'Ay İçi Fırsat',
+                            text: `${formatDate(maxRow.date)} tarihinde bakiye ${formatCurrency(futureBudget)} seviyesine çıkıyor. O gün aylık en çok düşüren seçenek: ${top.bankName} (${formatCurrency(top.relief)}/Ay).`
+                        });
+                    }
+                }
+            }
+
+            list.innerHTML = '';
+            if (items.length === 0) {
+                empty.classList.remove('hidden');
+                return;
+            }
+            empty.classList.add('hidden');
+
+            items.slice(0, 3).forEach((item) => {
+                const el = document.createElement('div');
+                const toneClass =
+                    item.tone === 'warn'
+                        ? 'bg-red-50 dark:bg-red-900/10 border-red-100 dark:border-red-900/30 text-red-800 dark:text-red-200'
+                        : item.tone === 'ok'
+                        ? 'bg-emerald-50 dark:bg-emerald-900/10 border-emerald-100 dark:border-emerald-900/30 text-emerald-900 dark:text-emerald-200'
+                        : 'bg-slate-50 dark:bg-slate-900/10 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200';
+
+                el.className = `p-3 rounded-xl border ${toneClass}`;
+                el.innerHTML = `
+                    <div class="text-xs font-black mb-1">${item.title}</div>
+                    <div class="text-[11px] font-bold leading-relaxed opacity-90">${item.text}</div>
+                `;
+                list.appendChild(el);
+            });
         };
 
         const updateBudgetUI = () => {
+            const selectedMonth = getSelectedBudgetMonth();
+            const summary = computeBudgetMonth(selectedMonth);
+
             const currentBudgetLabel = document.getElementById('currentBudgetLabel');
-            if (currentBudgetLabel) currentBudgetLabel.textContent = formatCurrency(getBudget());
+            if (currentBudgetLabel) currentBudgetLabel.textContent = formatCurrency(summary.availableNow);
+            const currentBudgetMonthLabel = document.getElementById('currentBudgetMonthLabel');
+            if (currentBudgetMonthLabel) currentBudgetMonthLabel.textContent = formatMonthKey(selectedMonth);
 
-            const budgetAmountInput = document.getElementById('budgetAmount');
-            if (budgetAmountInput) budgetAmountInput.value = getBudget() > 0 ? String(getBudget()) : '';
+            const budgetMonthInput = document.getElementById('budgetMonth');
+            if (budgetMonthInput) {
+                budgetMonthInput.value = selectedMonth;
+                if (!budgetMonthInput.dataset.bound) {
+                    budgetMonthInput.dataset.bound = '1';
+                    budgetMonthInput.addEventListener('change', () => {
+                        if (!budgetMonthInput.value) return;
+                        setSelectedBudgetMonth(budgetMonthInput.value);
+                        updateBudgetUI();
+                    });
+                }
+            }
+
+            const availableNowEl = document.getElementById('budgetAvailableNow');
+            if (availableNowEl) availableNowEl.textContent = formatCurrency(summary.availableNow);
+            const monthEndEl = document.getElementById('budgetMonthEnd');
+            if (monthEndEl) monthEndEl.textContent = formatCurrency(summary.monthEndBalance);
+            const totalIncomeEl = document.getElementById('budgetTotalIncome');
+            if (totalIncomeEl) totalIncomeEl.textContent = formatCurrency(summary.totalIncome);
+            const totalExpenseEl = document.getElementById('budgetTotalExpense');
+            if (totalExpenseEl) totalExpenseEl.textContent = formatCurrency(summary.totalExpense);
+
+            const txDateInput = document.getElementById('budgetTxDate');
+            if (txDateInput) {
+                const [y, m] = selectedMonth.split('-').map((x) => parseInt(x, 10));
+                const first = new Date(y, (m || 1) - 1, 1);
+                const last = new Date(y, (m || 1), 0);
+                const min = toISODate(first);
+                const max = toISODate(last);
+                txDateInput.min = min;
+                txDateInput.max = max;
+                const todayISO = toISODate();
+                const defaultDate = selectedMonth === toMonthKey() ? todayISO : min;
+                if (!txDateInput.value || txDateInput.value.slice(0, 7) !== selectedMonth) {
+                    txDateInput.value = defaultDate;
+                }
+            }
+
+            localStorage.setItem('budget', String(summary.availableNow));
+            renderBudgetTxList(selectedMonth);
+            renderBudgetAdvice(selectedMonth);
         };
 
-        window.saveBudget = () => {
-            const input = document.getElementById('budgetAmount');
-            if (!input) return;
-            const budget = parseFloat(input.value) || 0;
-            localStorage.setItem('budget', String(budget));
+        window.selectCurrentMonth = () => {
+            setSelectedBudgetMonth(toMonthKey());
             updateBudgetUI();
-            showConfirmModal('Başarılı', 'Bütçe kaydedildi.', () => {}, 'success');
         };
+
+        window.addBudgetTransaction = () => {
+            const monthKey = getSelectedBudgetMonth();
+            const dateInput = document.getElementById('budgetTxDate');
+            const typeInput = document.getElementById('budgetTxType');
+            const amountInput = document.getElementById('budgetTxAmount');
+            const noteInput = document.getElementById('budgetTxNote');
+            if (!dateInput || !typeInput || !amountInput || !noteInput) return;
+
+            const date = (dateInput.value || '').slice(0, 10);
+            if (!date || date.slice(0, 7) !== monthKey) {
+                showConfirmModal('Hata', 'Tarih seçili ayın içinde olmalı.', () => {}, 'danger');
+                return;
+            }
+
+            const type = typeInput.value === 'expense' ? 'expense' : 'income';
+            const amount = Math.max(0, parseFloat(amountInput.value) || 0);
+            if (amount <= 0) {
+                showConfirmModal('Hata', 'Tutar 0’dan büyük olmalı.', () => {}, 'danger');
+                return;
+            }
+
+            addTransactionToMonth(monthKey, { date, type, amount, note: noteInput.value || '' });
+            amountInput.value = '';
+            noteInput.value = '';
+            updateBudgetUI();
+        };
+
+        window.deleteBudgetTransaction = (txId) => {
+            const monthKey = getSelectedBudgetMonth();
+            deleteTransactionFromMonth(monthKey, txId);
+            updateBudgetUI();
+        };
+
+        const addMonths = (date, months) => {
+            const d = new Date(date);
+            d.setMonth(d.getMonth() + months);
+            return d;
+        };
+
+        const getInstallmentTransactionsForMonth = (monthKey) => {
+            const items = [];
+            loans
+                .filter((l) => !l.isEarlyClosed && (l.remainingInstallments || 0) > 0 && l.loanDate)
+                .forEach((loan) => {
+                    const total = Math.max(1, loan.totalInstallments || 1);
+                    const remaining = Math.max(0, loan.remainingInstallments || 0);
+                    const paid = Math.max(0, total - remaining);
+                    const monthlyPayment = Math.max(0, parseFloat(loan.monthlyPayment) || 0);
+                    if (monthlyPayment <= 0) return;
+
+                    const start = new Date(loan.loanDate);
+                    for (let k = 1; k <= remaining; k += 1) {
+                        const due = addMonths(start, paid + k);
+                        const dueMonth = toMonthKey(due);
+                        if (dueMonth !== monthKey) continue;
+                        items.push({
+                            date: toISODate(due),
+                            type: 'expense',
+                            amount: monthlyPayment,
+                            note: `${loan.bankName} Taksit`
+                        });
+                    }
+                });
+            return items;
+        };
+
+        window.importInstallmentsForSelectedMonth = () => {
+            const monthKey = getSelectedBudgetMonth();
+            const existing = getTransactionsForMonth(monthKey);
+            const imported = getInstallmentTransactionsForMonth(monthKey);
+
+            if (imported.length === 0) {
+                showConfirmModal('Bilgi', 'Bu ay için eklenecek taksit bulunamadı.', () => {}, 'info');
+                return;
+            }
+
+            const keyOf = (x) => `${x.date}|${x.type}|${x.amount}|${x.note}`;
+            const existingKeys = new Set(existing.map(keyOf));
+            imported.forEach((x) => {
+                if (!existingKeys.has(keyOf(x))) {
+                    addTransactionToMonth(monthKey, x);
+                }
+            });
+
+            updateBudgetUI();
+            showConfirmModal('Başarılı', 'Taksitler eklendi.', () => {}, 'success');
+        };
+
+        const getBudgetForRecommendations = () => computeBudgetMonth(getSelectedBudgetMonth()).availableNow;
 
         // Smart Recommendations Logic
         const calculateSmartRecommendations = () => {
             try {
-                const budget = getBudget();
+                const budget = getBudgetForRecommendations();
                 const resultsContainer = document.getElementById('recommendationResults');
                 const noRecContainer = document.getElementById('noRecommendation');
                 const noBudgetContainer = document.getElementById('noBudget');
@@ -846,71 +1423,7 @@
                 }
                 noBudgetContainer.classList.add('hidden');
 
-                // Prepare Data
-                const activeLoans = loans.filter(l => !l.isEarlyClosed).map(loan => {
-                    // Safe calculations to avoid NaN/Infinity
-                    const totalInst = loan.totalInstallments > 0 ? loan.totalInstallments : 1;
-                    const remainingInst = loan.remainingInstallments || 0;
-                    const monthly = parseFloat(loan.monthlyPayment) || 0;
-                    const loanAmount = parseFloat(loan.loanAmount) || 0;
-                    
-                    const remainingPrincipal = (remainingInst / totalInst) * loanAmount;
-                    
-                    let cost = remainingPrincipal;
-                    // Use early close amount if set and valid
-                    if (loan.earlyCloseAmount !== undefined && loan.earlyCloseAmount !== null && !isNaN(parseFloat(loan.earlyCloseAmount)) && parseFloat(loan.earlyCloseAmount) > 0) {
-                        cost = parseFloat(loan.earlyCloseAmount);
-                    }
-
-                    const totalFuturePayment = remainingInst * monthly;
-                    const profit = totalFuturePayment - cost;
-                    const relief = monthly;
-
-                    return {
-                        ...loan,
-                        cost: cost,
-                        profit: profit,
-                        relief: relief,
-                        originalIndex: loans.indexOf(loan)
-                    };
-                });
-
-                // Strategy 1: Max Profit
-                const profitSorted = [...activeLoans].sort((a, b) => b.profit - a.profit);
-                const profitPlan = { selected: [], totalCost: 0, totalProfit: 0 };
-                let currentBudgetProfit = budget;
-                
-                profitSorted.forEach(loan => {
-                    // Only select if profitable and within budget
-                    if (loan.cost <= currentBudgetProfit && loan.profit > 0) {
-                        profitPlan.selected.push(loan);
-                        profitPlan.totalCost += loan.cost;
-                        profitPlan.totalProfit += loan.profit;
-                        currentBudgetProfit -= loan.cost;
-                    }
-                });
-
-                // Strategy 2: Max Monthly Relief
-                const reliefSorted = [...activeLoans].sort((a, b) => {
-                    // Efficiency: Relief per Cost unit
-                    const costA = a.cost > 0 ? a.cost : 0.01; // Avoid div by zero
-                    const costB = b.cost > 0 ? b.cost : 0.01;
-                    const efficiencyA = a.relief / costA;
-                    const efficiencyB = b.relief / costB;
-                    return efficiencyB - efficiencyA;
-                });
-                
-                const reliefPlan = { selected: [], totalCost: 0, totalRelief: 0 };
-                let currentBudgetRelief = budget;
-                
-                reliefSorted.forEach(loan => {
-                    if (loan.cost <= currentBudgetRelief) {
-                        reliefPlan.selected.push(loan);
-                        reliefPlan.totalCost += loan.cost;
-                        reliefPlan.totalRelief += loan.relief;
-                        currentBudgetRelief -= loan.cost;
-                    }
-                });
+                const { profitPlan, reliefPlan } = computeSmartPlans(budget);
 
                 // Render Results
                 const renderList = (plan, containerId, type) => {
@@ -1249,13 +1762,17 @@
                     render();
 
                     // Live Budget Update
-                    const currentBudget = getBudget();
-                    if (currentBudget > 0) {
-                        const nextBudget = Math.max(0, currentBudget - closeCost);
-                        localStorage.setItem('budget', String(nextBudget));
-                        updateBudgetUI();
-                        calculateSmartRecommendations();
-                    }
+                    const now = new Date();
+                    const monthKey = toMonthKey(now);
+                    addTransactionToMonth(monthKey, {
+                        date: toISODate(now),
+                        type: 'expense',
+                        amount: Math.abs(closeCost),
+                        note: `Erken Kapama - ${loan.bankName}`
+                    });
+                    setSelectedBudgetMonth(monthKey);
+                    updateBudgetUI();
+                    calculateSmartRecommendations();
                 },
                 'info'
             );
@@ -1476,7 +1993,7 @@
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=2');
+                navigator.serviceWorker.register('./sw.js?v=5');
             });
         }
     </script>
