@@ -1,1 +1,0 @@
-# borc-takipp
