@@ -271,108 +271,111 @@
 
         <!-- BUDGET SCREEN -->
         <div id="budgetScreen" class="hidden animate-fade-in">
-            <div class="max-w-xl mx-auto">
-                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
-                    <h2 class="text-xl font-bold mb-6 text-slate-800 dark:text-slate-200 flex items-center gap-2">
-                        <span class="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 p-2 rounded-lg"><i class="fa-solid fa-wallet text-sm"></i></span>
-                        Bütçe
-                    </h2>
-
-                    <div class="space-y-4">
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-1 space-y-6">
+                    <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+                        <h3 class="text-lg font-bold mb-4 text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                            <span class="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 p-1.5 rounded-lg">
+                                <i class="fa-solid fa-coins text-xs"></i>
+                            </span>
+                            Gelir Ekle
+                        </h3>
+                        <form id="incomeForm" class="space-y-3">
                             <div>
-                                <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">Ay</label>
-                                <input type="month" id="budgetMonth"
-                                    class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 dark:text-white transition-all text-sm font-bold">
+                                <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Açıklama</label>
+                                <input id="incomeName" type="text" placeholder="Örn: Maaş" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-400/50 dark:text-white text-sm">
                             </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Tutar</label>
+                                    <input id="incomeAmount" type="number" step="0.01" placeholder="0.00" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-400/50 dark:text-white text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Gün (1-31)</label>
+                                    <input id="incomeDay" type="number" min="1" max="31" placeholder="10" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-400/50 dark:text-white text-sm">
+                                </div>
+                            </div>
+                            <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-4 py-2.5 rounded-xl shadow-sm shadow-emerald-600/20 transition-all active:scale-95">
+                                Ekle
+                            </button>
+                        </form>
+                        <div id="incomeList" class="mt-4 space-y-2"></div>
+                    </div>
 
-                            <div class="sm:col-span-2 grid grid-cols-2 gap-3">
-                                <div class="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-700">
-                                    <div class="text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider">Bugün Kullanılabilir</div>
-                                    <div class="text-xl font-black text-slate-800 dark:text-slate-100 mt-1" id="budgetAvailableNow">0 ₺</div>
+                    <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+                        <h3 class="text-lg font-bold mb-4 text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                            <span class="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 p-1.5 rounded-lg">
+                                <i class="fa-solid fa-credit-card text-xs"></i>
+                            </span>
+                            Kredi Taksitleri (Bu Ay)
+                        </h3>
+                        <div class="text-xs text-slate-500 dark:text-slate-400 mb-3">
+                            Borçlar sekmesindeki aktif kredilerin, bu aya denk gelen sıradaki taksitleri otomatik listelenir.
+                        </div>
+                        <div id="loanExpenseList" class="space-y-2"></div>
+                    </div>
+
+                    <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+                        <h3 class="text-lg font-bold mb-4 text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                            <span class="bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 p-1.5 rounded-lg">
+                                <i class="fa-solid fa-basket-shopping text-xs"></i>
+                            </span>
+                            Diğer Gider Ekle
+                        </h3>
+                        <form id="expenseForm" class="space-y-3">
+                            <div>
+                                <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Açıklama</label>
+                                <input id="expenseName" type="text" placeholder="Örn: Kira" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-400/50 dark:text-white text-sm">
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Tutar</label>
+                                    <input id="expenseAmount" type="number" step="0.01" placeholder="0.00" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-400/50 dark:text-white text-sm">
                                 </div>
-                                <div class="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-700">
-                                    <div class="text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider">Ay Sonu</div>
-                                    <div class="text-xl font-black text-slate-800 dark:text-slate-100 mt-1" id="budgetMonthEnd">0 ₺</div>
+                                <div>
+                                    <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Gün (1-31)</label>
+                                    <input id="expenseDay" type="number" min="1" max="31" placeholder="1" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-400/50 dark:text-white text-sm">
                                 </div>
+                            </div>
+                            <button type="submit" class="w-full bg-red-500 hover:bg-red-600 text-white text-sm font-semibold px-4 py-2.5 rounded-xl shadow-sm shadow-red-600/20 transition-all active:scale-95">
+                                Ekle
+                            </button>
+                        </form>
+                        <div id="expenseList" class="mt-4 space-y-2"></div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-2">
+                    <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                                <span class="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 p-1.5 rounded-lg">
+                                    <i class="fa-solid fa-calendar-days text-xs"></i>
+                                </span>
+                                Aylık Ödeme Planı (Gelire Göre)
+                            </h3>
+                            <button id="btnGeneratePlan" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2.5 rounded-xl shadow-sm shadow-blue-600/20 transition-all active:scale-95">
+                                Planı Oluştur
+                            </button>
+                        </div>
+                        <div class="text-xs text-slate-500 dark:text-slate-400 mb-4">
+                            Aynı ay içindeki gelir günleri ile gider/borç ödeme günleri eşleştirilerek öneri oluşturulur. Kümülatif bakiye negatifse ilgili gün uyarı ile vurgulanır.
+                        </div>
+                        <div id="planTotals" class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+                            <div class="p-3 rounded-xl border border-emerald-100 dark:border-emerald-900/30 bg-emerald-50/60 dark:bg-emerald-900/10">
+                                <div class="text-[10px] uppercase tracking-wide text-emerald-700 dark:text-emerald-300 font-semibold mb-1">Toplam Gelir</div>
+                                <div id="planTotalIncome" class="text-sm font-bold text-emerald-700 dark:text-emerald-300">0 ₺</div>
+                            </div>
+                            <div class="p-3 rounded-xl border border-red-100 dark:border-red-900/30 bg-red-50/60 dark:bg-red-900/10">
+                                <div class="text-[10px] uppercase tracking-wide text-red-700 dark:text-red-300 font-semibold mb-1">Toplam Gider</div>
+                                <div id="planTotalExpense" class="text-sm font-bold text-red-700 dark:text-red-300">0 ₺</div>
+                            </div>
+                            <div class="p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
+                                <div class="text-[10px] uppercase tracking-wide text-slate-600 dark:text-slate-300 font-semibold mb-1">Kalan Bütçe</div>
+                                <div id="planRemainingBudget" class="text-sm font-bold text-emerald-600 dark:text-emerald-400">0 ₺</div>
                             </div>
                         </div>
-
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <div class="bg-emerald-50 dark:bg-emerald-900/10 p-4 rounded-2xl border border-emerald-100 dark:border-emerald-900/30">
-                                <div class="text-[11px] font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">Toplam Gelir</div>
-                                <div class="text-lg font-black text-emerald-800 dark:text-emerald-300 mt-1" id="budgetTotalIncome">0 ₺</div>
-                            </div>
-                            <div class="bg-red-50 dark:bg-red-900/10 p-4 rounded-2xl border border-red-100 dark:border-red-900/30">
-                                <div class="text-[11px] font-black text-red-700 dark:text-red-400 uppercase tracking-wider">Toplam Gider</div>
-                                <div class="text-lg font-black text-red-700 dark:text-red-300 mt-1" id="budgetTotalExpense">0 ₺</div>
-                            </div>
-                        </div>
-
-                        <div class="bg-purple-50 dark:bg-purple-900/10 p-4 rounded-2xl border border-purple-100 dark:border-purple-900/30">
-                            <div class="flex items-center justify-between mb-3">
-                                <div class="text-xs font-black text-purple-700 dark:text-purple-300 uppercase tracking-wider">Tavsiye</div>
-                                <button onclick="updateBudgetUI()" class="text-xs font-bold text-purple-700 dark:text-purple-300 hover:underline">Yenile</button>
-                            </div>
-                            <div id="budgetAdviceList" class="space-y-2"></div>
-                            <div id="noBudgetAdvice" class="hidden text-center py-4 text-purple-600/70 dark:text-purple-300/70 text-sm">
-                                Henüz tavsiye yok.
-                            </div>
-                        </div>
-
-                        <div class="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-700">
-                            <div class="flex items-center justify-between mb-3">
-                                <div class="text-xs font-black text-slate-600 dark:text-slate-300 uppercase tracking-wider">Gelir / Gider Planı</div>
-                                <div class="flex items-center gap-3">
-                                    <button onclick="importInstallmentsForSelectedMonth()" class="text-xs font-bold text-slate-600 dark:text-slate-300 hover:underline">Taksitleri Ekle</button>
-                                    <button onclick="selectCurrentMonth()" class="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline">Bu Ay</button>
-                                </div>
-                            </div>
-
-                            <div class="grid grid-cols-1 sm:grid-cols-6 gap-3 mb-3">
-                                <div class="sm:col-span-2">
-                                    <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1">Tarih</label>
-                                    <input type="date" id="budgetTxDate"
-                                        class="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 dark:text-white transition-all text-sm font-bold">
-                                </div>
-                                <div class="sm:col-span-1">
-                                    <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1">Tür</label>
-                                    <select id="budgetTxType"
-                                        class="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 dark:text-white transition-all text-sm font-bold">
-                                        <option value="income">Gelir</option>
-                                        <option value="expense">Gider</option>
-                                    </select>
-                                </div>
-                                <div class="sm:col-span-2">
-                                    <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1">Tutar</label>
-                                    <div class="relative">
-                                        <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400">₺</span>
-                                        <input type="number" id="budgetTxAmount" placeholder="0" step="0.01"
-                                            class="pl-10 w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 dark:text-white transition-all text-sm font-bold">
-                                    </div>
-                                </div>
-                                <div class="sm:col-span-1 flex items-end">
-                                    <button onclick="addBudgetTransaction()" class="w-full flex justify-center items-center h-[46px] px-4 rounded-xl text-sm font-bold bg-blue-600 hover:bg-blue-700 text-white transition-all active:scale-[0.98]">
-                                        Ekle
-                                    </button>
-                                </div>
-                                <div class="sm:col-span-6">
-                                    <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-1">Açıklama</label>
-                                    <input type="text" id="budgetTxNote" placeholder="Örn: Maaş, Kira, Taksit"
-                                        class="w-full px-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 dark:text-white transition-all text-sm font-bold">
-                                </div>
-                            </div>
-
-                            <div id="budgetTxList" class="space-y-2"></div>
-
-                            <div id="noBudgetTx" class="hidden text-center py-6 text-slate-400 dark:text-slate-500 text-sm">
-                                Henüz gelir / gider eklenmedi.
-                            </div>
-                        </div>
-
-                        <button onclick="switchScreen('recommendations')" class="w-full flex justify-center items-center py-3 px-4 rounded-xl text-sm font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 transition-colors">
-                            Önerilere Git
-                        </button>
+                        <div id="planResults" class="space-y-3"></div>
                     </div>
                 </div>
             </div>
@@ -393,13 +396,11 @@
                     </div>
                     
                     <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:w-auto">
-                        <button onclick="switchScreen('budget')" class="flex items-center justify-between gap-3 w-full sm:w-auto bg-slate-50 dark:bg-slate-900/50 px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700">
-                            <div class="min-w-0">
-                                <div class="text-xs text-slate-500 dark:text-slate-400 font-semibold">Bütçe</div>
-                                <div class="text-[11px] font-bold text-slate-500 dark:text-slate-400 truncate" id="currentBudgetMonthLabel">-</div>
-                            </div>
-                            <span class="text-sm font-black text-slate-800 dark:text-slate-100" id="currentBudgetLabel">0 ₺</span>
-                        </button>
+                        <div class="relative w-full sm:w-60">
+                            <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400">₺</span>
+                            <input id="budgetInput" type="number" step="0.01" placeholder="Bütçe girin"
+                                class="pl-10 w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500 dark:text-white transition-all text-sm font-bold">
+                        </div>
                         <button onclick="calculateSmartRecommendations()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-3 rounded-xl shadow-sm text-sm font-bold transition-all active:scale-95 whitespace-nowrap">
                             Analiz Et
                         </button>
@@ -677,6 +678,7 @@
             } else if (screen === 'budget') {
                 budgetScreen.classList.remove('hidden');
                 navBudget.className = "flex flex-col items-center justify-center w-full h-full text-blue-600 dark:text-blue-400 transition-all transform scale-105";
+                updateBudgetUI();
             }
         };
 
@@ -722,8 +724,8 @@
         const backupData = () => {
             const payload = {
                 loans,
-                budgetTransactions: getBudgetTransactionsStore(),
-                budgetSelectedMonth: getSelectedBudgetMonth()
+                incomes,
+                otherExpenses
             };
             const dataStr = JSON.stringify(payload, null, 2);
             
@@ -755,19 +757,19 @@
             reader.onload = (e) => {
                 try {
                     const imported = JSON.parse(e.target.result);
-                    const importedLoans = Array.isArray(imported) ? imported : (imported && Array.isArray(imported.loans) ? imported.loans : null);
-                    const importedBudgetTransactions = imported && imported.budgetTransactions && typeof imported.budgetTransactions === 'object' ? imported.budgetTransactions : null;
-                    const importedBudgetPlan = imported && Array.isArray(imported.budgetPlan) ? imported.budgetPlan : null;
-                    const importedSelectedMonth = imported && typeof imported.budgetSelectedMonth === 'string' ? imported.budgetSelectedMonth : null;
+                    const importedLoans = Array.isArray(imported)
+                        ? imported
+                        : (imported && Array.isArray(imported.loans) ? imported.loans : null);
+                    const importedIncomes = imported && Array.isArray(imported.incomes) ? imported.incomes : null;
+                    const importedOtherExpenses = imported && Array.isArray(imported.otherExpenses) ? imported.otherExpenses : null;
 
                     if (Array.isArray(importedLoans)) {
                         toggleSettingsModal(); // Close settings first
                         showConfirmModal('Verileri Geri Yükle', 'Mevcut veriler SİLİNECEK ve yedekten geri yüklenecek. Bu işlem geri alınamaz. Devam edilsin mi?', () => {
                             loans = importedLoans;
-                            localStorage.setItem('loans', JSON.stringify(loans));
-                            if (importedBudgetTransactions) localStorage.setItem('budgetTransactions', JSON.stringify(importedBudgetTransactions));
-                            if (importedBudgetPlan) localStorage.setItem('budgetPlan', JSON.stringify(importedBudgetPlan));
-                            if (importedSelectedMonth) localStorage.setItem('budgetSelectedMonth', importedSelectedMonth);
+                            incomes = importedIncomes || [];
+                            otherExpenses = importedOtherExpenses || [];
+                            saveState();
                             updateBudgetUI();
                             updateUI(); // Function to refresh charts and list
                             render(); // Make sure render is called
@@ -800,6 +802,8 @@
 
         // State
         let loans = JSON.parse(localStorage.getItem('loans')) || [];
+        let incomes = JSON.parse(localStorage.getItem('incomes')) || [];
+        let otherExpenses = JSON.parse(localStorage.getItem('otherExpenses')) || [];
 
         // DOM Elements
         const form = document.getElementById('loanForm');
@@ -900,197 +904,272 @@
 
         const saveState = () => {
             localStorage.setItem('loans', JSON.stringify(loans));
+            localStorage.setItem('incomes', JSON.stringify(incomes));
+            localStorage.setItem('otherExpenses', JSON.stringify(otherExpenses));
         };
 
-        const toMonthKey = (date = new Date()) => {
-            const y = date.getFullYear();
-            const m = String(date.getMonth() + 1).padStart(2, '0');
-            return `${y}-${m}`;
-        };
+        // -------- Budget (Income/Expense) Helpers --------
+        const renderBudgetLists = () => {
+            const incomeList = document.getElementById('incomeList');
+            const expenseList = document.getElementById('expenseList');
+            const loanExpenseList = document.getElementById('loanExpenseList');
 
-        const formatMonthKey = (monthKey) => {
-            try {
-                const [y, m] = monthKey.split('-').map((x) => parseInt(x, 10));
-                if (!y || !m) return monthKey;
-                const d = new Date(y, m - 1, 1);
-                return new Intl.DateTimeFormat('tr-TR', { month: 'long', year: 'numeric' }).format(d);
-            } catch {
-                return monthKey;
-            }
-        };
-
-        const makeId = () => `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-
-        const toISODate = (date = new Date()) => date.toISOString().slice(0, 10);
-
-        const getBudgetTransactionsStore = () => {
-            try {
-                const raw = localStorage.getItem('budgetTransactions');
-                const parsed = raw ? JSON.parse(raw) : {};
-                return parsed && typeof parsed === 'object' ? parsed : {};
-            } catch {
-                return {};
-            }
-        };
-
-        const setBudgetTransactionsStore = (store) => {
-            localStorage.setItem('budgetTransactions', JSON.stringify(store));
-        };
-
-        const getLegacyBudgetAmountForMonth = (monthKey) => {
-            try {
-                const raw = localStorage.getItem('budgetPlan');
-                const parsed = raw ? JSON.parse(raw) : null;
-                if (Array.isArray(parsed)) {
-                    const item = parsed.find((x) => x && x.month === monthKey);
-                    const amount = item ? parseFloat(item.amount) : NaN;
-                    if (Number.isFinite(amount) && amount > 0) return amount;
-                }
-            } catch {}
-
-            if (monthKey === toMonthKey()) {
-                const legacy = parseFloat(localStorage.getItem('budget'));
-                if (Number.isFinite(legacy) && legacy > 0) return legacy;
-            }
-            return 0;
-        };
-
-        const normalizeBudgetTx = (tx) => {
-            const type = tx && tx.type === 'expense' ? 'expense' : 'income';
-            const date = tx && typeof tx.date === 'string' ? tx.date.slice(0, 10) : toISODate();
-            const amount = Math.max(0, parseFloat(tx && tx.amount) || 0);
-            const note = tx && typeof tx.note === 'string' ? tx.note : '';
-            const id = tx && typeof tx.id === 'string' ? tx.id : makeId();
-            return { id, date, type, amount, note };
-        };
-
-        const ensureBudgetMonthInitialized = (monthKey) => {
-            const store = getBudgetTransactionsStore();
-            if (!Array.isArray(store[monthKey])) store[monthKey] = [];
-            if (store[monthKey].length === 0) {
-                const legacyAmount = getLegacyBudgetAmountForMonth(monthKey);
-                if (legacyAmount > 0) {
-                    store[monthKey].push(normalizeBudgetTx({
-                        id: `legacy-${monthKey}`,
-                        date: `${monthKey}-01`,
-                        type: 'income',
-                        amount: legacyAmount,
-                        note: 'Gelir'
-                    }));
-                    setBudgetTransactionsStore(store);
+            if (incomeList) {
+                incomeList.innerHTML = '';
+                if (incomes.length === 0) {
+                    incomeList.innerHTML = '<div class="text-xs text-slate-400">Kayıtlı gelir yok.</div>';
+                } else {
+                    incomes.forEach((it, idx) => {
+                        const div = document.createElement('div');
+                        div.className = 'flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-700/30 rounded-lg border border-slate-100 dark:border-slate-700';
+                        div.innerHTML = `
+                            <div class="text-xs">
+                                <div class="font-bold text-slate-700 dark:text-slate-200">${it.name || 'Gelir'}</div>
+                                <div class="text-slate-500 dark:text-slate-400"><span class="font-bold text-emerald-600 dark:text-emerald-400">+${formatCurrency(it.amount)}</span> • Ayın ${it.day}. günü</div>
+                            </div>
+                            <button class="text-red-500 hover:text-red-600 text-xs px-2 py-1 rounded-md bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800" data-del-income="${idx}">
+                                Sil
+                            </button>
+                        `;
+                        incomeList.appendChild(div);
+                    });
+                    incomeList.querySelectorAll('[data-del-income]').forEach((btn) => {
+                        btn.addEventListener('click', (e) => {
+                            const i = parseInt(e.currentTarget.getAttribute('data-del-income'), 10);
+                            incomes.splice(i, 1);
+                            saveState();
+                            renderBudgetLists();
+                            generateBudgetPlan();
+                        });
+                    });
                 }
             }
-            return store;
-        };
 
-        const getSelectedBudgetMonth = () => {
-            const month = localStorage.getItem('budgetSelectedMonth');
-            return month && month.length >= 7 ? month : toMonthKey();
-        };
+            if (loanExpenseList) {
+                loanExpenseList.innerHTML = '';
+                const now = new Date();
+                const year = now.getFullYear();
+                const month = now.getMonth();
+                const items = [];
 
-        const setSelectedBudgetMonth = (monthKey) => {
-            if (!monthKey || monthKey.length < 7) return;
-            localStorage.setItem('budgetSelectedMonth', monthKey);
-        };
+                loans.forEach((loan) => {
+                    if (loan.isEarlyClosed || loan.remainingInstallments <= 0) return;
+                    const nextDate = calculateNextPaymentDate(loan.loanDate, loan.totalInstallments, loan.remainingInstallments);
+                    if (nextDate.getFullYear() === year && nextDate.getMonth() === month) {
+                        items.push({
+                            bankName: loan.bankName,
+                            day: nextDate.getDate(),
+                            amount: parseFloat(loan.monthlyPayment) || 0
+                        });
+                    }
+                });
 
-        const getTransactionsForMonth = (monthKey) => {
-            const store = ensureBudgetMonthInitialized(monthKey);
-            const list = Array.isArray(store[monthKey]) ? store[monthKey] : [];
-            return list.map(normalizeBudgetTx);
-        };
-
-        const setTransactionsForMonth = (monthKey, txs) => {
-            const store = getBudgetTransactionsStore();
-            store[monthKey] = Array.isArray(txs) ? txs.map(normalizeBudgetTx) : [];
-            setBudgetTransactionsStore(store);
-        };
-
-        const addTransactionToMonth = (monthKey, tx) => {
-            const txs = getTransactionsForMonth(monthKey);
-            txs.push(normalizeBudgetTx(tx));
-            setTransactionsForMonth(monthKey, txs);
-        };
-
-        const deleteTransactionFromMonth = (monthKey, txId) => {
-            const txs = getTransactionsForMonth(monthKey).filter((x) => x.id !== txId);
-            setTransactionsForMonth(monthKey, txs);
-        };
-
-        const computeBudgetMonth = (monthKey) => {
-            const txs = getTransactionsForMonth(monthKey)
-                .filter((x) => x.date && x.date.length === 10)
-                .sort((a, b) => (a.date > b.date ? 1 : a.date < b.date ? -1 : 0));
-
-            const todayMonth = toMonthKey();
-            const todayISO = toISODate();
-            const isCurrentMonth = monthKey === todayMonth;
-
-            let totalIncome = 0;
-            let totalExpense = 0;
-            let balance = 0;
-            let balanceNow = 0;
-
-            const rows = txs.map((tx) => {
-                const signed = tx.type === 'expense' ? -Math.abs(tx.amount) : Math.abs(tx.amount);
-                if (signed >= 0) totalIncome += signed;
-                else totalExpense += Math.abs(signed);
-
-                balance += signed;
-                if (!isCurrentMonth || tx.date <= todayISO) {
-                    balanceNow += signed;
+                if (items.length === 0) {
+                    loanExpenseList.innerHTML = '<div class="text-xs text-slate-400">Bu ay için taksit görünmüyor.</div>';
+                } else {
+                    items.sort((a, b) => a.day - b.day);
+                    items.forEach((it) => {
+                        const div = document.createElement('div');
+                        div.className = 'flex items-center justify-between p-2 bg-red-50/60 dark:bg-red-900/20 rounded-lg border border-red-100 dark:border-red-800';
+                        div.innerHTML = `
+                            <div class="text-xs">
+                                <div class="font-bold text-slate-700 dark:text-slate-200">${it.bankName}</div>
+                                <div class="text-slate-600 dark:text-slate-400">Ayın ${it.day}. günü • <span class="font-bold text-red-600 dark:text-red-400">-${formatCurrency(it.amount)}</span></div>
+                            </div>
+                            <div class="text-[11px] font-bold text-red-700 dark:text-red-300">-${formatCurrency(it.amount)}</div>
+                        `;
+                        loanExpenseList.appendChild(div);
+                    });
                 }
-                return { ...tx, signed, balanceAfter: balance };
+            }
+
+            if (expenseList) {
+                expenseList.innerHTML = '';
+                if (otherExpenses.length === 0) {
+                    expenseList.innerHTML = '<div class="text-xs text-slate-400">Kayıtlı gider yok.</div>';
+                } else {
+                    otherExpenses.forEach((it, idx) => {
+                        const div = document.createElement('div');
+                        div.className = 'flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-700/30 rounded-lg border border-slate-100 dark:border-slate-700';
+                        div.innerHTML = `
+                            <div class="text-xs">
+                                <div class="font-bold text-slate-700 dark:text-slate-200">${it.name || 'Gider'}</div>
+                                <div class="text-slate-500 dark:text-slate-400"><span class="font-bold text-red-600 dark:text-red-400">-${formatCurrency(it.amount)}</span> • Ayın ${it.day}. günü</div>
+                            </div>
+                            <button class="text-red-500 hover:text-red-600 text-xs px-2 py-1 rounded-md bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800" data-del-expense="${idx}">
+                                Sil
+                            </button>
+                        `;
+                        expenseList.appendChild(div);
+                    });
+                    expenseList.querySelectorAll('[data-del-expense]').forEach((btn) => {
+                        btn.addEventListener('click', (e) => {
+                            const i = parseInt(e.currentTarget.getAttribute('data-del-expense'), 10);
+                            otherExpenses.splice(i, 1);
+                            saveState();
+                            renderBudgetLists();
+                            generateBudgetPlan();
+                        });
+                    });
+                }
+            }
+        };
+
+        const addIncome = (e) => {
+            e.preventDefault();
+            const name = document.getElementById('incomeName').value.trim();
+            const amount = parseFloat(document.getElementById('incomeAmount').value);
+            const day = parseInt(document.getElementById('incomeDay').value, 10);
+            if (!amount || !day || day < 1 || day > 31) return;
+            incomes.push({ name, amount, day });
+            saveState();
+            e.target.reset();
+            renderBudgetLists();
+            generateBudgetPlan();
+        };
+
+        const addOtherExpense = (e) => {
+            e.preventDefault();
+            const name = document.getElementById('expenseName').value.trim();
+            const amount = parseFloat(document.getElementById('expenseAmount').value);
+            const day = parseInt(document.getElementById('expenseDay').value, 10);
+            if (!amount || !day || day < 1 || day > 31) return;
+            otherExpenses.push({ name, amount, day });
+            saveState();
+            e.target.reset();
+            renderBudgetLists();
+            generateBudgetPlan();
+        };
+
+        const generateBudgetPlan = () => {
+            const container = document.getElementById('planResults');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = now.getMonth();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+            const incomeByDay = Array(daysInMonth + 1).fill(0);
+            const expenseByDay = Array(daysInMonth + 1).fill(0);
+            const incomeItemsByDay = Array.from({ length: daysInMonth + 1 }, () => []);
+            const expenseItemsByDay = Array.from({ length: daysInMonth + 1 }, () => []);
+
+            incomes.forEach((i) => {
+                const d = Math.min(Math.max(1, parseInt(i.day, 10)), daysInMonth);
+                const amt = parseFloat(i.amount) || 0;
+                incomeByDay[d] += amt;
+                incomeItemsByDay[d].push({ label: i.name || 'Gelir', amount: amt, type: 'income' });
             });
 
-            return {
-                monthKey,
-                rows,
-                totalIncome,
-                totalExpense,
-                monthEndBalance: balance,
-                availableNow: isCurrentMonth ? balanceNow : balance
-            };
-        };
+            otherExpenses.forEach((x) => {
+                const d = Math.min(Math.max(1, parseInt(x.day, 10)), daysInMonth);
+                const amt = parseFloat(x.amount) || 0;
+                expenseByDay[d] += amt;
+                expenseItemsByDay[d].push({ label: x.name || 'Gider', amount: amt, type: 'expense' });
+            });
 
-        const renderBudgetTxList = (monthKey) => {
-            const list = document.getElementById('budgetTxList');
-            const empty = document.getElementById('noBudgetTx');
-            if (!list || !empty) return;
+            loans.forEach((loan) => {
+                if (loan.isEarlyClosed || loan.remainingInstallments <= 0) return;
+                const nextDate = calculateNextPaymentDate(loan.loanDate, loan.totalInstallments, loan.remainingInstallments);
+                if (nextDate.getFullYear() === year && nextDate.getMonth() === month) {
+                    const d = nextDate.getDate();
+                    const amt = parseFloat(loan.monthlyPayment) || 0;
+                    expenseByDay[d] += amt;
+                    expenseItemsByDay[d].push({ label: `Kredi: ${loan.bankName}`, amount: amt, type: 'loan' });
+                }
+            });
 
-            const { rows } = computeBudgetMonth(monthKey);
-            list.innerHTML = '';
+            const totalIncome = incomeByDay.reduce((a, b) => a + b, 0);
+            const totalExpense = expenseByDay.reduce((a, b) => a + b, 0);
+            const remaining = totalIncome - totalExpense;
 
-            if (rows.length === 0) {
-                empty.classList.remove('hidden');
-                return;
+            const totalIncomeEl = document.getElementById('planTotalIncome');
+            const totalExpenseEl = document.getElementById('planTotalExpense');
+            const remainingEl = document.getElementById('planRemainingBudget');
+            if (totalIncomeEl) totalIncomeEl.textContent = formatCurrency(totalIncome);
+            if (totalExpenseEl) totalExpenseEl.textContent = formatCurrency(totalExpense);
+            if (remainingEl) {
+                remainingEl.textContent = formatCurrency(remaining);
+                remainingEl.className = `text-sm font-bold ${remaining >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`;
             }
-            empty.classList.add('hidden');
 
-            rows.forEach((row) => {
-                const el = document.createElement('div');
-                const isIncome = row.type === 'income';
-                const amountClass = isIncome ? 'text-emerald-700 dark:text-emerald-300' : 'text-red-700 dark:text-red-300';
-                const badgeClass = isIncome ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300' : 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300';
+            let balance = 0;
+            for (let d = 1; d <= daysInMonth; d += 1) {
+                const inc = incomeByDay[d];
+                const exp = expenseByDay[d];
+                if (inc === 0 && exp === 0) continue;
+                balance += inc - exp;
+                const risky = balance < 0;
 
-                el.className = 'flex items-center justify-between gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white/60 dark:bg-slate-800/40';
-                el.innerHTML = `
-                    <div class="min-w-0">
-                        <div class="flex items-center gap-2">
-                            <div class="text-xs font-black text-slate-700 dark:text-slate-200">${formatDate(row.date)}</div>
-                            <span class="px-2 py-0.5 rounded-full text-[10px] font-black ${badgeClass}">${isIncome ? 'Gelir' : 'Gider'}</span>
+                const dayBox = document.createElement('div');
+                dayBox.className = `p-3 rounded-xl border shadow-sm ${risky ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' : 'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700'}`;
+
+                const header = `
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-lg flex items-center justify-center ${risky ? 'bg-red-100 text-red-600 dark:bg-red-900/40 dark:text-red-300' : 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300'}">
+                                <i class="fa-solid ${risky ? 'fa-triangle-exclamation' : 'fa-calendar-day'} text-sm"></i>
+                            </div>
+                            <div>
+                                <div class="text-xs font-bold text-slate-700 dark:text-slate-200">${d}.${month + 1}.${year}</div>
+                                <div class="text-[11px] text-slate-500 dark:text-slate-400">
+                                    Gelir: <span class="font-bold text-emerald-600 dark:text-emerald-400">+${formatCurrency(inc)}</span>
+                                    •
+                                    Gider: <span class="font-bold text-red-600 dark:text-red-400">-${formatCurrency(exp)}</span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="text-[11px] text-slate-500 dark:text-slate-400 font-bold truncate">${row.note || '-'}</div>
-                        <div class="text-[11px] text-slate-500 dark:text-slate-400 font-bold">Bakiye: ${formatCurrency(row.balanceAfter)}</div>
-                    </div>
-                    <div class="flex items-center gap-2 shrink-0">
-                        <div class="text-sm font-black ${amountClass}">${formatCurrency(row.signed)}</div>
-                        <button onclick="deleteBudgetTransaction('${row.id}')" class="w-9 h-9 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-200 flex items-center justify-center" title="Sil">
-                            <i class="fa-solid fa-trash text-xs"></i>
-                        </button>
+                        <div class="text-right">
+                            <div class="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400">Bakiye</div>
+                            <div class="font-bold ${risky ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}">${formatCurrency(balance)}</div>
+                        </div>
                     </div>
                 `;
-                list.appendChild(el);
-            });
+
+                const incomeItems = incomeItemsByDay[d]
+                    .map((it) => `
+                        <span class="text-[11px] px-2 py-1 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                            ${it.label} • +${formatCurrency(it.amount)}
+                        </span>
+                    `)
+                    .join(' ');
+
+                const expenseItems = expenseItemsByDay[d]
+                    .map((it) => `
+                        <span class="text-[11px] px-2 py-1 rounded-lg border bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800">
+                            ${it.label} • -${formatCurrency(it.amount)}
+                        </span>
+                    `)
+                    .join(' ');
+
+                const lists = `
+                    <div class="mt-3 space-y-2">
+                        ${incomeItems ? `<div class="flex flex-wrap gap-1.5 items-center"><span class="text-[10px] font-bold text-slate-500 dark:text-slate-400">Gelir:</span> ${incomeItems}</div>` : ''}
+                        ${expenseItems ? `<div class="flex flex-wrap gap-1.5 items-center"><span class="text-[10px] font-bold text-slate-500 dark:text-slate-400">Gider:</span> ${expenseItems}</div>` : ''}
+                    </div>
+                `;
+
+                dayBox.innerHTML = header + lists;
+                container.appendChild(dayBox);
+            }
+
+            if (container.innerHTML.trim() === '') {
+                container.innerHTML = '<div class="text-sm text-slate-500 dark:text-slate-400">Bu ay için kayıtlı gelir veya gider bulunmuyor.</div>';
+            }
+        };
+
+        const incomeFormEl = document.getElementById('incomeForm');
+        if (incomeFormEl) incomeFormEl.addEventListener('submit', addIncome);
+        const expenseFormEl = document.getElementById('expenseForm');
+        if (expenseFormEl) expenseFormEl.addEventListener('submit', addOtherExpense);
+        const btnGeneratePlan = document.getElementById('btnGeneratePlan');
+        if (btnGeneratePlan) btnGeneratePlan.addEventListener('click', generateBudgetPlan);
+
+        const updateBudgetUI = () => {
+            renderBudgetLists();
+            generateBudgetPlan();
         };
 
         function computeSmartPlans(budget) {
@@ -1170,242 +1249,11 @@
             return { profitPlan, reliefPlan };
         }
 
-        const renderBudgetAdvice = (monthKey) => {
-            const list = document.getElementById('budgetAdviceList');
-            const empty = document.getElementById('noBudgetAdvice');
-            if (!list || !empty) return;
-
-            const summary = computeBudgetMonth(monthKey);
-            const rows = summary.rows || [];
-
-            const items = [];
-
-            if (rows.length > 0) {
-                let minRow = rows[0];
-                let maxRow = rows[0];
-                rows.forEach((r) => {
-                    if (r.balanceAfter < minRow.balanceAfter) minRow = r;
-                    if (r.balanceAfter > maxRow.balanceAfter) maxRow = r;
-                });
-
-                if (minRow.balanceAfter < 0) {
-                    items.push({
-                        tone: 'warn',
-                        title: 'Açık Uyarısı',
-                        text: `${formatDate(minRow.date)} tarihinde bakiye ${formatCurrency(minRow.balanceAfter)} oluyor. Bu tarihe kadar en az ${formatCurrency(Math.abs(minRow.balanceAfter))} ek gelir veya gider azaltımı gerekir.`
-                    });
-                }
-
-                const nowBudget = summary.availableNow;
-                const nowPlans = computeSmartPlans(nowBudget);
-                if (nowPlans.profitPlan.selected.length > 0) {
-                    const top = nowPlans.profitPlan.selected[0];
-                    items.push({
-                        tone: 'ok',
-                        title: 'Bugün Erken Kapama',
-                        text: `Bugün kullanılabilir ${formatCurrency(nowBudget)} ile en kârlı seçenek: ${top.bankName} (tahmini kâr ${formatCurrency(top.profit)}).`
-                    });
-                } else if (nowPlans.reliefPlan.selected.length > 0) {
-                    const top = nowPlans.reliefPlan.selected[0];
-                    items.push({
-                        tone: 'ok',
-                        title: 'Bugün Rahatlama',
-                        text: `Bugün kullanılabilir ${formatCurrency(nowBudget)} ile aylık en çok düşüren seçenek: ${top.bankName} (${formatCurrency(top.relief)}/Ay).`
-                    });
-                }
-
-                if (maxRow.balanceAfter > nowBudget && maxRow.date) {
-                    const futureBudget = maxRow.balanceAfter;
-                    const futurePlans = computeSmartPlans(futureBudget);
-                    if (futurePlans.profitPlan.selected.length > 0) {
-                        const top = futurePlans.profitPlan.selected[0];
-                        items.push({
-                            tone: 'info',
-                            title: 'Ay İçi Fırsat',
-                            text: `${formatDate(maxRow.date)} tarihinde bakiye ${formatCurrency(futureBudget)} seviyesine çıkıyor. O gün en kârlı seçenek: ${top.bankName} (tahmini kâr ${formatCurrency(top.profit)}).`
-                        });
-                    } else if (futurePlans.reliefPlan.selected.length > 0) {
-                        const top = futurePlans.reliefPlan.selected[0];
-                        items.push({
-                            tone: 'info',
-                            title: 'Ay İçi Fırsat',
-                            text: `${formatDate(maxRow.date)} tarihinde bakiye ${formatCurrency(futureBudget)} seviyesine çıkıyor. O gün aylık en çok düşüren seçenek: ${top.bankName} (${formatCurrency(top.relief)}/Ay).`
-                        });
-                    }
-                }
-            }
-
-            list.innerHTML = '';
-            if (items.length === 0) {
-                empty.classList.remove('hidden');
-                return;
-            }
-            empty.classList.add('hidden');
-
-            items.slice(0, 3).forEach((item) => {
-                const el = document.createElement('div');
-                const toneClass =
-                    item.tone === 'warn'
-                        ? 'bg-red-50 dark:bg-red-900/10 border-red-100 dark:border-red-900/30 text-red-800 dark:text-red-200'
-                        : item.tone === 'ok'
-                        ? 'bg-emerald-50 dark:bg-emerald-900/10 border-emerald-100 dark:border-emerald-900/30 text-emerald-900 dark:text-emerald-200'
-                        : 'bg-slate-50 dark:bg-slate-900/10 border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200';
-
-                el.className = `p-3 rounded-xl border ${toneClass}`;
-                el.innerHTML = `
-                    <div class="text-xs font-black mb-1">${item.title}</div>
-                    <div class="text-[11px] font-bold leading-relaxed opacity-90">${item.text}</div>
-                `;
-                list.appendChild(el);
-            });
+        const getBudgetForRecommendations = () => {
+            const budgetInput = document.getElementById('budgetInput');
+            const raw = budgetInput ? parseFloat(budgetInput.value) : 0;
+            return Number.isFinite(raw) ? raw : 0;
         };
-
-        const updateBudgetUI = () => {
-            const selectedMonth = getSelectedBudgetMonth();
-            const summary = computeBudgetMonth(selectedMonth);
-
-            const currentBudgetLabel = document.getElementById('currentBudgetLabel');
-            if (currentBudgetLabel) currentBudgetLabel.textContent = formatCurrency(summary.availableNow);
-            const currentBudgetMonthLabel = document.getElementById('currentBudgetMonthLabel');
-            if (currentBudgetMonthLabel) currentBudgetMonthLabel.textContent = formatMonthKey(selectedMonth);
-
-            const budgetMonthInput = document.getElementById('budgetMonth');
-            if (budgetMonthInput) {
-                budgetMonthInput.value = selectedMonth;
-                if (!budgetMonthInput.dataset.bound) {
-                    budgetMonthInput.dataset.bound = '1';
-                    budgetMonthInput.addEventListener('change', () => {
-                        if (!budgetMonthInput.value) return;
-                        setSelectedBudgetMonth(budgetMonthInput.value);
-                        updateBudgetUI();
-                    });
-                }
-            }
-
-            const availableNowEl = document.getElementById('budgetAvailableNow');
-            if (availableNowEl) availableNowEl.textContent = formatCurrency(summary.availableNow);
-            const monthEndEl = document.getElementById('budgetMonthEnd');
-            if (monthEndEl) monthEndEl.textContent = formatCurrency(summary.monthEndBalance);
-            const totalIncomeEl = document.getElementById('budgetTotalIncome');
-            if (totalIncomeEl) totalIncomeEl.textContent = formatCurrency(summary.totalIncome);
-            const totalExpenseEl = document.getElementById('budgetTotalExpense');
-            if (totalExpenseEl) totalExpenseEl.textContent = formatCurrency(summary.totalExpense);
-
-            const txDateInput = document.getElementById('budgetTxDate');
-            if (txDateInput) {
-                const [y, m] = selectedMonth.split('-').map((x) => parseInt(x, 10));
-                const first = new Date(y, (m || 1) - 1, 1);
-                const last = new Date(y, (m || 1), 0);
-                const min = toISODate(first);
-                const max = toISODate(last);
-                txDateInput.min = min;
-                txDateInput.max = max;
-                const todayISO = toISODate();
-                const defaultDate = selectedMonth === toMonthKey() ? todayISO : min;
-                if (!txDateInput.value || txDateInput.value.slice(0, 7) !== selectedMonth) {
-                    txDateInput.value = defaultDate;
-                }
-            }
-
-            localStorage.setItem('budget', String(summary.availableNow));
-            renderBudgetTxList(selectedMonth);
-            renderBudgetAdvice(selectedMonth);
-        };
-
-        window.selectCurrentMonth = () => {
-            setSelectedBudgetMonth(toMonthKey());
-            updateBudgetUI();
-        };
-
-        window.addBudgetTransaction = () => {
-            const monthKey = getSelectedBudgetMonth();
-            const dateInput = document.getElementById('budgetTxDate');
-            const typeInput = document.getElementById('budgetTxType');
-            const amountInput = document.getElementById('budgetTxAmount');
-            const noteInput = document.getElementById('budgetTxNote');
-            if (!dateInput || !typeInput || !amountInput || !noteInput) return;
-
-            const date = (dateInput.value || '').slice(0, 10);
-            if (!date || date.slice(0, 7) !== monthKey) {
-                showConfirmModal('Hata', 'Tarih seçili ayın içinde olmalı.', () => {}, 'danger');
-                return;
-            }
-
-            const type = typeInput.value === 'expense' ? 'expense' : 'income';
-            const amount = Math.max(0, parseFloat(amountInput.value) || 0);
-            if (amount <= 0) {
-                showConfirmModal('Hata', 'Tutar 0’dan büyük olmalı.', () => {}, 'danger');
-                return;
-            }
-
-            addTransactionToMonth(monthKey, { date, type, amount, note: noteInput.value || '' });
-            amountInput.value = '';
-            noteInput.value = '';
-            updateBudgetUI();
-        };
-
-        window.deleteBudgetTransaction = (txId) => {
-            const monthKey = getSelectedBudgetMonth();
-            deleteTransactionFromMonth(monthKey, txId);
-            updateBudgetUI();
-        };
-
-        const addMonths = (date, months) => {
-            const d = new Date(date);
-            d.setMonth(d.getMonth() + months);
-            return d;
-        };
-
-        const getInstallmentTransactionsForMonth = (monthKey) => {
-            const items = [];
-            loans
-                .filter((l) => !l.isEarlyClosed && (l.remainingInstallments || 0) > 0 && l.loanDate)
-                .forEach((loan) => {
-                    const total = Math.max(1, loan.totalInstallments || 1);
-                    const remaining = Math.max(0, loan.remainingInstallments || 0);
-                    const paid = Math.max(0, total - remaining);
-                    const monthlyPayment = Math.max(0, parseFloat(loan.monthlyPayment) || 0);
-                    if (monthlyPayment <= 0) return;
-
-                    const start = new Date(loan.loanDate);
-                    for (let k = 1; k <= remaining; k += 1) {
-                        const due = addMonths(start, paid + k);
-                        const dueMonth = toMonthKey(due);
-                        if (dueMonth !== monthKey) continue;
-                        items.push({
-                            date: toISODate(due),
-                            type: 'expense',
-                            amount: monthlyPayment,
-                            note: `${loan.bankName} Taksit`
-                        });
-                    }
-                });
-            return items;
-        };
-
-        window.importInstallmentsForSelectedMonth = () => {
-            const monthKey = getSelectedBudgetMonth();
-            const existing = getTransactionsForMonth(monthKey);
-            const imported = getInstallmentTransactionsForMonth(monthKey);
-
-            if (imported.length === 0) {
-                showConfirmModal('Bilgi', 'Bu ay için eklenecek taksit bulunamadı.', () => {}, 'info');
-                return;
-            }
-
-            const keyOf = (x) => `${x.date}|${x.type}|${x.amount}|${x.note}`;
-            const existingKeys = new Set(existing.map(keyOf));
-            imported.forEach((x) => {
-                if (!existingKeys.has(keyOf(x))) {
-                    addTransactionToMonth(monthKey, x);
-                }
-            });
-
-            updateBudgetUI();
-            showConfirmModal('Başarılı', 'Taksitler eklendi.', () => {}, 'success');
-        };
-
-        const getBudgetForRecommendations = () => computeBudgetMonth(getSelectedBudgetMonth()).availableNow;
 
         // Smart Recommendations Logic
         const calculateSmartRecommendations = () => {
@@ -1760,19 +1608,18 @@
                     
                     saveState();
                     render();
-
-                    // Live Budget Update
-                    const now = new Date();
-                    const monthKey = toMonthKey(now);
-                    addTransactionToMonth(monthKey, {
-                        date: toISODate(now),
-                        type: 'expense',
-                        amount: Math.abs(closeCost),
-                        note: `Erken Kapama - ${loan.bankName}`
-                    });
-                    setSelectedBudgetMonth(monthKey);
                     updateBudgetUI();
                     calculateSmartRecommendations();
+
+                    const budgetInput = document.getElementById('budgetInput');
+                    if (budgetInput && budgetInput.value) {
+                        let currentBudget = parseFloat(budgetInput.value);
+                        if (!isNaN(currentBudget)) {
+                            currentBudget -= closeCost;
+                            budgetInput.value = currentBudget > 0 ? currentBudget : 0;
+                            calculateSmartRecommendations();
+                        }
+                    }
                 },
                 'info'
             );
