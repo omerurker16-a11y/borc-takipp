@@ -634,7 +634,8 @@
 <!-- SUPABASE CLOUD INTEGRATION -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-  const supabase = window.supabase.createClient(
+  // Çakışmayı önlemek için değişken adını değiştirdik
+  const supabaseClient = window.supabase.createClient(
     "https://bicfoxsrhvryrouxsaml.supabase.co",
     "sb_publishable_lkWkHfj18mI2u19RBR2kIg_7F0XtH5-"
   );
@@ -642,28 +643,36 @@
   const SAVE_ID = "00000000-0000-0000-0000-000000000001";
 
   async function saveToCloud(data) {
-    const { error } = await supabase
-      .from("borclar")
-      .upsert({ id: SAVE_ID, data }, { onConflict: "id" });
+    try {
+      const { error } = await supabaseClient
+        .from("borclar")
+        .upsert({ id: SAVE_ID, data }, { onConflict: "id" });
 
-    if (error) {
-      console.error("Supabase save error:", error);
+      if (error) {
+        console.error("Supabase save error:", error);
+      }
+    } catch (e) {
+      console.error("Cloud save exception:", e);
     }
   }
 
   async function loadFromCloud() {
-    const { data, error } = await supabase
-      .from("borclar")
-      .select("data")
-      .eq("id", SAVE_ID)
-      .single();
+    try {
+      const { data, error } = await supabaseClient
+        .from("borclar")
+        .select("data")
+        .eq("id", SAVE_ID)
+        .maybeSingle(); // single() yerine maybeSingle() kullanarak tablo boşsa hata fırlatmasını önledik
 
-    if (error) {
-      console.warn("Supabase load error:", error.message);
+      if (error) {
+        console.warn("Supabase load error:", error.message);
+        return null;
+      }
+      return data?.data || null;
+    } catch (e) {
+      console.error("Cloud load exception:", e);
       return null;
     }
-
-    return data?.data || null;
   }
 </script>
     <!-- JavaScript Logic -->
