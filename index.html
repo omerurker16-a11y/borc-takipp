@@ -11,24 +11,32 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    
-    <!-- ✅ Tailwind Dark Mode Config -->
+
+    <!-- Dark mode flash önleme -->
+    <script>
+        (function() {
+            try {
+                const saved = localStorage.getItem('darkMode');
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                const isDark = saved !== null ? saved === 'true' : prefersDark;
+                if (isDark) document.documentElement.classList.add('dark');
+            } catch(e) {}
+        })();
+    </script>
+
+    <!-- 1. Önce Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 2. Sonra config -->
     <script>
         tailwind.config = {
             darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        accent: '#6366f1'
-                    }
-                }
-            }
+            theme: { extend: {} }
         }
     </script>
-    <script src="https://cdn.tailwindcss.com"></script>
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+
     <style>
         * { font-family: 'Inter', sans-serif; }
         body { -webkit-tap-highlight-color: transparent; }
@@ -36,14 +44,17 @@
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
         .dark ::-webkit-scrollbar-thumb { background: #475569; }
         .animate-fade-in { animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
-<body class="bg-slate-50 dark:bg-gray-900 min-h-screen text-slate-800 dark:text-slate-100 transition-colors duration-200 pb-24">
+<body class="bg-slate-50 dark:bg-slate-900 min-h-screen text-slate-800 dark:text-slate-100 transition-colors duration-200 pb-24">
 
-<!-- ===== SETTINGS MODAL ===== -->
-<div id="settingsModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden overflow-y-auto h-full w-full z-[60] flex items-center justify-center p-4">
-    <div class="relative bg-white dark:bg-slate-800 w-full max-w-sm shadow-2xl rounded-2xl border border-slate-100 dark:border-slate-700 overflow-hidden">
+<!-- SETTINGS MODAL -->
+<div id="settingsModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden z-[60] items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-800 w-full max-w-sm shadow-2xl rounded-2xl border border-slate-100 dark:border-slate-700">
         <div class="p-6">
             <h3 class="text-lg font-bold text-slate-800 dark:text-white border-b border-slate-100 dark:border-slate-700 pb-3 mb-4 flex items-center gap-2">
                 <span class="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 p-1.5 rounded-lg">
@@ -81,9 +92,9 @@
     </div>
 </div>
 
-<!-- ===== EDIT MODAL ===== -->
-<div id="editModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden overflow-y-auto h-full w-full z-[60] flex items-center justify-center p-4">
-    <div class="relative bg-white dark:bg-slate-800 w-full max-w-sm shadow-2xl rounded-2xl border border-slate-100 dark:border-slate-700 overflow-hidden">
+<!-- EDIT MODAL -->
+<div id="editModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden z-[60] items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-800 w-full max-w-sm shadow-2xl rounded-2xl border border-slate-100 dark:border-slate-700">
         <div class="p-6">
             <h3 class="text-lg font-bold text-slate-800 dark:text-white border-b border-slate-100 dark:border-slate-700 pb-3 mb-4 flex items-center gap-2">
                 <span class="bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 p-1.5 rounded-lg">
@@ -123,26 +134,22 @@
                         <input type="date" id="editLoanDate" required class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:text-white text-sm">
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Erken Kapama</label>
+                        <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Erken Kapama (₺)</label>
                         <input type="number" step="0.01" id="editEarlyCloseAmount" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:text-white text-sm">
                     </div>
                 </div>
                 <div class="flex gap-3 pt-2">
-                    <button type="button" onclick="closeEditModal()" class="flex-1 py-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 rounded-xl font-medium text-sm transition-colors">
-                        Vazgeç
-                    </button>
-                    <button type="submit" class="flex-1 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium text-sm transition-colors">
-                        Kaydet
-                    </button>
+                    <button type="button" onclick="closeEditModal()" class="flex-1 py-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 rounded-xl font-medium text-sm transition-colors">Vazgeç</button>
+                    <button type="submit" class="flex-1 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium text-sm transition-colors">Kaydet</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<!-- ===== DETAIL MODAL ===== -->
-<div id="detailModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden overflow-y-auto h-full w-full z-[60] flex items-center justify-center p-4">
-    <div class="relative bg-white dark:bg-slate-800 w-full max-w-md shadow-2xl rounded-2xl border border-slate-100 dark:border-slate-700 overflow-hidden max-h-[90vh] overflow-y-auto">
+<!-- DETAIL MODAL -->
+<div id="detailModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden z-[60] items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-800 w-full max-w-md shadow-2xl rounded-2xl border border-slate-100 dark:border-slate-700 max-h-[90vh] overflow-y-auto">
         <div class="p-6">
             <h3 class="text-lg font-bold text-slate-800 dark:text-white border-b border-slate-100 dark:border-slate-700 pb-3 mb-4 flex items-center gap-2">
                 <span class="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 p-1.5 rounded-lg">
@@ -150,45 +157,59 @@
                 </span>
                 Kredi Detayı
             </h3>
-            <div id="detailContent" class="space-y-3 text-sm"></div>
+            <div id="detailContent" class="space-y-3"></div>
             <div class="mt-6 flex justify-end">
-                <button onclick="closeDetailModal()" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 py-2.5 px-5 rounded-xl text-sm font-bold transition-colors">
-                    Kapat
-                </button>
+                <button onclick="closeDetailModal()" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 py-2.5 px-5 rounded-xl text-sm font-bold transition-colors">Kapat</button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- ===== NAVBAR ===== -->
-<nav class="bg-white/90 dark:bg-slate-900/90 text-slate-800 dark:text-white shadow-sm border-b border-slate-200 dark:border-slate-800 sticky top-0 z-50 backdrop-blur-md transition-colors duration-300">
+<!-- CONFIRM MODAL -->
+<div id="confirmModal" class="fixed inset-0 z-[70] hidden items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700 w-full max-w-sm">
+        <div class="p-6 text-center">
+            <div id="confirmIconContainer" class="w-16 h-16 bg-blue-50 dark:bg-blue-900/20 rounded-full flex items-center justify-center mx-auto mb-4 text-blue-500">
+                <i id="confirmIcon" class="fa-solid fa-circle-question text-3xl"></i>
+            </div>
+            <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-2" id="confirmTitle">Onay</h3>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mb-6 leading-relaxed" id="confirmMessage"></p>
+            <div class="flex gap-3">
+                <button id="btnCancel" class="flex-1 py-3 px-4 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 rounded-xl font-medium transition-colors text-sm">Vazgeç</button>
+                <button id="btnConfirm" class="flex-1 py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-colors text-sm">Onayla</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- NAVBAR -->
+<nav class="bg-white/95 dark:bg-slate-900/95 shadow-sm border-b border-slate-200 dark:border-slate-800 sticky top-0 z-50 backdrop-blur-md transition-colors duration-300">
     <div class="container mx-auto px-4 py-3 flex justify-between items-center">
         <div class="flex items-center gap-3">
             <div class="bg-indigo-600 p-2 rounded-lg shadow-md shadow-indigo-600/20">
                 <i class="fa-solid fa-wallet text-xl text-white"></i>
             </div>
             <div>
-                <h1 class="text-lg font-bold leading-none tracking-tight text-slate-900 dark:text-white">Borç Takip</h1>
-                <div class="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider font-medium">Finansal Asistan</div>
+                <h1 class="text-lg font-bold leading-none text-slate-900 dark:text-white">Borç Takip</h1>
+                <div class="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider">Finansal Asistan</div>
             </div>
         </div>
         <div class="flex items-center gap-2">
-            <!-- Cloud Status -->
             <div id="cloudStatus" class="text-xs px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 flex items-center gap-1">
                 <i class="fa-solid fa-cloud text-xs"></i>
                 <span id="cloudStatusText">...</span>
             </div>
-            <button onclick="toggleSettingsModal()" class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/20 text-slate-600 dark:text-white transition-colors">
+            <button onclick="toggleSettingsModal()" class="w-9 h-9 flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 transition-colors">
                 <i class="fa-solid fa-gear text-sm"></i>
             </button>
-            <button onclick="toggleDarkMode()" class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/20 text-slate-600 dark:text-white transition-colors">
+            <button onclick="toggleDarkMode()" class="w-9 h-9 flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 transition-colors">
                 <i class="fa-solid fa-moon text-sm" id="darkModeIcon"></i>
             </button>
         </div>
     </div>
 </nav>
 
-<!-- ===== MAIN CONTENT ===== -->
+<!-- MAIN -->
 <div class="container mx-auto px-4 py-6">
 
     <!-- LOANS SCREEN -->
@@ -218,15 +239,14 @@
         </div>
 
         <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden">
-            <div class="px-6 py-5 border-b border-slate-100 dark:border-slate-700 flex flex-col md:flex-row justify-between items-center gap-4 bg-slate-50/50 dark:bg-slate-800/50">
+            <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex flex-col md:flex-row justify-between items-center gap-3 bg-slate-50/50 dark:bg-slate-800/50">
                 <div class="flex items-center gap-3 w-full md:w-auto">
                     <h2 class="text-lg font-bold text-slate-800 dark:text-slate-200">Kredilerim</h2>
-                    <span id="loanCount" class="bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">0 Adet</span>
+                    <span id="loanCount" class="bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase">0 Adet</span>
                 </div>
-                <div class="flex flex-col md:flex-row gap-2 w-full md:w-auto">
-                    <input type="text" id="filterBankName" placeholder="Ara..."
-                        class="px-3 py-1.5 text-sm border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/30 bg-white dark:bg-slate-700 dark:text-white placeholder-slate-400">
-                    <select id="filterCategory" class="px-3 py-1.5 text-sm border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/30 bg-white dark:bg-slate-700 dark:text-white">
+                <div class="flex gap-2 w-full md:w-auto">
+                    <input type="text" id="filterBankName" placeholder="Ara..." class="flex-1 px-3 py-2 text-sm border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/30 bg-white dark:bg-slate-700 dark:text-white placeholder-slate-400">
+                    <select id="filterCategory" class="px-3 py-2 text-sm border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/30 bg-white dark:bg-slate-700 dark:text-white">
                         <option value="all">Tümü</option>
                         <option value="İhtiyaç">İhtiyaç</option>
                         <option value="Taşıt">Taşıt</option>
@@ -238,7 +258,7 @@
             </div>
             <div id="loanList" class="divide-y divide-slate-100 dark:divide-slate-700/50">
                 <div class="p-12 text-center text-slate-400 dark:text-slate-500" id="emptyState">
-                    <div class="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <div class="w-16 h-16 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-4">
                         <i class="fa-solid fa-file-invoice-dollar text-2xl opacity-50"></i>
                     </div>
                     <p class="text-sm font-medium">Henüz kayıtlı kredi bulunmuyor.</p>
@@ -247,8 +267,8 @@
             </div>
         </div>
 
-        <button onclick="switchScreen('add')" class="fixed bottom-24 right-5 bg-indigo-600 hover:bg-indigo-700 text-white w-14 h-14 rounded-2xl shadow-xl shadow-indigo-600/30 flex items-center justify-center active:scale-95 transition-transform z-[55]">
-            <i class="fa-solid fa-plus text-lg"></i>
+        <button onclick="switchScreen('add')" class="fixed bottom-24 right-5 bg-indigo-600 hover:bg-indigo-700 text-white w-14 h-14 rounded-2xl shadow-xl shadow-indigo-600/30 flex items-center justify-center active:scale-95 transition-all z-[55]">
+            <i class="fa-solid fa-plus text-xl"></i>
         </button>
     </div>
 
@@ -263,14 +283,14 @@
                         </span>
                         Yeni Kredi Ekle
                     </h2>
-                    <button onclick="switchScreen('loans')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
-                        <i class="fa-solid fa-xmark text-lg"></i>
+                    <button onclick="switchScreen('loans')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
+                        <i class="fa-solid fa-xmark text-xl"></i>
                     </button>
                 </div>
                 <form id="loanForm" class="space-y-5">
                     <div>
                         <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">Kredi Adı / Banka *</label>
-                        <input type="text" id="bankName" placeholder="Örn: X Bankası İhtiyaç" required
+                        <input type="text" id="bankName" placeholder="Örn: Ziraat Bankası İhtiyaç" required
                             class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:text-white text-sm">
                     </div>
                     <div>
@@ -285,12 +305,12 @@
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">Çekilen Tutar *</label>
+                            <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">Çekilen Tutar (₺) *</label>
                             <input type="number" id="loanAmount" step="0.01" placeholder="0.00" required
                                 class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:text-white text-sm">
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">Aylık Taksit *</label>
+                            <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">Aylık Taksit (₺) *</label>
                             <input type="number" id="monthlyPayment" step="0.01" placeholder="0.00" required
                                 class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:text-white text-sm">
                         </div>
@@ -311,10 +331,10 @@
                         <div class="text-[10px] uppercase tracking-wide text-blue-600 dark:text-blue-400 mb-0.5">Toplam Geri Ödeme</div>
                         <div class="font-bold text-blue-800 dark:text-blue-300 text-lg" id="previewTotalAmount">₺0,00</div>
                         <div class="text-xs text-red-500 dark:text-red-400 mt-1 hidden" id="previewWarning">
-                            <i class="fa-solid fa-triangle-exclamation mr-1.5"></i> Anaparadan düşük!
+                            <i class="fa-solid fa-triangle-exclamation mr-1"></i> Anaparadan düşük!
                         </div>
                     </div>
-                    <button type="submit" class="w-full flex justify-center items-center py-4 px-4 rounded-xl text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none transition-all active:scale-[0.98] shadow-lg shadow-indigo-600/20">
+                    <button type="submit" class="w-full flex justify-center items-center py-4 rounded-xl text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 transition-all active:scale-[0.98] shadow-lg shadow-indigo-600/20">
                         <i class="fa-solid fa-check mr-2"></i> Kaydet
                     </button>
                 </form>
@@ -326,68 +346,43 @@
     <div id="budgetScreen" class="hidden animate-fade-in">
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div class="lg:col-span-1 space-y-6">
-                <!-- Gelir -->
                 <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
-                    <h3 class="text-lg font-bold mb-4 text-slate-800 dark:text-slate-200 flex items-center gap-2">
-                        <span class="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 p-1.5 rounded-lg">
-                            <i class="fa-solid fa-coins text-xs"></i>
-                        </span>
+                    <h3 class="text-base font-bold mb-4 text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                        <span class="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 p-1.5 rounded-lg"><i class="fa-solid fa-coins text-xs"></i></span>
                         Gelir Ekle
                     </h3>
                     <form id="incomeForm" class="space-y-3">
-                        <div>
-                            <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Açıklama</label>
-                            <input id="incomeName" type="text" placeholder="Örn: Maaş" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-400/50 dark:text-white text-sm">
-                        </div>
+                        <input id="incomeName" type="text" placeholder="Açıklama (Örn: Maaş)" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-400/50 dark:text-white text-sm">
                         <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Tutar</label>
-                                <input id="incomeAmount" type="number" step="0.01" placeholder="0.00" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-400/50 dark:text-white text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Gün (1-31)</label>
-                                <input id="incomeDay" type="number" min="1" max="31" placeholder="10" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-400/50 dark:text-white text-sm">
-                            </div>
+                            <input id="incomeAmount" type="number" step="0.01" placeholder="Tutar (₺)" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-400/50 dark:text-white text-sm">
+                            <input id="incomeDay" type="number" min="1" max="31" placeholder="Gün (1-31)" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-400/50 dark:text-white text-sm">
                         </div>
-                        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-all active:scale-95">Ekle</button>
+                        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-all active:scale-95">Gelir Ekle</button>
                     </form>
                     <div id="incomeList" class="mt-4 space-y-2"></div>
                 </div>
-                <!-- Kredi Taksitleri -->
+
                 <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
-                    <h3 class="text-lg font-bold mb-4 text-slate-800 dark:text-slate-200 flex items-center gap-2">
-                        <span class="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 p-1.5 rounded-lg">
-                            <i class="fa-solid fa-credit-card text-xs"></i>
-                        </span>
+                    <h3 class="text-base font-bold mb-3 text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                        <span class="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 p-1.5 rounded-lg"><i class="fa-solid fa-credit-card text-xs"></i></span>
                         Kredi Taksitleri (Bu Ay)
                     </h3>
-                    <div class="text-xs text-slate-500 dark:text-slate-400 mb-3">Aktif kredilerin bu aya denk gelen taksitleri otomatik listelenir.</div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-3">Bu aya ait taksitler otomatik listelenir.</p>
                     <div id="loanExpenseList" class="space-y-2"></div>
                 </div>
-                <!-- Diğer Gider -->
+
                 <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
-                    <h3 class="text-lg font-bold mb-4 text-slate-800 dark:text-slate-200 flex items-center gap-2">
-                        <span class="bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 p-1.5 rounded-lg">
-                            <i class="fa-solid fa-basket-shopping text-xs"></i>
-                        </span>
+                    <h3 class="text-base font-bold mb-4 text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                        <span class="bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 p-1.5 rounded-lg"><i class="fa-solid fa-basket-shopping text-xs"></i></span>
                         Diğer Gider Ekle
                     </h3>
                     <form id="expenseForm" class="space-y-3">
-                        <div>
-                            <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Açıklama</label>
-                            <input id="expenseName" type="text" placeholder="Örn: Kira" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-400/50 dark:text-white text-sm">
-                        </div>
+                        <input id="expenseName" type="text" placeholder="Açıklama (Örn: Kira)" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-400/50 dark:text-white text-sm">
                         <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Tutar</label>
-                                <input id="expenseAmount" type="number" step="0.01" placeholder="0.00" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-400/50 dark:text-white text-sm">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Gün (1-31)</label>
-                                <input id="expenseDay" type="number" min="1" max="31" placeholder="1" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-400/50 dark:text-white text-sm">
-                            </div>
+                            <input id="expenseAmount" type="number" step="0.01" placeholder="Tutar (₺)" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-400/50 dark:text-white text-sm">
+                            <input id="expenseDay" type="number" min="1" max="31" placeholder="Gün (1-31)" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-400/50 dark:text-white text-sm">
                         </div>
-                        <button type="submit" class="w-full bg-red-500 hover:bg-red-600 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-all active:scale-95">Ekle</button>
+                        <button type="submit" class="w-full bg-red-500 hover:bg-red-600 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-all active:scale-95">Gider Ekle</button>
                     </form>
                     <div id="expenseList" class="mt-4 space-y-2"></div>
                 </div>
@@ -396,25 +391,23 @@
             <div class="lg:col-span-2">
                 <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
                     <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
-                            <span class="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 p-1.5 rounded-lg">
-                                <i class="fa-solid fa-calendar-days text-xs"></i>
-                            </span>
+                        <h3 class="text-base font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                            <span class="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 p-1.5 rounded-lg"><i class="fa-solid fa-calendar-days text-xs"></i></span>
                             Aylık Ödeme Planı
                         </h3>
-                        <button id="btnGeneratePlan" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-all active:scale-95">Planı Oluştur</button>
+                        <button id="btnGeneratePlan" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-all active:scale-95">Planı Oluştur</button>
                     </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+                    <div class="grid grid-cols-3 gap-3 mb-4">
                         <div class="p-3 rounded-xl border border-emerald-100 dark:border-emerald-900/30 bg-emerald-50/60 dark:bg-emerald-900/10">
-                            <div class="text-[10px] uppercase tracking-wide text-emerald-700 dark:text-emerald-300 font-semibold mb-1">Toplam Gelir</div>
+                            <div class="text-[10px] uppercase text-emerald-700 dark:text-emerald-300 font-semibold mb-1">Gelir</div>
                             <div id="planTotalIncome" class="text-sm font-bold text-emerald-700 dark:text-emerald-300">₺0</div>
                         </div>
                         <div class="p-3 rounded-xl border border-red-100 dark:border-red-900/30 bg-red-50/60 dark:bg-red-900/10">
-                            <div class="text-[10px] uppercase tracking-wide text-red-700 dark:text-red-300 font-semibold mb-1">Toplam Gider</div>
+                            <div class="text-[10px] uppercase text-red-700 dark:text-red-300 font-semibold mb-1">Gider</div>
                             <div id="planTotalExpense" class="text-sm font-bold text-red-700 dark:text-red-300">₺0</div>
                         </div>
-                        <div class="p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50">
-                            <div class="text-[10px] uppercase tracking-wide text-slate-600 dark:text-slate-300 font-semibold mb-1">Kalan Bütçe</div>
+                        <div class="p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-700/30">
+                            <div class="text-[10px] uppercase text-slate-600 dark:text-slate-300 font-semibold mb-1">Kalan</div>
                             <div id="planRemainingBudget" class="text-sm font-bold text-emerald-600 dark:text-emerald-400">₺0</div>
                         </div>
                     </div>
@@ -427,7 +420,7 @@
     <!-- RECOMMENDATIONS SCREEN -->
     <div id="recommendationsScreen" class="hidden animate-fade-in">
         <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
-            <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-6">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                 <div>
                     <h3 class="text-xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
                         <span class="bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 p-2 rounded-lg">
@@ -437,11 +430,11 @@
                     </h3>
                     <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Bütçenize en uygun erken kapama stratejilerini keşfedin.</p>
                 </div>
-                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:w-auto">
-                    <div class="relative w-full sm:w-60">
-                        <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-400">₺</span>
+                <div class="flex gap-2 w-full md:w-auto">
+                    <div class="relative flex-1 md:w-56">
+                        <span class="absolute inset-y-0 left-3 flex items-center text-slate-400 text-sm">₺</span>
                         <input id="budgetInput" type="number" step="0.01" placeholder="Bütçe girin"
-                            class="pl-10 w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/30 dark:text-white text-sm font-bold">
+                            class="pl-8 w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/30 dark:text-white text-sm font-bold">
                     </div>
                     <button onclick="calculateSmartRecommendations()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-3 rounded-xl text-sm font-bold transition-all active:scale-95 whitespace-nowrap">
                         Analiz Et
@@ -450,327 +443,267 @@
             </div>
 
             <div id="recommendationResults" class="hidden grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="border border-emerald-100 dark:border-emerald-900/30 bg-emerald-50/50 dark:bg-emerald-900/10 rounded-2xl p-6">
-                    <div class="flex items-center gap-3 mb-6">
-                        <div class="bg-white dark:bg-emerald-900/50 p-3 rounded-xl shadow-sm">
-                            <i class="fa-solid fa-piggy-bank text-emerald-600 dark:text-emerald-400 text-xl"></i>
+                <div class="border border-emerald-100 dark:border-emerald-900/30 bg-emerald-50/50 dark:bg-emerald-900/10 rounded-2xl p-5">
+                    <div class="flex items-center gap-3 mb-5">
+                        <div class="bg-white dark:bg-emerald-900/50 p-2.5 rounded-xl shadow-sm">
+                            <i class="fa-solid fa-piggy-bank text-emerald-600 dark:text-emerald-400 text-lg"></i>
                         </div>
                         <div>
                             <h4 class="font-bold text-emerald-900 dark:text-emerald-300">En Kârlı Senaryo</h4>
-                            <p class="text-xs text-emerald-700 dark:text-emerald-500">Toplam faizden maksimum tasarruf</p>
+                            <p class="text-xs text-emerald-700 dark:text-emerald-500">Maksimum faiz tasarrufu</p>
                         </div>
                     </div>
-                    <ul id="profitList" class="space-y-3 mb-6"></ul>
+                    <ul id="profitList" class="space-y-2 mb-5"></ul>
                     <div class="bg-white/80 dark:bg-slate-800/80 p-4 rounded-xl border border-emerald-100 dark:border-emerald-900/30">
                         <div class="flex justify-between text-sm mb-2">
                             <span class="text-slate-500 dark:text-slate-400">Gerekli Bütçe</span>
                             <span class="font-bold text-slate-700 dark:text-slate-200" id="profitUsedBudget">₺0</span>
                         </div>
-                        <div class="flex justify-between text-sm items-center pt-2 border-t border-slate-100 dark:border-slate-700/50">
-                            <span class="text-emerald-600 dark:text-emerald-400 font-bold">Toplam Kâr</span>
+                        <div class="flex justify-between items-center pt-2 border-t border-slate-100 dark:border-slate-700/50">
+                            <span class="text-emerald-600 dark:text-emerald-400 font-bold text-sm">Toplam Kâr</span>
                             <span class="font-black text-lg text-emerald-600 dark:text-emerald-400" id="profitTotalGain">₺0</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="border border-blue-100 dark:border-blue-900/30 bg-blue-50/50 dark:bg-blue-900/10 rounded-2xl p-6">
-                    <div class="flex items-center gap-3 mb-6">
-                        <div class="bg-white dark:bg-blue-900/50 p-3 rounded-xl shadow-sm">
-                            <i class="fa-solid fa-hand-holding-dollar text-blue-600 dark:text-blue-400 text-xl"></i>
+                <div class="border border-blue-100 dark:border-blue-900/30 bg-blue-50/50 dark:bg-blue-900/10 rounded-2xl p-5">
+                    <div class="flex items-center gap-3 mb-5">
+                        <div class="bg-white dark:bg-blue-900/50 p-2.5 rounded-xl shadow-sm">
+                            <i class="fa-solid fa-hand-holding-dollar text-blue-600 dark:text-blue-400 text-lg"></i>
                         </div>
                         <div>
                             <h4 class="font-bold text-blue-900 dark:text-blue-300">Aylık Rahatlama</h4>
-                            <p class="text-xs text-blue-700 dark:text-blue-500">Aylık ödemeleri en çok düşüren plan</p>
+                            <p class="text-xs text-blue-700 dark:text-blue-500">Aylık yükü en çok azaltan plan</p>
                         </div>
                     </div>
-                    <ul id="reliefList" class="space-y-3 mb-6"></ul>
+                    <ul id="reliefList" class="space-y-2 mb-5"></ul>
                     <div class="bg-white/80 dark:bg-slate-800/80 p-4 rounded-xl border border-blue-100 dark:border-blue-900/30">
                         <div class="flex justify-between text-sm mb-2">
                             <span class="text-slate-500 dark:text-slate-400">Gerekli Bütçe</span>
                             <span class="font-bold text-slate-700 dark:text-slate-200" id="reliefUsedBudget">₺0</span>
                         </div>
-                        <div class="flex justify-between text-sm items-center pt-2 border-t border-slate-100 dark:border-slate-700/50">
-                            <span class="text-blue-600 dark:text-blue-400 font-bold">Aylık Kazanç</span>
+                        <div class="flex justify-between items-center pt-2 border-t border-slate-100 dark:border-slate-700/50">
+                            <span class="text-blue-600 dark:text-blue-400 font-bold text-sm">Aylık Kazanç</span>
                             <span class="font-black text-lg text-blue-600 dark:text-blue-400" id="reliefTotalGain">₺0</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div id="noRecommendation" class="hidden py-12 text-center text-slate-400 dark:text-slate-500 bg-slate-50/50 dark:bg-slate-900/30 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700">
-                <i class="fa-solid fa-circle-info text-3xl mb-3 opacity-50 block"></i>
-                <p>Bu bütçe ile kapatılabilecek uygun kredi bulunamadı.</p>
+            <div id="noRecommendation" class="hidden py-12 text-center text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-900/30 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700 mt-4">
+                <i class="fa-solid fa-circle-info text-3xl mb-3 block opacity-50"></i>
+                <p class="text-sm">Bu bütçe ile kapatılabilecek kredi bulunamadı.</p>
             </div>
-            <div id="noBudget" class="hidden py-12 text-center text-slate-400 dark:text-slate-500 bg-slate-50/50 dark:bg-slate-900/30 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700">
-                <i class="fa-solid fa-wallet text-3xl mb-3 opacity-50 block"></i>
-                <p class="text-sm font-medium">Bütçe belirlemeniz gerekiyor.</p>
-                <button onclick="switchScreen('budget')" class="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all active:scale-95">Bütçe Sekmesine Git</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- ===== CONFIRM MODAL ===== -->
-<div id="confirmModal" class="fixed inset-0 z-[70] hidden items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
-    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700 w-full max-w-sm overflow-hidden">
-        <div class="p-6 text-center">
-            <div id="confirmIconContainer" class="w-16 h-16 bg-blue-50 dark:bg-blue-900/20 rounded-full flex items-center justify-center mx-auto mb-4 text-blue-500">
-                <i id="confirmIcon" class="fa-solid fa-circle-question text-3xl"></i>
-            </div>
-            <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-2" id="confirmTitle">Onay</h3>
-            <p class="text-sm text-slate-500 dark:text-slate-400 mb-6 leading-relaxed" id="confirmMessage">Bu işlemi yapmak istediğinize emin misiniz?</p>
-            <div class="flex gap-3">
-                <button id="btnCancel" class="flex-1 py-3 px-4 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 rounded-xl font-medium transition-colors text-sm">Vazgeç</button>
-                <button id="btnConfirm" class="flex-1 py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-colors text-sm">Onayla</button>
+            <div id="noBudget" class="hidden py-12 text-center text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-900/30 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700 mt-4">
+                <i class="fa-solid fa-wallet text-3xl mb-3 block opacity-50"></i>
+                <p class="text-sm font-medium">Analiz için bütçe girmeniz gerekiyor.</p>
             </div>
         </div>
     </div>
 </div>
 
-<!-- ===== BOTTOM NAV ===== -->
-<div class="fixed bottom-0 left-0 w-full bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 shadow-lg z-50">
+<!-- BOTTOM NAV -->
+<div class="fixed bottom-0 left-0 w-full bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 z-50">
     <div class="flex justify-around items-center h-16 max-w-lg mx-auto">
-        <button onclick="switchScreen('loans')" id="navLoans" class="flex flex-col items-center justify-center w-full h-full text-indigo-600 transition-all">
-            <i class="fa-solid fa-list-ul text-xl mb-1"></i>
+        <button onclick="switchScreen('loans')" id="navLoans" class="flex flex-col items-center justify-center w-full h-full gap-1 transition-all text-indigo-600">
+            <i class="fa-solid fa-list-ul text-lg"></i>
             <span class="text-[10px] font-bold">Borçlar</span>
         </button>
         <div class="w-px h-8 bg-slate-100 dark:bg-slate-800"></div>
-        <button onclick="switchScreen('recommendations')" id="navRecs" class="flex flex-col items-center justify-center w-full h-full text-slate-400 dark:text-slate-500 hover:text-slate-600 transition-all">
-            <i class="fa-solid fa-wand-magic-sparkles text-xl mb-1"></i>
+        <button onclick="switchScreen('recommendations')" id="navRecs" class="flex flex-col items-center justify-center w-full h-full gap-1 transition-all text-slate-400 dark:text-slate-500">
+            <i class="fa-solid fa-wand-magic-sparkles text-lg"></i>
             <span class="text-[10px] font-bold">Öneriler</span>
         </button>
         <div class="w-px h-8 bg-slate-100 dark:bg-slate-800"></div>
-        <button onclick="switchScreen('budget')" id="navBudget" class="flex flex-col items-center justify-center w-full h-full text-slate-400 dark:text-slate-500 hover:text-slate-600 transition-all">
-            <i class="fa-solid fa-wallet text-xl mb-1"></i>
+        <button onclick="switchScreen('budget')" id="navBudget" class="flex flex-col items-center justify-center w-full h-full gap-1 transition-all text-slate-400 dark:text-slate-500">
+            <i class="fa-solid fa-wallet text-lg"></i>
             <span class="text-[10px] font-bold">Bütçe</span>
         </button>
     </div>
 </div>
 
-<!-- ===== SCRIPTS ===== -->
+<!-- SUPABASE -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// ============================================================
-// SUPABASE CONFIG
-// ============================================================
-const SUPABASE_URL = "https://ejeapbjlyqrucidbarhg.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVqZWFwYmpseXFydWNpZGJhcmhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE2MTA5NDIsImV4cCI6MjA5NzE4Njk0Mn0.b-1xu-TMknnsTv7ijqp2hQKTE1V9yLEfHN3yNJnKD4g"; // eyJ... ile başlar
-const SAVE_ID = "00000000-0000-0000-0000-000000000001";
+const SUPABASE_URL  = "https://ejeapbjlyqrucidbarhg.supabase.co";
+const SUPABASE_KEY  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVqZWFwYmpseXFydWNpZGJhcmhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE2MTA5NDIsImV4cCI6MjA5NzE4Njk0Mn0.b-1xu-TMknnsTv7ijqp2hQKTE1V9yLEfHN3yNJnKD4g";
+const SAVE_ID       = "00000000-0000-0000-0000-000000000001";
 
-let supabaseClient = null;
-try {
-    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-} catch(e) {
-    console.error("Supabase init error:", e);
-}
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-function setCloudStatus(status, text) {
+function setCloudStatus(type, text) {
     const el = document.getElementById('cloudStatusText');
-    const parent = document.getElementById('cloudStatus');
-    if (!el || !parent) return;
+    const wrap = document.getElementById('cloudStatus');
+    if (!el || !wrap) return;
     el.textContent = text;
-    parent.className = 'text-xs px-2 py-1 rounded-lg flex items-center gap-1 ';
-    if (status === 'ok') parent.className += 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400';
-    else if (status === 'error') parent.className += 'bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400';
-    else parent.className += 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400';
+    const base = 'text-xs px-2 py-1 rounded-lg flex items-center gap-1 ';
+    if (type === 'ok')    wrap.className = base + 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400';
+    else if (type === 'err') wrap.className = base + 'bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400';
+    else                  wrap.className = base + 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400';
 }
 
 async function saveToCloud(data) {
-    if (!supabaseClient) { setCloudStatus('error', 'Bağlantı Yok'); return; }
     try {
         setCloudStatus('loading', 'Kaydediliyor...');
-        // ✅ created_at göndermiyoruz, Supabase default now() kullansın
-        const { error } = await supabaseClient
-            .from("borclar")
-            .upsert(
-                { id: SAVE_ID, data: data },
-                { onConflict: "id", ignoreDuplicates: false }
-            );
-        if (error) {
-            console.error("Supabase save error:", error);
-            setCloudStatus('error', 'Hata!');
-            localStorage.setItem('borc_takip_backup', JSON.stringify(data));
-        } else {
-            setCloudStatus('ok', 'Kaydedildi ✓');
-            localStorage.setItem('borc_takip_backup', JSON.stringify(data));
-        }
-    } catch (e) {
-        console.error("Cloud save exception:", e);
-        setCloudStatus('error', 'Hata');
-        localStorage.setItem('borc_takip_backup', JSON.stringify(data));
+        const { error } = await sb.from('borclar').upsert(
+            { id: SAVE_ID, data },
+            { onConflict: 'id' }
+        );
+        if (error) throw error;
+        setCloudStatus('ok', 'Kaydedildi ✓');
+        localStorage.setItem('btBackup', JSON.stringify(data));
+    } catch(e) {
+        console.error('saveToCloud:', e);
+        setCloudStatus('err', 'Hata!');
+        localStorage.setItem('btBackup', JSON.stringify(data));
     }
 }
 
 async function loadFromCloud() {
-    if (!supabaseClient) {
-        setCloudStatus('error', 'Bağlantı Yok');
-        return loadFromLocal();
-    }
     try {
         setCloudStatus('loading', 'Yükleniyor...');
-        const { data, error } = await supabaseClient
-            .from("borclar")
-            .select("data")
-            .eq("id", SAVE_ID)
-            .maybeSingle();
-        if (error) {
-            console.warn("Supabase load error:", error.message);
-            setCloudStatus('error', 'Hata');
-            return loadFromLocal();
-        }
-        if (data && data.data) {
+        const { data, error } = await sb.from('borclar').select('data').eq('id', SAVE_ID).maybeSingle();
+        if (error) throw error;
+        if (data?.data) {
             setCloudStatus('ok', 'Bulut ✓');
-            localStorage.setItem('borc_takip_backup', JSON.stringify(data.data));
+            localStorage.setItem('btBackup', JSON.stringify(data.data));
             return data.data;
         }
         setCloudStatus('ok', 'Hazır');
-        return loadFromLocal();
-    } catch (e) {
-        console.error("Cloud load exception:", e);
-        setCloudStatus('error', 'Hata');
-        return loadFromLocal();
+        return null;
+    } catch(e) {
+        console.error('loadFromCloud:', e);
+        setCloudStatus('err', 'Çevrimdışı');
+        return null;
     }
 }
 
 function loadFromLocal() {
     try {
-        const raw = localStorage.getItem('borc_takip_backup');
-        if (raw) return JSON.parse(raw);
-    } catch(e) {}
-    return null;
+        const raw = localStorage.getItem('btBackup');
+        return raw ? JSON.parse(raw) : null;
+    } catch(e) { return null; }
 }
 </script>
 
 <script>
-// ============================================================
-// APP STATE
-// ============================================================
+// ================================================================
+// STATE
+// ================================================================
 let loans = [];
 let incomes = [];
 let otherExpenses = [];
 
-// ============================================================
-// HELPERS
-// ============================================================
-const formatCurrency = (amount) =>
-    new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(amount || 0);
+// ================================================================
+// UTILS
+// ================================================================
+const fmt = (n) => new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(n || 0);
 
-const formatDate = (dateInput) => {
-    if (!dateInput) return '-';
-    const date = dateInput instanceof Date ? dateInput : new Date(dateInput);
-    if (isNaN(date)) return '-';
-    return new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' }).format(date);
+const fmtDate = (v) => {
+    if (!v) return '-';
+    const d = v instanceof Date ? v : new Date(v);
+    return isNaN(d) ? '-' : new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' }).format(d);
 };
 
-const calculateNextPaymentDate = (loanDateStr, totalInstallments, remainingInstallments) => {
+const nextPayDate = (loanDateStr, total, remaining) => {
     if (!loanDateStr) return new Date();
-    const loanDate = new Date(loanDateStr);
-    const paidInstallments = totalInstallments - remainingInstallments;
-    const nextDate = new Date(loanDate);
-    nextDate.setMonth(nextDate.getMonth() + paidInstallments + 1);
-    return nextDate;
+    const d = new Date(loanDateStr);
+    d.setMonth(d.getMonth() + (total - remaining) + 1);
+    return d;
 };
 
 const saveState = async () => {
-    const data = { loans, incomes, otherExpenses };
-    await saveToCloud(data);
+    await saveToCloud({ loans, incomes, otherExpenses });
 };
 
-// ============================================================
-// DARK MODE  ✅ DÜZELTİLDİ
-// ============================================================
+// ================================================================
+// DARK MODE
+// ================================================================
+const updateDarkIcon = (isDark) => {
+    const el = document.getElementById('darkModeIcon');
+    if (el) el.className = isDark ? 'fa-solid fa-sun text-sm' : 'fa-solid fa-moon text-sm';
+};
+
 const toggleDarkMode = () => {
     const isDark = document.documentElement.classList.toggle('dark');
-    localStorage.setItem('darkMode', isDark ? 'true' : 'false');
-    updateDarkModeIcon(isDark);
-    updateThemeColor(isDark);
-};
-
-const updateDarkModeIcon = (isDark) => {
-    const icon = document.getElementById('darkModeIcon');
-    if (!icon) return;
-    icon.className = isDark ? 'fa-solid fa-sun text-sm' : 'fa-solid fa-moon text-sm';
-};
-
-const updateThemeColor = (isDark) => {
-    const color = isDark ? '#0f172a' : '#ffffff';
+    localStorage.setItem('darkMode', isDark);
+    updateDarkIcon(isDark);
     const meta = document.getElementById('themeColor');
-    if (meta) meta.content = color;
+    if (meta) meta.content = isDark ? '#0f172a' : '#ffffff';
 };
 
-const applyDarkMode = () => {
-    const saved = localStorage.getItem('darkMode');
-    // Eğer hiç kayıt yoksa sistem tercihine bak
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const isDark = saved !== null ? saved === 'true' : prefersDark;
-    if (isDark) {
-        document.documentElement.classList.add('dark');
-    } else {
-        document.documentElement.classList.remove('dark');
-    }
-    updateDarkModeIcon(isDark);
-    updateThemeColor(isDark);
-};
+// İkon durumunu başlat
+updateDarkIcon(document.documentElement.classList.contains('dark'));
 
-// ============================================================
-// SCREEN SWITCHING
-// ============================================================
-window.switchScreen = (screen) => {
-    ['loansScreen','addScreen','recommendationsScreen','budgetScreen'].forEach(s => {
-        document.getElementById(s)?.classList.add('hidden');
+// ================================================================
+// SCREEN SWITCH
+// ================================================================
+window.switchScreen = (s) => {
+    ['loansScreen','addScreen','recommendationsScreen','budgetScreen'].forEach(id => {
+        document.getElementById(id)?.classList.add('hidden');
     });
 
-    const inactive = "flex flex-col items-center justify-center w-full h-full text-slate-400 dark:text-slate-500 hover:text-slate-600 transition-all";
-    ['navLoans','navRecs','navBudget'].forEach(n => {
-        const el = document.getElementById(n);
-        if (el) el.className = inactive;
-    });
+    const base = 'flex flex-col items-center justify-center w-full h-full gap-1 transition-all ';
+    document.getElementById('navLoans').className = base + 'text-slate-400 dark:text-slate-500';
+    document.getElementById('navRecs').className  = base + 'text-slate-400 dark:text-slate-500';
+    document.getElementById('navBudget').className = base + 'text-slate-400 dark:text-slate-500';
 
-    const activeColors = { navLoans: 'text-indigo-600', navRecs: 'text-purple-600 dark:text-purple-400', navBudget: 'text-blue-600 dark:text-blue-400' };
-    const activeBase = "flex flex-col items-center justify-center w-full h-full transition-all font-bold";
-
-    if (screen === 'loans') {
-        document.getElementById('loansScreen')?.classList.remove('hidden');
-        document.getElementById('navLoans').className = `${activeBase} ${activeColors.navLoans}`;
-    } else if (screen === 'add') {
-        document.getElementById('addScreen')?.classList.remove('hidden');
-    } else if (screen === 'recommendations') {
-        document.getElementById('recommendationsScreen')?.classList.remove('hidden');
-        document.getElementById('navRecs').className = `${activeBase} ${activeColors.navRecs}`;
-        const budget = getBudgetForRecommendations();
-        if (budget > 0) calculateSmartRecommendations();
-        else showNoBudgetState();
-    } else if (screen === 'budget') {
-        document.getElementById('budgetScreen')?.classList.remove('hidden');
-        document.getElementById('navBudget').className = `${activeBase} ${activeColors.navBudget}`;
+    if (s === 'loans') {
+        document.getElementById('loansScreen').classList.remove('hidden');
+        document.getElementById('navLoans').className = base + 'text-indigo-600';
+    } else if (s === 'add') {
+        document.getElementById('addScreen').classList.remove('hidden');
+    } else if (s === 'recommendations') {
+        document.getElementById('recommendationsScreen').classList.remove('hidden');
+        document.getElementById('navRecs').className = base + 'text-purple-600 dark:text-purple-400';
+        if (getBudget() > 0) calculateSmartRecommendations();
+        else showEl('noBudget');
+    } else if (s === 'budget') {
+        document.getElementById('budgetScreen').classList.remove('hidden');
+        document.getElementById('navBudget').className = base + 'text-blue-600 dark:text-blue-400';
         updateBudgetUI();
     }
 };
 
-// ============================================================
-// SETTINGS & BACKUP
-// ============================================================
+// ================================================================
+// MODAL HELPERS
+// ================================================================
+const showModal = (id) => {
+    const m = document.getElementById(id);
+    if (m) { m.classList.remove('hidden'); m.classList.add('flex'); }
+};
+const hideModal = (id) => {
+    const m = document.getElementById(id);
+    if (m) { m.classList.add('hidden'); m.classList.remove('flex'); }
+};
+const showEl = (id) => document.getElementById(id)?.classList.remove('hidden');
+const hideEl = (id) => document.getElementById(id)?.classList.add('hidden');
+
+// Modal dışı tıklama
+['settingsModal','editModal','detailModal','confirmModal'].forEach(id => {
+    document.getElementById(id)?.addEventListener('click', (e) => {
+        if (e.target.id === id) hideModal(id);
+    });
+});
+
+// ================================================================
+// SETTINGS
+// ================================================================
 const toggleSettingsModal = () => {
-    const modal = document.getElementById('settingsModal');
-    if (!modal) return;
-    const isHidden = modal.classList.contains('hidden');
-    if (isHidden) { modal.classList.remove('hidden'); modal.classList.add('flex'); }
-    else { modal.classList.add('hidden'); modal.classList.remove('flex'); }
+    const m = document.getElementById('settingsModal');
+    if (!m) return;
+    m.classList.contains('hidden') ? showModal('settingsModal') : hideModal('settingsModal');
 };
 
 const backupData = () => {
-    const payload = { loans, incomes, otherExpenses };
-    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
+    const blob = new Blob([JSON.stringify({ loans, incomes, otherExpenses }, null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
-    a.href = url;
-    a.download = `borc_takip_yedek_${new Date().toISOString().slice(0,10)}.json`;
-    document.body.appendChild(a);
+    a.href = URL.createObjectURL(blob);
+    a.download = `borc_yedek_${new Date().toISOString().slice(0,10)}.json`;
     a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    toggleSettingsModal();
-    showConfirmModal('Başarılı', 'Yedek dosyası indirildi.', () => {}, 'success');
+    URL.revokeObjectURL(a.href);
+    hideModal('settingsModal');
+    showConfirm('Başarılı', 'Yedek dosyası indirildi.', () => {}, 'success');
 };
 
 const restoreData = (input) => {
@@ -779,299 +712,260 @@ const restoreData = (input) => {
     const reader = new FileReader();
     reader.onload = async (e) => {
         try {
-            const imported = JSON.parse(e.target.result);
-            const importedLoans = Array.isArray(imported) ? imported : (imported?.loans || null);
-            if (!Array.isArray(importedLoans)) throw new Error('Geçersiz format');
-            toggleSettingsModal();
-            showConfirmModal('Geri Yükle', 'Mevcut veriler silinecek. Devam edilsin mi?', async () => {
-                loans = importedLoans;
-                incomes = imported?.incomes || [];
-                otherExpenses = imported?.otherExpenses || [];
+            const imp = JSON.parse(e.target.result);
+            const l = Array.isArray(imp) ? imp : (imp?.loans || null);
+            if (!Array.isArray(l)) throw new Error();
+            hideModal('settingsModal');
+            showConfirm('Geri Yükle', 'Mevcut veriler silinecek ve yedekten geri yüklenecek. Devam?', async () => {
+                loans = l;
+                incomes = imp?.incomes || [];
+                otherExpenses = imp?.otherExpenses || [];
                 await saveState();
                 render();
                 updateBudgetUI();
-                showConfirmModal('Başarılı', 'Veriler geri yüklendi.', () => {}, 'success');
+                showConfirm('Başarılı', 'Veriler geri yüklendi.', () => {}, 'success');
             }, 'danger');
-        } catch (err) {
-            showConfirmModal('Hata', 'Yedek dosyası geçersiz veya bozuk.', () => {}, 'danger');
+        } catch {
+            showConfirm('Hata', 'Geçersiz yedek dosyası!', () => {}, 'danger');
         }
     };
     reader.readAsText(file);
     input.value = '';
 };
 
-// ============================================================
+// ================================================================
 // CONFIRM MODAL
-// ============================================================
-let confirmCallbackFn = null;
+// ================================================================
+let confirmCb = null;
 
-const showConfirmModal = (title, message, onConfirm, type = 'info') => {
-    const modal = document.getElementById('confirmModal');
-    if (!modal) return;
+const showConfirm = (title, msg, cb, type = 'info') => {
     document.getElementById('confirmTitle').textContent = title;
-    document.getElementById('confirmMessage').innerHTML = message.replace(/\n/g, '<br>');
-    confirmCallbackFn = onConfirm;
+    document.getElementById('confirmMessage').innerHTML = msg.replace(/\n/g, '<br>');
+    confirmCb = cb;
 
-    const iconContainer = document.getElementById('confirmIconContainer');
-    const icon = document.getElementById('confirmIcon');
-    const btnConfirm = document.getElementById('btnConfirm');
-
-    const configs = {
-        danger:  { ic: 'bg-red-50 dark:bg-red-900/20 text-red-500', i: 'fa-solid fa-triangle-exclamation text-3xl', btn: 'bg-red-600 hover:bg-red-700', txt: 'Evet, Devam Et' },
-        success: { ic: 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-500', i: 'fa-solid fa-circle-check text-3xl', btn: 'bg-emerald-600 hover:bg-emerald-700', txt: 'Tamam' },
-        info:    { ic: 'bg-blue-50 dark:bg-blue-900/20 text-blue-500', i: 'fa-solid fa-circle-question text-3xl', btn: 'bg-blue-600 hover:bg-blue-700', txt: 'Onayla' }
+    const cfgs = {
+        danger:  { ic: 'bg-red-50 dark:bg-red-900/20 text-red-500',     icon: 'fa-triangle-exclamation', btn: 'bg-red-600 hover:bg-red-700',     txt: 'Evet, Devam Et' },
+        success: { ic: 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-500', icon: 'fa-circle-check', btn: 'bg-emerald-600 hover:bg-emerald-700', txt: 'Tamam' },
+        info:    { ic: 'bg-blue-50 dark:bg-blue-900/20 text-blue-500',   icon: 'fa-circle-question',     btn: 'bg-blue-600 hover:bg-blue-700',     txt: 'Onayla' }
     };
-    const cfg = configs[type] || configs.info;
+    const c = cfgs[type] || cfgs.info;
 
-    iconContainer.className = `w-16 h-16 ${cfg.ic} rounded-full flex items-center justify-center mx-auto mb-4`;
-    icon.className = cfg.i;
-    btnConfirm.className = `flex-1 py-3 px-4 ${cfg.btn} text-white rounded-xl font-medium transition-colors text-sm`;
-    btnConfirm.textContent = cfg.txt;
+    document.getElementById('confirmIconContainer').className = `w-16 h-16 ${c.ic} rounded-full flex items-center justify-center mx-auto mb-4`;
+    document.getElementById('confirmIcon').className = `fa-solid ${c.icon} text-3xl`;
+    const btn = document.getElementById('btnConfirm');
+    btn.className = `flex-1 py-3 px-4 ${c.btn} text-white rounded-xl font-medium transition-colors text-sm`;
+    btn.textContent = c.txt;
 
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
-};
-
-const closeConfirmModal = () => {
-    const modal = document.getElementById('confirmModal');
-    if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
-    confirmCallbackFn = null;
+    showModal('confirmModal');
 };
 
 document.getElementById('btnConfirm').addEventListener('click', () => {
-    if (confirmCallbackFn) confirmCallbackFn();
-    closeConfirmModal();
+    if (confirmCb) confirmCb();
+    hideModal('confirmModal');
+    confirmCb = null;
 });
-document.getElementById('btnCancel').addEventListener('click', closeConfirmModal);
+document.getElementById('btnCancel').addEventListener('click', () => {
+    hideModal('confirmModal');
+    confirmCb = null;
+});
 
-// ============================================================
+// ================================================================
 // EDIT MODAL
-// ============================================================
-window.openEditModal = (index) => {
-    const loan = loans[index];
+// ================================================================
+window.openEditModal = (idx) => {
+    const loan = loans[idx];
     if (!loan) return;
-    document.getElementById('editIndex').value = index;
+    document.getElementById('editIndex').value = idx;
     document.getElementById('editBankName').value = loan.bankName || '';
     document.getElementById('editCategory').value = loan.category || 'İhtiyaç';
     document.getElementById('editMonthlyPayment').value = loan.monthlyPayment || '';
     document.getElementById('editTotalInstallments').value = loan.totalInstallments || '';
     document.getElementById('editLoanDate').value = loan.loanDate || '';
     document.getElementById('editEarlyCloseAmount').value = loan.earlyCloseAmount || '';
-    const modal = document.getElementById('editModal');
-    if (modal) { modal.classList.remove('hidden'); modal.classList.add('flex'); }
+    showModal('editModal');
 };
 
-window.closeEditModal = () => {
-    const modal = document.getElementById('editModal');
-    if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
-};
+window.closeEditModal = () => hideModal('editModal');
 
 document.getElementById('editForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const index = parseInt(document.getElementById('editIndex').value);
-    if (isNaN(index) || !loans[index]) return;
-    loans[index].bankName = document.getElementById('editBankName').value;
-    loans[index].category = document.getElementById('editCategory').value;
-    loans[index].monthlyPayment = parseFloat(document.getElementById('editMonthlyPayment').value) || 0;
-    loans[index].totalInstallments = parseInt(document.getElementById('editTotalInstallments').value) || 1;
-    loans[index].loanDate = document.getElementById('editLoanDate').value;
-    loans[index].earlyCloseAmount = parseFloat(document.getElementById('editEarlyCloseAmount').value) || 0;
+    const idx = parseInt(document.getElementById('editIndex').value);
+    if (isNaN(idx) || !loans[idx]) return;
+    loans[idx].bankName = document.getElementById('editBankName').value.trim();
+    loans[idx].category = document.getElementById('editCategory').value;
+    loans[idx].monthlyPayment = parseFloat(document.getElementById('editMonthlyPayment').value) || 0;
+    loans[idx].totalInstallments = parseInt(document.getElementById('editTotalInstallments').value) || 1;
+    loans[idx].loanDate = document.getElementById('editLoanDate').value;
+    loans[idx].earlyCloseAmount = parseFloat(document.getElementById('editEarlyCloseAmount').value) || 0;
     await saveState();
-    closeEditModal();
+    hideModal('editModal');
     render();
 });
 
-// ============================================================
+// ================================================================
 // DETAIL MODAL
-// ============================================================
-window.openDetailModal = (index) => {
-    const loan = loans[index];
+// ================================================================
+window.openDetailModal = (idx) => {
+    const loan = loans[idx];
     if (!loan) return;
-    const totalInst = Math.max(1, loan.totalInstallments || 1);
-    const remainingInst = loan.isEarlyClosed ? 0 : (loan.remainingInstallments || 0);
+    const total = Math.max(1, loan.totalInstallments || 1);
+    const rem = loan.isEarlyClosed ? 0 : (loan.remainingInstallments || 0);
     const monthly = parseFloat(loan.monthlyPayment) || 0;
     const loanAmt = parseFloat(loan.loanAmount) || 0;
-    const paidCount = totalInst - (loan.isEarlyClosed ? (loan.savedInstallments || 0) : remainingInst);
-    const totalPaid = paidCount * monthly;
-    const remainingPrincipal = loan.isEarlyClosed ? 0 : ((remainingInst / totalInst) * loanAmt);
-    const totalFuture = remainingInst * monthly;
-    const earlyClose = parseFloat(loan.earlyCloseAmount) || 0;
-    const profit = earlyClose > 0 ? totalFuture - earlyClose : 0;
-    const nextDate = loan.isEarlyClosed ? null : calculateNextPaymentDate(loan.loanDate, loan.totalInstallments, remainingInst);
+    const paid = total - (loan.isEarlyClosed ? (loan.savedInstallments || 0) : rem);
+    const totalPaid = paid * monthly;
+    const remPrincipal = loan.isEarlyClosed ? 0 : (rem / total) * loanAmt;
+    const ec = parseFloat(loan.earlyCloseAmount) || 0;
+    const profit = ec > 0 ? (rem * monthly) - ec : 0;
+    const nd = loan.isEarlyClosed ? null : nextPayDate(loan.loanDate, total, rem);
 
     document.getElementById('detailContent').innerHTML = `
-        <div class="grid grid-cols-2 gap-3">
-            <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl col-span-2">
-                <div class="text-[10px] text-slate-400 uppercase mb-1">Banka / Kredi Adı</div>
+        <div class="grid grid-cols-2 gap-2 text-sm">
+            <div class="col-span-2 bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl">
+                <div class="text-[10px] text-slate-400 uppercase mb-0.5">Kredi Adı</div>
                 <div class="font-bold text-slate-700 dark:text-slate-200">${loan.bankName}</div>
             </div>
             <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl">
-                <div class="text-[10px] text-slate-400 uppercase mb-1">Kategori</div>
+                <div class="text-[10px] text-slate-400 uppercase mb-0.5">Kategori</div>
                 <div class="font-bold text-slate-700 dark:text-slate-200">${loan.category}</div>
             </div>
             <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl">
-                <div class="text-[10px] text-slate-400 uppercase mb-1">Durum</div>
-                <div class="font-bold ${loan.isEarlyClosed ? 'text-emerald-600' : 'text-blue-600'}">${loan.isEarlyClosed ? '✓ Kapatıldı' : '⏳ Devam Ediyor'}</div>
+                <div class="text-[10px] text-slate-400 uppercase mb-0.5">Durum</div>
+                <div class="font-bold ${loan.isEarlyClosed ? 'text-emerald-600 dark:text-emerald-400' : 'text-blue-600 dark:text-blue-400'}">${loan.isEarlyClosed ? '✓ Kapatıldı' : '⏳ Devam Ediyor'}</div>
             </div>
             <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl">
-                <div class="text-[10px] text-slate-400 uppercase mb-1">Çekilen Tutar</div>
-                <div class="font-bold text-slate-700 dark:text-slate-200">${formatCurrency(loanAmt)}</div>
+                <div class="text-[10px] text-slate-400 uppercase mb-0.5">Çekilen Tutar</div>
+                <div class="font-bold text-slate-700 dark:text-slate-200">${fmt(loanAmt)}</div>
             </div>
             <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl">
-                <div class="text-[10px] text-slate-400 uppercase mb-1">Aylık Taksit</div>
-                <div class="font-bold text-slate-700 dark:text-slate-200">${formatCurrency(monthly)}</div>
+                <div class="text-[10px] text-slate-400 uppercase mb-0.5">Aylık Taksit</div>
+                <div class="font-bold text-slate-700 dark:text-slate-200">${fmt(monthly)}</div>
             </div>
             <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl">
-                <div class="text-[10px] text-slate-400 uppercase mb-1">Ödenen Taksit</div>
-                <div class="font-bold text-emerald-600 dark:text-emerald-400">${paidCount} / ${totalInst}</div>
+                <div class="text-[10px] text-slate-400 uppercase mb-0.5">Ödenen / Toplam</div>
+                <div class="font-bold text-emerald-600 dark:text-emerald-400">${paid} / ${total}</div>
             </div>
             <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl">
-                <div class="text-[10px] text-slate-400 uppercase mb-1">Kalan Taksit</div>
-                <div class="font-bold text-red-500 dark:text-red-400">${remainingInst}</div>
+                <div class="text-[10px] text-slate-400 uppercase mb-0.5">Kalan Taksit</div>
+                <div class="font-bold text-red-500 dark:text-red-400">${rem}</div>
             </div>
             <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl">
-                <div class="text-[10px] text-slate-400 uppercase mb-1">Toplam Ödenen</div>
-                <div class="font-bold text-slate-700 dark:text-slate-200">${formatCurrency(totalPaid)}</div>
+                <div class="text-[10px] text-slate-400 uppercase mb-0.5">Toplam Ödenen</div>
+                <div class="font-bold text-slate-700 dark:text-slate-200">${fmt(totalPaid)}</div>
             </div>
             <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl">
-                <div class="text-[10px] text-slate-400 uppercase mb-1">Kalan Anapara</div>
-                <div class="font-bold text-red-500 dark:text-red-400">${formatCurrency(remainingPrincipal)}</div>
+                <div class="text-[10px] text-slate-400 uppercase mb-0.5">Kalan Anapara</div>
+                <div class="font-bold text-red-500 dark:text-red-400">${fmt(remPrincipal)}</div>
             </div>
             <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl">
-                <div class="text-[10px] text-slate-400 uppercase mb-1">Kullanım Tarihi</div>
-                <div class="font-bold text-slate-700 dark:text-slate-200">${formatDate(loan.loanDate)}</div>
+                <div class="text-[10px] text-slate-400 uppercase mb-0.5">Kullanım Tarihi</div>
+                <div class="font-bold text-slate-700 dark:text-slate-200">${fmtDate(loan.loanDate)}</div>
             </div>
             <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl">
-                <div class="text-[10px] text-slate-400 uppercase mb-1">Sonraki Ödeme</div>
-                <div class="font-bold text-slate-700 dark:text-slate-200">${loan.isEarlyClosed ? 'Kapatıldı' : formatDate(nextDate)}</div>
+                <div class="text-[10px] text-slate-400 uppercase mb-0.5">Sonraki Ödeme</div>
+                <div class="font-bold text-slate-700 dark:text-slate-200">${loan.isEarlyClosed ? 'Kapatıldı' : fmtDate(nd)}</div>
             </div>
-            ${earlyClose > 0 ? `
-            <div class="bg-emerald-50 dark:bg-emerald-900/20 p-3 rounded-xl col-span-2 border border-emerald-100 dark:border-emerald-900/30">
-                <div class="text-[10px] text-emerald-600 uppercase mb-1">Erken Kapama Kârı/Zararı</div>
-                <div class="font-bold ${profit >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500 dark:text-red-400'} text-lg">${profit >= 0 ? '+' : ''}${formatCurrency(profit)}</div>
-                <div class="text-xs text-slate-500 mt-1">Erken kapama tutarı: ${formatCurrency(earlyClose)}</div>
+            ${ec > 0 ? `
+            <div class="col-span-2 bg-emerald-50 dark:bg-emerald-900/20 p-3 rounded-xl border border-emerald-100 dark:border-emerald-900/30">
+                <div class="text-[10px] text-emerald-600 dark:text-emerald-400 uppercase mb-0.5">Erken Kapama Kâr/Zarar</div>
+                <div class="font-bold text-lg ${profit >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500'}">${profit >= 0 ? '+' : ''}${fmt(profit)}</div>
+                <div class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Erken kapama tutarı: ${fmt(ec)}</div>
             </div>` : ''}
         </div>
-        ${loan.paymentHistory?.length > 0 ? `
+        ${loan.paymentHistory?.length ? `
         <div class="mt-4">
-            <div class="text-xs font-bold text-slate-500 dark:text-slate-400 mb-2 uppercase tracking-wide">Son Ödemeler</div>
-            <div class="space-y-1.5">
-                ${loan.paymentHistory.slice(-5).reverse().map(h => `
-                    <div class="flex justify-between items-center text-xs p-2 bg-slate-50 dark:bg-slate-900/50 rounded-lg border border-slate-100 dark:border-slate-700">
-                        <span class="text-slate-500">${formatDate(h.date)}</span>
-                        <span class="font-bold text-emerald-600 dark:text-emerald-400">${formatCurrency(h.amount)}</span>
-                    </div>
-                `).join('')}
-            </div>
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-2">Son Ödemeler</div>
+            ${loan.paymentHistory.slice(-5).reverse().map(h => `
+                <div class="flex justify-between text-xs p-2 bg-slate-50 dark:bg-slate-900/50 rounded-lg mb-1 border border-slate-100 dark:border-slate-700">
+                    <span class="text-slate-500 dark:text-slate-400">${fmtDate(h.date)}</span>
+                    <span class="font-bold text-emerald-600 dark:text-emerald-400">${fmt(h.amount)}</span>
+                </div>`).join('')}
         </div>` : ''}
     `;
-    const modal = document.getElementById('detailModal');
-    if (modal) { modal.classList.remove('hidden'); modal.classList.add('flex'); }
+    showModal('detailModal');
 };
 
-window.closeDetailModal = () => {
-    const modal = document.getElementById('detailModal');
-    if (modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); }
-};
+window.closeDetailModal = () => hideModal('detailModal');
 
-// Modal dışı tıklamada kapat
-['editModal','detailModal','confirmModal','settingsModal'].forEach(id => {
-    document.getElementById(id)?.addEventListener('click', (e) => {
-        if (e.target.id === id) {
-            if (id === 'editModal') closeEditModal();
-            else if (id === 'detailModal') closeDetailModal();
-            else if (id === 'confirmModal') closeConfirmModal();
-            else if (id === 'settingsModal') toggleSettingsModal();
-        }
-    });
-});
-
-// ============================================================
-// LOAN FORM - Preview
-// ============================================================
+// ================================================================
+// LOAN FORM PREVIEW
+// ================================================================
 const updatePreview = () => {
-    const monthly = parseFloat(document.getElementById('monthlyPayment')?.value) || 0;
-    const total = parseInt(document.getElementById('totalInstallments')?.value) || 0;
-    const loanAmount = parseFloat(document.getElementById('loanAmount')?.value) || 0;
-    const preview = document.getElementById('paymentPreview');
-    const previewTotal = document.getElementById('previewTotalAmount');
-    const warning = document.getElementById('previewWarning');
+    const m = parseFloat(document.getElementById('monthlyPayment')?.value) || 0;
+    const t = parseInt(document.getElementById('totalInstallments')?.value) || 0;
+    const l = parseFloat(document.getElementById('loanAmount')?.value) || 0;
+    const prev = document.getElementById('paymentPreview');
+    const warn = document.getElementById('previewWarning');
 
-    if (monthly > 0 && total > 0) {
-        const totalPayment = monthly * total;
-        if (previewTotal) previewTotal.textContent = formatCurrency(totalPayment);
-        if (preview) preview.classList.remove('hidden');
-        if (warning) {
-            if (loanAmount > 0 && totalPayment < loanAmount) warning.classList.remove('hidden');
-            else warning.classList.add('hidden');
-        }
+    if (m > 0 && t > 0) {
+        const tp = m * t;
+        document.getElementById('previewTotalAmount').textContent = fmt(tp);
+        prev?.classList.remove('hidden');
+        if (l > 0 && tp < l) warn?.classList.remove('hidden');
+        else warn?.classList.add('hidden');
     } else {
-        if (preview) preview.classList.add('hidden');
+        prev?.classList.add('hidden');
     }
 };
 
-// ============================================================
+document.getElementById('loanAmount')?.addEventListener('input', updatePreview);
+document.getElementById('monthlyPayment')?.addEventListener('input', updatePreview);
+document.getElementById('totalInstallments')?.addEventListener('input', updatePreview);
+
+// ================================================================
 // ADD LOAN
-// ============================================================
-const addLoan = async (e) => {
+// ================================================================
+document.getElementById('loanForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const bankName = document.getElementById('bankName')?.value?.trim();
-    const loanAmount = parseFloat(document.getElementById('loanAmount')?.value);
-    const monthlyPayment = parseFloat(document.getElementById('monthlyPayment')?.value);
-    const totalInstallments = parseInt(document.getElementById('totalInstallments')?.value);
-    const loanDate = document.getElementById('loanDate')?.value;
-    const category = document.getElementById('category')?.value;
+    const bankName = document.getElementById('bankName').value.trim();
+    const loanAmount = parseFloat(document.getElementById('loanAmount').value);
+    const monthlyPayment = parseFloat(document.getElementById('monthlyPayment').value);
+    const totalInstallments = parseInt(document.getElementById('totalInstallments').value);
+    const loanDate = document.getElementById('loanDate').value;
+    const category = document.getElementById('category').value;
 
     if (!bankName || isNaN(loanAmount) || isNaN(monthlyPayment) || isNaN(totalInstallments) || !loanDate) {
-        showConfirmModal('Eksik Bilgi', 'Lütfen tüm zorunlu alanları doldurun!', () => {}, 'danger');
+        showConfirm('Eksik Bilgi', 'Lütfen tüm zorunlu alanları (*) doldurun.', () => {}, 'danger');
         return;
     }
 
     const proceed = async () => {
-        loans.push({
-            bankName, category, loanAmount, monthlyPayment, totalInstallments,
-            remainingInstallments: totalInstallments, loanDate,
-            earlyCloseAmount: 0, paymentHistory: []
-        });
+        loans.push({ bankName, category, loanAmount, monthlyPayment, totalInstallments, remainingInstallments: totalInstallments, loanDate, earlyCloseAmount: 0, paymentHistory: [] });
         await saveState();
         render();
-        document.getElementById('loanForm')?.reset();
+        document.getElementById('loanForm').reset();
         document.getElementById('paymentPreview')?.classList.add('hidden');
-        const ld = document.getElementById('loanDate');
-        if (ld) ld.valueAsDate = new Date();
+        document.getElementById('loanDate').valueAsDate = new Date();
         switchScreen('loans');
     };
 
-    const totalPayment = monthlyPayment * totalInstallments;
-    if (totalPayment < loanAmount) {
-        showConfirmModal('Uyarı', `Toplam geri ödeme (${formatCurrency(totalPayment)}) çekilen tutardan (${formatCurrency(loanAmount)}) düşük!\n\nYine de devam edilsin mi?`, proceed, 'danger');
+    const tp = monthlyPayment * totalInstallments;
+    if (tp < loanAmount) {
+        showConfirm('Uyarı', `Toplam geri ödeme (${fmt(tp)}) çekilen tutardan (${fmt(loanAmount)}) düşük!\n\nYine de devam edilsin mi?`, proceed, 'danger');
     } else {
         await proceed();
     }
-};
+});
 
-// ============================================================
+// ================================================================
 // LOAN ACTIONS
-// ============================================================
-window.updateEarlyClose = async (index, value) => {
-    if (!loans[index]) return;
-    loans[index].earlyCloseAmount = parseFloat(value) || 0;
+// ================================================================
+window.updateEarlyClose = async (idx, val) => {
+    if (!loans[idx]) return;
+    loans[idx].earlyCloseAmount = parseFloat(val) || 0;
     await saveState();
     render();
 };
 
-window.earlyCloseLoan = (index) => {
-    const loan = loans[index];
+window.earlyCloseLoan = (idx) => {
+    const loan = loans[idx];
     if (!loan || loan.isEarlyClosed) return;
-    const totalFuture = loan.remainingInstallments * loan.monthlyPayment;
-    const profit = totalFuture - loan.earlyCloseAmount;
-    showConfirmModal(
-        'Erken Kapama',
-        `${loan.bankName} kredisini kapatmak istiyor musunuz?\n\n` +
-        `Erken Kapama Tutarı: ${formatCurrency(loan.earlyCloseAmount)}\n` +
-        `Kâr/Zarar: ${profit >= 0 ? '+' : ''}${formatCurrency(profit)}`,
+    const future = loan.remainingInstallments * loan.monthlyPayment;
+    const profit = future - loan.earlyCloseAmount;
+    showConfirm('Erken Kapama',
+        `${loan.bankName} kredisini kapatmak istiyor musunuz?\n\nErken kapama tutarı: ${fmt(loan.earlyCloseAmount)}\nKâr/Zarar: ${profit >= 0 ? '+' : ''}${fmt(profit)}`,
         async () => {
-            const closeCost = loan.earlyCloseAmount;
+            const cost = loan.earlyCloseAmount;
             loan.isEarlyClosed = true;
             loan.savedInstallments = loan.remainingInstallments;
             loan.remainingInstallments = 0;
@@ -1079,267 +973,238 @@ window.earlyCloseLoan = (index) => {
             await saveState();
             render();
             updateBudgetUI();
-            const budgetInput = document.getElementById('budgetInput');
-            if (budgetInput?.value) {
-                const cur = parseFloat(budgetInput.value);
-                if (!isNaN(cur)) budgetInput.value = Math.max(0, cur - closeCost).toFixed(2);
-            }
-        },
-        'info'
-    );
+            const bi = document.getElementById('budgetInput');
+            if (bi?.value) { const c = parseFloat(bi.value); if (!isNaN(c)) bi.value = Math.max(0, c - cost).toFixed(2); }
+        }, 'info');
 };
 
-window.deleteLoan = (index) => {
-    if (!loans[index]) return;
-    showConfirmModal('Kredi Sil', `"${loans[index].bankName}" kredisini silmek istediğinize emin misiniz?\n\nBu işlem geri alınamaz!`, async () => {
-        loans.splice(index, 1);
+window.deleteLoan = (idx) => {
+    if (!loans[idx]) return;
+    showConfirm('Sil', `"${loans[idx].bankName}" kredisini silmek istediğinize emin misiniz?`, async () => {
+        loans.splice(idx, 1);
         await saveState();
         render();
     }, 'danger');
 };
 
-window.payInstallment = (index) => {
-    if (!loans[index] || loans[index].remainingInstallments <= 0) return;
-    showConfirmModal('Taksit Öde', `"${loans[index].bankName}" için ${formatCurrency(loans[index].monthlyPayment)} taksit ödemesini onaylıyor musunuz?`, async () => {
-        loans[index].remainingInstallments -= 1;
-        if (!loans[index].paymentHistory) loans[index].paymentHistory = [];
-        loans[index].paymentHistory.push({ date: new Date().toISOString(), amount: loans[index].monthlyPayment });
+window.payInstallment = (idx) => {
+    if (!loans[idx] || loans[idx].remainingInstallments <= 0) return;
+    showConfirm('Taksit Öde', `${loans[idx].bankName} için ${fmt(loans[idx].monthlyPayment)} taksit ödensin mi?`, async () => {
+        loans[idx].remainingInstallments--;
+        if (!loans[idx].paymentHistory) loans[idx].paymentHistory = [];
+        loans[idx].paymentHistory.push({ date: new Date().toISOString(), amount: loans[idx].monthlyPayment });
         await saveState();
         render();
     }, 'success');
 };
 
-window.undoInstallment = (index) => {
-    if (!loans[index] || loans[index].remainingInstallments >= loans[index].totalInstallments) return;
-    showConfirmModal('Geri Al', 'Son taksit ödemesini geri almak istediğinize emin misiniz?', async () => {
-        loans[index].remainingInstallments += 1;
-        if (loans[index].paymentHistory?.length > 0) loans[index].paymentHistory.pop();
+window.undoInstallment = (idx) => {
+    if (!loans[idx] || loans[idx].remainingInstallments >= loans[idx].totalInstallments) return;
+    showConfirm('Geri Al', 'Son taksit ödemesini geri almak istiyor musunuz?', async () => {
+        loans[idx].remainingInstallments++;
+        if (loans[idx].paymentHistory?.length) loans[idx].paymentHistory.pop();
         await saveState();
         render();
     }, 'danger');
 };
 
-// ============================================================
+// ================================================================
 // RENDER
-// ============================================================
+// ================================================================
 const render = () => {
-    const listContainer = document.getElementById('loanList');
-    const emptyState = document.getElementById('emptyState');
-    if (!listContainer) return;
+    const list = document.getElementById('loanList');
+    const empty = document.getElementById('emptyState');
+    if (!list) return;
 
-    const filterBank = (document.getElementById('filterBankName')?.value || '').toLowerCase();
-    const filterCat = document.getElementById('filterCategory')?.value || 'all';
+    const fb = (document.getElementById('filterBankName')?.value || '').toLowerCase();
+    const fc = document.getElementById('filterCategory')?.value || 'all';
 
-    const filteredLoans = loans.filter(loan => {
-        const matchBank = (loan.bankName || '').toLowerCase().includes(filterBank);
-        const matchCat = filterCat === 'all' || loan.category === filterCat;
-        return matchBank && matchCat;
-    });
+    const filtered = loans.filter(l =>
+        (l.bankName || '').toLowerCase().includes(fb) &&
+        (fc === 'all' || l.category === fc)
+    );
 
-    listContainer.innerHTML = '';
-
-    if (filteredLoans.length === 0) {
-        if (emptyState) { listContainer.appendChild(emptyState); emptyState.style.display = 'block'; }
+    list.innerHTML = '';
+    if (filtered.length === 0) {
+        if (empty) { list.appendChild(empty); empty.style.display = 'block'; }
     } else {
-        if (emptyState) emptyState.style.display = 'none';
+        if (empty) empty.style.display = 'none';
     }
 
-    let grandTotalMonthly = 0, grandTotalDebt = 0, grandTotalProfit = 0;
+    let totMonthly = 0, totDebt = 0, totProfit = 0;
 
-    filteredLoans.forEach(loan => {
-        const originalIndex = loans.indexOf(loan);
-        const totalInst = Math.max(1, loan.totalInstallments || 1);
-        const remainingInst = loan.isEarlyClosed ? 0 : (loan.remainingInstallments || 0);
+    filtered.forEach(loan => {
+        const oi = loans.indexOf(loan);
+        const total = Math.max(1, loan.totalInstallments || 1);
+        const rem = loan.isEarlyClosed ? 0 : (loan.remainingInstallments || 0);
         const monthly = parseFloat(loan.monthlyPayment) || 0;
         const loanAmt = parseFloat(loan.loanAmount) || 0;
-        const earlyClose = parseFloat(loan.earlyCloseAmount) || 0;
-        const remainingPrincipal = loan.isEarlyClosed ? 0 : ((remainingInst / totalInst) * loanAmt);
-        const totalFuture = remainingInst * monthly;
-        const hasEarlyClose = earlyClose > 0;
-        const profit = hasEarlyClose ? totalFuture - earlyClose : 0;
-        const paidCount = totalInst - (loan.isEarlyClosed ? (loan.savedInstallments || 0) : remainingInst);
+        const ec = parseFloat(loan.earlyCloseAmount) || 0;
+        const remP = loan.isEarlyClosed ? 0 : (rem / total) * loanAmt;
+        const future = rem * monthly;
+        const hasEC = ec > 0;
+        const profit = hasEC ? future - ec : 0;
+        const paid = total - (loan.isEarlyClosed ? (loan.savedInstallments || 0) : rem);
 
-        const nextDate = loan.isEarlyClosed ? null : calculateNextPaymentDate(loan.loanDate, totalInst, remainingInst);
-        let isUrgent = false;
-        if (nextDate) {
-            const diffDays = Math.ceil((nextDate - new Date()) / 86400000);
-            if (diffDays >= 0 && diffDays <= 3) isUrgent = true;
-        }
+        const nd = loan.isEarlyClosed ? null : nextPayDate(loan.loanDate, total, rem);
+        const urgent = nd ? Math.ceil((nd - new Date()) / 86400000) <= 3 && Math.ceil((nd - new Date()) / 86400000) >= 0 : false;
 
-        if (!loan.isEarlyClosed) { grandTotalMonthly += monthly; grandTotalDebt += remainingPrincipal; }
-        if (hasEarlyClose) grandTotalProfit += profit;
+        if (!loan.isEarlyClosed) { totMonthly += monthly; totDebt += remP; }
+        if (hasEC) totProfit += profit;
 
-        let borderClass = 'border-l-4 border-l-slate-300 dark:border-l-slate-600';
-        if (loan.isEarlyClosed) borderClass = 'border-l-4 border-l-emerald-500 bg-emerald-50/30 dark:bg-emerald-900/10';
-        else if (isUrgent) borderClass = 'border-l-4 border-l-red-500 bg-red-50/50 dark:bg-red-900/10';
-        else if (hasEarlyClose) borderClass = profit >= 0 ? 'border-l-4 border-l-emerald-400' : 'border-l-4 border-l-red-400';
+        let border = 'border-l-4 border-l-slate-300 dark:border-l-slate-600';
+        if (loan.isEarlyClosed) border = 'border-l-4 border-l-emerald-500 bg-emerald-50/30 dark:bg-emerald-900/10';
+        else if (urgent) border = 'border-l-4 border-l-red-500 bg-red-50/50 dark:bg-red-900/10';
+        else if (hasEC) border = profit >= 0 ? 'border-l-4 border-l-emerald-400' : 'border-l-4 border-l-red-400';
 
         const item = document.createElement('div');
-        item.className = `p-5 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-all relative border-b border-slate-100 dark:border-slate-700 last:border-b-0 ${borderClass}`;
+        item.className = `p-5 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors relative border-b border-slate-100 dark:border-slate-700 last:border-b-0 ${border}`;
         item.innerHTML = `
-            ${loan.isEarlyClosed ? `<span class="absolute top-4 right-4 bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300 text-[10px] font-bold px-2 py-1 rounded-md border border-emerald-200 dark:border-emerald-800">KAPATILDI</span>` : ''}
-            ${isUrgent ? `<span class="absolute top-4 right-4 bg-red-100 text-red-600 dark:bg-red-900/50 dark:text-red-300 text-[10px] font-bold px-2 py-1 rounded-md animate-pulse border border-red-200 dark:border-red-800"><i class="fa-solid fa-bell mr-1"></i>ÖDEME YAKLAŞTI</span>` : ''}
+            ${loan.isEarlyClosed ? `<span class="absolute top-4 right-4 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold px-2 py-1 rounded-md border border-emerald-200 dark:border-emerald-800">KAPATILDI</span>` : ''}
+            ${urgent && !loan.isEarlyClosed ? `<span class="absolute top-4 right-4 bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-300 text-[10px] font-bold px-2 py-1 rounded-md animate-pulse border border-red-200 dark:border-red-800"><i class="fa-solid fa-bell mr-1"></i>YAKLAŞIYOR</span>` : ''}
 
-            <div class="flex items-center gap-2 flex-wrap pr-28 mb-2">
+            <div class="flex flex-wrap items-center gap-2 pr-28 mb-2">
                 <h3 class="text-base font-bold text-slate-800 dark:text-white">${loan.bankName}</h3>
-                <span class="text-[10px] bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded-full uppercase font-medium">${loan.category}</span>
-                ${hasEarlyClose ? `<span class="text-[10px] px-2 py-0.5 rounded-full font-bold border ${profit >= 0 ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800' : 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border-red-200 dark:border-red-800'}">${profit >= 0 ? 'Kârlı' : 'Zararlı'}</span>` : ''}
+                <span class="text-[10px] bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded-full font-medium">${loan.category}</span>
+                ${hasEC ? `<span class="text-[10px] px-2 py-0.5 rounded-full font-bold border ${profit >= 0 ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800' : 'bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400 border-red-200 dark:border-red-800'}">${profit >= 0 ? 'Kârlı' : 'Zararlı'}</span>` : ''}
             </div>
 
-            <div class="text-xs bg-slate-50/80 dark:bg-slate-700/30 p-2.5 rounded-lg border border-slate-100 dark:border-slate-600/50 flex justify-between items-center mb-3">
-                <span class="text-slate-500 dark:text-slate-400">Sonraki: <strong class="${isUrgent ? 'text-red-600 dark:text-red-400' : 'text-slate-700 dark:text-slate-200'}">${loan.isEarlyClosed ? '-' : formatDate(nextDate)}</strong></span>
-                <span class="text-indigo-600 dark:text-indigo-400 font-bold">Ödenen: ${paidCount} / ${totalInst}</span>
+            <div class="flex justify-between items-center text-xs bg-slate-50 dark:bg-slate-700/30 px-3 py-2 rounded-lg border border-slate-100 dark:border-slate-600/50 mb-3">
+                <span class="text-slate-500 dark:text-slate-400">Sonraki: <strong class="${urgent ? 'text-red-600 dark:text-red-400' : 'text-slate-700 dark:text-slate-200'}">${loan.isEarlyClosed ? '-' : fmtDate(nd)}</strong></span>
+                <span class="text-indigo-600 dark:text-indigo-400 font-bold">Ödenen: ${paid}/${total}</span>
             </div>
 
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
                 <div class="bg-white dark:bg-slate-800/50 p-2 rounded-lg border border-slate-100 dark:border-slate-700/50">
                     <div class="text-[10px] text-slate-400 uppercase mb-0.5">Çekilen</div>
-                    <div class="font-bold text-slate-700 dark:text-slate-200 text-sm">${formatCurrency(loanAmt)}</div>
+                    <div class="font-bold text-slate-700 dark:text-slate-200 text-sm">${fmt(loanAmt)}</div>
                 </div>
                 <div class="bg-white dark:bg-slate-800/50 p-2 rounded-lg border border-slate-100 dark:border-slate-700/50">
                     <div class="text-[10px] text-slate-400 uppercase mb-0.5">Taksit</div>
-                    <div class="font-bold text-slate-700 dark:text-slate-200 text-sm">${formatCurrency(monthly)}</div>
+                    <div class="font-bold text-slate-700 dark:text-slate-200 text-sm">${fmt(monthly)}</div>
                 </div>
                 <div class="bg-white dark:bg-slate-800/50 p-2 rounded-lg border border-slate-100 dark:border-slate-700/50">
                     <div class="text-[10px] text-slate-400 uppercase mb-0.5">Kalan Borç</div>
-                    <div class="font-bold text-red-500 dark:text-red-400 text-sm">${formatCurrency(remainingPrincipal)}</div>
+                    <div class="font-bold text-red-500 dark:text-red-400 text-sm">${fmt(remP)}</div>
                 </div>
                 <div class="bg-white dark:bg-slate-800/50 p-2 rounded-lg border border-slate-100 dark:border-slate-700/50">
-                    <div class="text-[10px] text-slate-400 uppercase mb-0.5">Erken Kapama</div>
-                    <div class="flex items-center gap-1 mt-0.5">
-                        <input type="number" step="0.01" value="${earlyClose || ''}" placeholder="0.00"
+                    <div class="text-[10px] text-slate-400 uppercase mb-0.5">Erken Kapama (₺)</div>
+                    <div class="flex items-center gap-1">
+                        <input type="number" step="0.01" value="${ec || ''}" placeholder="0.00"
                             ${loan.isEarlyClosed ? 'disabled' : ''}
-                            onchange="updateEarlyClose(${originalIndex}, this.value)"
+                            onchange="updateEarlyClose(${oi}, this.value)"
                             class="w-full text-xs bg-transparent border-b border-slate-300 dark:border-slate-600 focus:border-indigo-500 outline-none font-bold text-slate-700 dark:text-white disabled:opacity-50 py-0.5">
-                        ${(!loan.isEarlyClosed && hasEarlyClose) ? `<button onclick="earlyCloseLoan(${originalIndex})" class="text-emerald-500 hover:text-emerald-600 flex-shrink-0 ml-1" title="Erken Kapat"><i class="fa-solid fa-circle-check text-lg"></i></button>` : ''}
+                        ${!loan.isEarlyClosed && hasEC ? `<button onclick="earlyCloseLoan(${oi})" class="text-emerald-500 hover:text-emerald-600 shrink-0" title="Erken Kapat"><i class="fa-solid fa-circle-check text-lg"></i></button>` : ''}
                     </div>
                 </div>
             </div>
 
             <div class="flex flex-wrap gap-2 pt-3 border-t border-slate-100 dark:border-slate-700/50">
                 ${!loan.isEarlyClosed ? `
-                    <button onclick="undoInstallment(${originalIndex})" class="bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 w-8 h-8 rounded-lg flex items-center justify-center" title="Geri Al">
+                    <button onclick="undoInstallment(${oi})" class="w-8 h-8 bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 rounded-lg flex items-center justify-center transition-colors" title="Geri Al">
                         <i class="fa-solid fa-rotate-left text-xs"></i>
                     </button>
-                    <button onclick="payInstallment(${originalIndex})" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-3 py-2 rounded-lg flex items-center gap-1.5 shadow-sm">
+                    <button onclick="payInstallment(${oi})" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-3 py-2 rounded-lg flex items-center gap-1.5 transition-colors shadow-sm shadow-indigo-600/20">
                         <i class="fa-solid fa-check"></i> Taksit Öde
                     </button>
-                    <button onclick="openEditModal(${originalIndex})" class="bg-amber-400 hover:bg-amber-500 text-white text-xs px-3 py-2 rounded-lg flex items-center gap-1.5">
+                    <button onclick="openEditModal(${oi})" class="bg-amber-400 hover:bg-amber-500 text-white text-xs px-3 py-2 rounded-lg flex items-center gap-1.5 transition-colors">
                         <i class="fa-solid fa-pen"></i> Düzenle
                     </button>
-                ` : `
-                    <div class="text-xs text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-900/20 px-3 py-1.5 rounded-lg border border-emerald-100 dark:border-emerald-800">
-                        <i class="fa-solid fa-check-double"></i> Borç bitti
-                    </div>
-                `}
-                <button onclick="openDetailModal(${originalIndex})" class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-3 py-2 rounded-lg flex items-center gap-1.5">
+                ` : `<div class="text-xs text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-900/20 px-3 py-1.5 rounded-lg border border-emerald-100 dark:border-emerald-800"><i class="fa-solid fa-check-double"></i> Borç kapatıldı</div>`}
+                <button onclick="openDetailModal(${oi})" class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-3 py-2 rounded-lg flex items-center gap-1.5 transition-colors">
                     <i class="fa-solid fa-list-ul"></i> Detay
                 </button>
-                <button onclick="deleteLoan(${originalIndex})" class="bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 text-xs px-3 py-2 rounded-lg flex items-center gap-1.5 ml-auto border border-red-200 dark:border-red-800/50">
+                <button onclick="deleteLoan(${oi})" class="bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 text-xs px-3 py-2 rounded-lg flex items-center gap-1.5 ml-auto border border-red-200 dark:border-red-800/50 transition-colors">
                     <i class="fa-solid fa-trash"></i> Sil
                 </button>
             </div>
         `;
-        listContainer.appendChild(item);
+        list.appendChild(item);
     });
 
-    document.getElementById('totalMonthlyPayment').textContent = formatCurrency(grandTotalMonthly);
-    document.getElementById('totalRemainingDebt').textContent = formatCurrency(grandTotalDebt);
-    document.getElementById('totalProfit').textContent = formatCurrency(grandTotalProfit);
-    document.getElementById('loanCount').textContent = `${filteredLoans.length} Adet`;
+    document.getElementById('totalMonthlyPayment').textContent = fmt(totMonthly);
+    document.getElementById('totalRemainingDebt').textContent = fmt(totDebt);
+    document.getElementById('totalProfit').textContent = fmt(totProfit);
+    document.getElementById('loanCount').textContent = `${filtered.length} Adet`;
 };
 
-// ============================================================
+// ================================================================
+// FILTER
+// ================================================================
+document.getElementById('filterBankName')?.addEventListener('input', render);
+document.getElementById('filterCategory')?.addEventListener('change', render);
+
+// ================================================================
 // BUDGET
-// ============================================================
+// ================================================================
 const renderBudgetLists = () => {
-    // Income List
-    const incomeList = document.getElementById('incomeList');
-    if (incomeList) {
-        incomeList.innerHTML = incomes.length === 0
-            ? '<div class="text-xs text-slate-400 dark:text-slate-500">Kayıtlı gelir yok.</div>'
-            : '';
-        incomes.forEach((it, idx) => {
-            const div = document.createElement('div');
-            div.className = 'flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-700/30 rounded-lg border border-slate-100 dark:border-slate-700';
-            div.innerHTML = `
-                <div class="text-xs">
+    // Gelirler
+    const il = document.getElementById('incomeList');
+    if (il) {
+        il.innerHTML = '';
+        if (!incomes.length) { il.innerHTML = '<p class="text-xs text-slate-400 dark:text-slate-500">Kayıtlı gelir yok.</p>'; }
+        incomes.forEach((it, i) => {
+            const d = document.createElement('div');
+            d.className = 'flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-700/30 rounded-lg border border-slate-100 dark:border-slate-700 text-xs';
+            d.innerHTML = `
+                <div>
                     <div class="font-bold text-slate-700 dark:text-slate-200">${it.name || 'Gelir'}</div>
-                    <div class="text-slate-500 dark:text-slate-400"><span class="font-bold text-emerald-600 dark:text-emerald-400">+${formatCurrency(it.amount)}</span> • Ayın ${it.day}. günü</div>
+                    <div class="text-slate-500 dark:text-slate-400"><span class="font-bold text-emerald-600 dark:text-emerald-400">+${fmt(it.amount)}</span> • Ayın ${it.day}. günü</div>
                 </div>
-                <button data-del-income="${idx}" class="text-red-500 text-xs px-2 py-1 rounded bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 hover:bg-red-100">Sil</button>
-            `;
-            incomeList.appendChild(div);
+                <button data-i="${i}" class="del-income text-red-500 px-2 py-1 rounded bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 hover:bg-red-100 transition-colors">Sil</button>`;
+            il.appendChild(d);
         });
-        incomeList.querySelectorAll('[data-del-income]').forEach(btn => {
-            btn.addEventListener('click', async (e) => {
-                incomes.splice(parseInt(e.currentTarget.dataset.delIncome), 1);
-                await saveState();
-                renderBudgetLists();
-                generateBudgetPlan();
-            });
-        });
+        il.querySelectorAll('.del-income').forEach(b => b.addEventListener('click', async e => {
+            incomes.splice(+e.currentTarget.dataset.i, 1);
+            await saveState(); renderBudgetLists(); generateBudgetPlan();
+        }));
     }
 
-    // Loan Expense List
-    const loanExpenseList = document.getElementById('loanExpenseList');
-    if (loanExpenseList) {
-        loanExpenseList.innerHTML = '';
+    // Kredi taksitleri
+    const ll = document.getElementById('loanExpenseList');
+    if (ll) {
+        ll.innerHTML = '';
         const now = new Date();
-        const items = loans
-            .filter(l => !l.isEarlyClosed && l.remainingInstallments > 0)
-            .map(loan => {
-                const nd = calculateNextPaymentDate(loan.loanDate, loan.totalInstallments, loan.remainingInstallments);
+        const items = loans.filter(l => !l.isEarlyClosed && l.remainingInstallments > 0)
+            .map(l => {
+                const nd = nextPayDate(l.loanDate, l.totalInstallments, l.remainingInstallments);
                 return nd.getFullYear() === now.getFullYear() && nd.getMonth() === now.getMonth()
-                    ? { bankName: loan.bankName, day: nd.getDate(), amount: parseFloat(loan.monthlyPayment) || 0 }
-                    : null;
-            })
-            .filter(Boolean)
-            .sort((a, b) => a.day - b.day);
+                    ? { name: l.bankName, day: nd.getDate(), amount: parseFloat(l.monthlyPayment) || 0 } : null;
+            }).filter(Boolean).sort((a, b) => a.day - b.day);
 
-        if (items.length === 0) {
-            loanExpenseList.innerHTML = '<div class="text-xs text-slate-400 dark:text-slate-500">Bu ay için taksit yok.</div>';
-        } else {
-            items.forEach(it => {
-                const div = document.createElement('div');
-                div.className = 'flex items-center justify-between p-2 bg-red-50/60 dark:bg-red-900/20 rounded-lg border border-red-100 dark:border-red-800';
-                div.innerHTML = `
-                    <div class="text-xs">
-                        <div class="font-bold text-slate-700 dark:text-slate-200">${it.bankName}</div>
-                        <div class="text-slate-500 dark:text-slate-400">Ayın ${it.day}. günü • <span class="font-bold text-red-600 dark:text-red-400">-${formatCurrency(it.amount)}</span></div>
-                    </div>
-                `;
-                loanExpenseList.appendChild(div);
-            });
-        }
+        if (!items.length) { ll.innerHTML = '<p class="text-xs text-slate-400 dark:text-slate-500">Bu ay için taksit yok.</p>'; }
+        items.forEach(it => {
+            const d = document.createElement('div');
+            d.className = 'flex items-center justify-between p-2 bg-red-50/60 dark:bg-red-900/20 rounded-lg border border-red-100 dark:border-red-800 text-xs';
+            d.innerHTML = `
+                <div>
+                    <div class="font-bold text-slate-700 dark:text-slate-200">${it.name}</div>
+                    <div class="text-slate-500 dark:text-slate-400">Ayın ${it.day}. günü • <span class="font-bold text-red-600 dark:text-red-400">-${fmt(it.amount)}</span></div>
+                </div>`;
+            ll.appendChild(d);
+        });
     }
 
-    // Expense List
-    const expenseList = document.getElementById('expenseList');
-    if (expenseList) {
-        expenseList.innerHTML = otherExpenses.length === 0
-            ? '<div class="text-xs text-slate-400 dark:text-slate-500">Kayıtlı gider yok.</div>'
-            : '';
-        otherExpenses.forEach((it, idx) => {
-            const div = document.createElement('div');
-            div.className = 'flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-700/30 rounded-lg border border-slate-100 dark:border-slate-700';
-            div.innerHTML = `
-                <div class="text-xs">
+    // Diğer giderler
+    const el = document.getElementById('expenseList');
+    if (el) {
+        el.innerHTML = '';
+        if (!otherExpenses.length) { el.innerHTML = '<p class="text-xs text-slate-400 dark:text-slate-500">Kayıtlı gider yok.</p>'; }
+        otherExpenses.forEach((it, i) => {
+            const d = document.createElement('div');
+            d.className = 'flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-700/30 rounded-lg border border-slate-100 dark:border-slate-700 text-xs';
+            d.innerHTML = `
+                <div>
                     <div class="font-bold text-slate-700 dark:text-slate-200">${it.name || 'Gider'}</div>
-                    <div class="text-slate-500 dark:text-slate-400"><span class="font-bold text-red-600 dark:text-red-400">-${formatCurrency(it.amount)}</span> • Ayın ${it.day}. günü</div>
+                    <div class="text-slate-500 dark:text-slate-400"><span class="font-bold text-red-600 dark:text-red-400">-${fmt(it.amount)}</span> • Ayın ${it.day}. günü</div>
                 </div>
-                <button data-del-expense="${idx}" class="text-red-500 text-xs px-2 py-1 rounded bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 hover:bg-red-100">Sil</button>
-            `;
-            expenseList.appendChild(div);
+                <button data-i="${i}" class="del-expense text-red-500 px-2 py-1 rounded bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 hover:bg-red-100 transition-colors">Sil</button>`;
+            el.appendChild(d);
         });
-        expenseList.querySelectorAll('[data-del-expense]').forEach(btn => {
-            btn.addEventListener('click', async (e) => {
-                otherExpenses.splice(parseInt(e.currentTarget.dataset.delExpense), 1);
-                await saveState();
-                renderBudgetLists();
-                generateBudgetPlan();
-            });
-        });
+        el.querySelectorAll('.del-expense').forEach(b => b.addEventListener('click', async e => {
+            otherExpenses.splice(+e.currentTarget.dataset.i, 1);
+            await saveState(); renderBudgetLists(); generateBudgetPlan();
+        }));
     }
 };
 
@@ -1349,288 +1214,221 @@ const generateBudgetPlan = () => {
     container.innerHTML = '';
 
     const now = new Date();
-    const year = now.getFullYear();
-    const month = now.getMonth();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const y = now.getFullYear(), m = now.getMonth();
+    const dim = new Date(y, m + 1, 0).getDate();
 
-    const incByDay = Array(daysInMonth + 2).fill(0);
-    const expByDay = Array(daysInMonth + 2).fill(0);
-    const incItems = Array.from({ length: daysInMonth + 2 }, () => []);
-    const expItems = Array.from({ length: daysInMonth + 2 }, () => []);
+    const incB = Array(dim + 2).fill(0), expB = Array(dim + 2).fill(0);
+    const incI = Array.from({ length: dim + 2 }, () => []);
+    const expI = Array.from({ length: dim + 2 }, () => []);
 
-    incomes.forEach(i => {
-        const d = Math.min(Math.max(1, parseInt(i.day) || 1), daysInMonth);
-        const amt = parseFloat(i.amount) || 0;
-        incByDay[d] += amt;
-        incItems[d].push({ label: i.name || 'Gelir', amount: amt });
+    incomes.forEach(it => {
+        const d = Math.min(Math.max(1, +it.day || 1), dim);
+        const a = parseFloat(it.amount) || 0;
+        incB[d] += a; incI[d].push({ label: it.name || 'Gelir', amount: a });
     });
 
-    otherExpenses.forEach(x => {
-        const d = Math.min(Math.max(1, parseInt(x.day) || 1), daysInMonth);
-        const amt = parseFloat(x.amount) || 0;
-        expByDay[d] += amt;
-        expItems[d].push({ label: x.name || 'Gider', amount: amt });
+    otherExpenses.forEach(it => {
+        const d = Math.min(Math.max(1, +it.day || 1), dim);
+        const a = parseFloat(it.amount) || 0;
+        expB[d] += a; expI[d].push({ label: it.name || 'Gider', amount: a });
     });
 
     loans.forEach(loan => {
         if (loan.isEarlyClosed || loan.remainingInstallments <= 0) return;
-        const nd = calculateNextPaymentDate(loan.loanDate, loan.totalInstallments, loan.remainingInstallments);
-        if (nd.getFullYear() === year && nd.getMonth() === month) {
+        const nd = nextPayDate(loan.loanDate, loan.totalInstallments, loan.remainingInstallments);
+        if (nd.getFullYear() === y && nd.getMonth() === m) {
             const d = nd.getDate();
-            const amt = parseFloat(loan.monthlyPayment) || 0;
-            expByDay[d] += amt;
-            expItems[d].push({ label: `Kredi: ${loan.bankName}`, amount: amt });
+            const a = parseFloat(loan.monthlyPayment) || 0;
+            expB[d] += a; expI[d].push({ label: `Kredi: ${loan.bankName}`, amount: a });
         }
     });
 
-    const totalIncome = incByDay.reduce((a, b) => a + b, 0);
-    const totalExpense = expByDay.reduce((a, b) => a + b, 0);
-    const remaining = totalIncome - totalExpense;
+    const totInc = incB.reduce((a, b) => a + b, 0);
+    const totExp = expB.reduce((a, b) => a + b, 0);
+    const rem = totInc - totExp;
 
-    const ti = document.getElementById('planTotalIncome');
-    const te = document.getElementById('planTotalExpense');
+    document.getElementById('planTotalIncome').textContent = fmt(totInc);
+    document.getElementById('planTotalExpense').textContent = fmt(totExp);
     const rb = document.getElementById('planRemainingBudget');
-    if (ti) ti.textContent = formatCurrency(totalIncome);
-    if (te) te.textContent = formatCurrency(totalExpense);
-    if (rb) {
-        rb.textContent = formatCurrency(remaining);
-        rb.className = `text-sm font-bold ${remaining >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`;
-    }
+    if (rb) { rb.textContent = fmt(rem); rb.className = `text-sm font-bold ${rem >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`; }
 
-    let balance = 0;
-    let hasDays = false;
-    for (let d = 1; d <= daysInMonth; d++) {
-        const inc = incByDay[d];
-        const exp = expByDay[d];
-        if (inc === 0 && exp === 0) continue;
-        hasDays = true;
-        balance += inc - exp;
+    let balance = 0, hasAny = false;
+    for (let d = 1; d <= dim; d++) {
+        if (!incB[d] && !expB[d]) continue;
+        hasAny = true;
+        balance += incB[d] - expB[d];
         const risky = balance < 0;
 
-        const dayBox = document.createElement('div');
-        dayBox.className = `p-3 rounded-xl border ${risky ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' : 'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700'}`;
-        dayBox.innerHTML = `
-            <div class="flex items-center justify-between">
+        const box = document.createElement('div');
+        box.className = `p-3 rounded-xl border ${risky ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' : 'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700'}`;
+        box.innerHTML = `
+            <div class="flex items-center justify-between mb-2">
                 <div class="flex items-center gap-2">
                     <div class="w-8 h-8 rounded-lg flex items-center justify-center ${risky ? 'bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-300' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'}">
                         <i class="fa-solid ${risky ? 'fa-triangle-exclamation' : 'fa-calendar-day'} text-xs"></i>
                     </div>
                     <div>
-                        <div class="text-xs font-bold text-slate-700 dark:text-slate-200">${d}.${month + 1}.${year}</div>
+                        <div class="text-xs font-bold text-slate-700 dark:text-slate-200">${d}.${m + 1}.${y}</div>
                         <div class="text-[11px] text-slate-500 dark:text-slate-400">
-                            <span class="text-emerald-600 dark:text-emerald-400 font-bold">+${formatCurrency(inc)}</span>
+                            <span class="text-emerald-600 dark:text-emerald-400 font-bold">+${fmt(incB[d])}</span>
                             <span class="mx-1">•</span>
-                            <span class="text-red-600 dark:text-red-400 font-bold">-${formatCurrency(exp)}</span>
+                            <span class="text-red-600 dark:text-red-400 font-bold">-${fmt(expB[d])}</span>
                         </div>
                     </div>
                 </div>
                 <div class="text-right">
                     <div class="text-[10px] text-slate-400 dark:text-slate-500">Bakiye</div>
-                    <div class="font-bold text-sm ${risky ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}">${formatCurrency(balance)}</div>
+                    <div class="font-bold text-sm ${risky ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}">${fmt(balance)}</div>
                 </div>
             </div>
-            <div class="mt-2 flex flex-wrap gap-1">
-                ${incItems[d].map(it => `<span class="text-[11px] px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">${it.label} +${formatCurrency(it.amount)}</span>`).join('')}
-                ${expItems[d].map(it => `<span class="text-[11px] px-2 py-0.5 rounded bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800">${it.label} -${formatCurrency(it.amount)}</span>`).join('')}
-            </div>
-        `;
-        container.appendChild(dayBox);
+            <div class="flex flex-wrap gap-1">
+                ${incI[d].map(it => `<span class="text-[11px] px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">${it.label} +${fmt(it.amount)}</span>`).join('')}
+                ${expI[d].map(it => `<span class="text-[11px] px-2 py-0.5 rounded bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800">${it.label} -${fmt(it.amount)}</span>`).join('')}
+            </div>`;
+        container.appendChild(box);
     }
 
-    if (!hasDays) {
-        container.innerHTML = '<div class="text-sm text-slate-500 dark:text-slate-400 text-center py-8">Bu ay için gelir veya gider bulunmuyor.</div>';
-    }
+    if (!hasAny) container.innerHTML = '<p class="text-sm text-slate-400 dark:text-slate-500 text-center py-8">Bu ay için gelir veya gider bulunmuyor.</p>';
 };
 
 const updateBudgetUI = () => { renderBudgetLists(); generateBudgetPlan(); };
 
-// ============================================================
-// RECOMMENDATIONS
-// ============================================================
-const getBudgetForRecommendations = () => {
-    const raw = parseFloat(document.getElementById('budgetInput')?.value);
-    return Number.isFinite(raw) ? raw : 0;
-};
-
-const showNoBudgetState = () => {
-    document.getElementById('recommendationResults')?.classList.add('hidden');
-    document.getElementById('noRecommendation')?.classList.add('hidden');
-    const nb = document.getElementById('noBudget');
-    if (nb) { nb.classList.remove('hidden'); nb.classList.add('flex'); }
-};
-
-const calculateSmartRecommendations = () => {
-    const budget = getBudgetForRecommendations();
-    const resultsEl = document.getElementById('recommendationResults');
-    const noRecEl = document.getElementById('noRecommendation');
-    const noBudgetEl = document.getElementById('noBudget');
-
-    if (budget <= 0) { showNoBudgetState(); return; }
-    if (noBudgetEl) { noBudgetEl.classList.add('hidden'); noBudgetEl.classList.remove('flex'); }
-
-    const activeLoans = loans
-        .filter(l => !l.isEarlyClosed)
-        .map(loan => {
-            const totalInst = Math.max(1, loan.totalInstallments);
-            const remainingInst = loan.remainingInstallments || 0;
-            const monthly = parseFloat(loan.monthlyPayment) || 0;
-            const loanAmt = parseFloat(loan.loanAmount) || 0;
-            const earlyClose = parseFloat(loan.earlyCloseAmount) || 0;
-            const remainingPrincipal = (remainingInst / totalInst) * loanAmt;
-            const cost = earlyClose > 0 ? earlyClose : remainingPrincipal;
-            const totalFuture = remainingInst * monthly;
-            const profit = totalFuture - cost;
-            return { ...loan, cost, profit, relief: monthly, originalIndex: loans.indexOf(loan) };
-        });
-
-    // En kârlı
-    const profitSorted = [...activeLoans].sort((a, b) => b.profit - a.profit);
-    const profitPlan = { selected: [], totalCost: 0, totalProfit: 0 };
-    let rem1 = budget;
-    profitSorted.forEach(loan => {
-        if (loan.cost > 0 && loan.cost <= rem1 && loan.profit > 0) {
-            profitPlan.selected.push(loan);
-            profitPlan.totalCost += loan.cost;
-            profitPlan.totalProfit += loan.profit;
-            rem1 -= loan.cost;
-        }
-    });
-
-    // Aylık rahatlama
-    const reliefSorted = [...activeLoans].sort((a, b) => {
-        const ra = a.cost > 0 ? a.relief / a.cost : 0;
-        const rb2 = b.cost > 0 ? b.relief / b.cost : 0;
-        return rb2 - ra;
-    });
-    const reliefPlan = { selected: [], totalCost: 0, totalRelief: 0 };
-    let rem2 = budget;
-    reliefSorted.forEach(loan => {
-        if (loan.cost > 0 && loan.cost <= rem2) {
-            reliefPlan.selected.push(loan);
-            reliefPlan.totalCost += loan.cost;
-            reliefPlan.totalRelief += loan.relief;
-            rem2 -= loan.cost;
-        }
-    });
-
-    const renderList = (plan, listId, type) => {
-        const container = document.getElementById(listId);
-        if (!container) return;
-        container.innerHTML = '';
-        if (plan.selected.length === 0) {
-            container.innerHTML = '<li class="text-xs text-slate-400 dark:text-slate-500 italic">Bu strateji için uygun kredi yok.</li>';
-            return;
-        }
-        plan.selected.forEach(loan => {
-            const li = document.createElement('li');
-            li.className = 'bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-100 dark:border-slate-700 flex justify-between items-center gap-2';
-            li.innerHTML = `
-                <div class="flex-1 min-w-0">
-                    <div class="font-bold text-slate-700 dark:text-slate-200 text-sm truncate">${loan.bankName}</div>
-                    <div class="text-[10px] text-slate-500 dark:text-slate-400">Maliyet: ${formatCurrency(loan.cost)}</div>
-                </div>
-                <div class="flex items-center gap-2 shrink-0">
-                    <span class="font-bold text-xs ${type === 'profit' ? 'text-emerald-600 dark:text-emerald-400' : 'text-blue-600 dark:text-blue-400'}">
-                        ${type === 'profit' ? `+${formatCurrency(loan.profit)}` : `-${formatCurrency(loan.relief)}/Ay`}
-                    </span>
-                    <button onclick="earlyCloseLoan(${loan.originalIndex})" class="bg-red-500 hover:bg-red-600 text-white w-7 h-7 flex items-center justify-center rounded-lg shrink-0" title="Erken Kapat">
-                        <i class="fa-solid fa-power-off text-xs"></i>
-                    </button>
-                </div>
-            `;
-            container.appendChild(li);
-        });
-    };
-
-    renderList(profitPlan, 'profitList', 'profit');
-    document.getElementById('profitUsedBudget').textContent = formatCurrency(profitPlan.totalCost);
-    document.getElementById('profitTotalGain').textContent = formatCurrency(profitPlan.totalProfit);
-
-    renderList(reliefPlan, 'reliefList', 'relief');
-    document.getElementById('reliefUsedBudget').textContent = formatCurrency(reliefPlan.totalCost);
-    document.getElementById('reliefTotalGain').textContent = formatCurrency(reliefPlan.totalRelief) + '/Ay';
-
-    if (profitPlan.selected.length === 0 && reliefPlan.selected.length === 0) {
-        if (resultsEl) resultsEl.classList.add('hidden');
-        if (noRecEl) { noRecEl.classList.remove('hidden'); }
-    } else {
-        if (resultsEl) { resultsEl.classList.remove('hidden'); resultsEl.style.display = 'grid'; }
-        if (noRecEl) noRecEl.classList.add('hidden');
-    }
-};
-
-// ============================================================
-// EVENT LISTENERS
-// ============================================================
-document.getElementById('loanForm')?.addEventListener('submit', addLoan);
-
 document.getElementById('incomeForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const name = document.getElementById('incomeName')?.value?.trim();
-    const amount = parseFloat(document.getElementById('incomeAmount')?.value);
-    const day = parseInt(document.getElementById('incomeDay')?.value, 10);
+    const name = document.getElementById('incomeName').value.trim();
+    const amount = parseFloat(document.getElementById('incomeAmount').value);
+    const day = parseInt(document.getElementById('incomeDay').value);
     if (!amount || isNaN(day) || day < 1 || day > 31) {
-        showConfirmModal('Hata', 'Lütfen tutar ve geçerli bir gün girin (1-31).', () => {}, 'danger');
-        return;
+        showConfirm('Hata', 'Geçerli bir tutar ve gün (1-31) giriniz.', () => {}, 'danger'); return;
     }
     incomes.push({ name: name || 'Gelir', amount, day });
     await saveState();
     e.target.reset();
-    renderBudgetLists();
-    generateBudgetPlan();
+    renderBudgetLists(); generateBudgetPlan();
 });
 
 document.getElementById('expenseForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const name = document.getElementById('expenseName')?.value?.trim();
-    const amount = parseFloat(document.getElementById('expenseAmount')?.value);
-    const day = parseInt(document.getElementById('expenseDay')?.value, 10);
+    const name = document.getElementById('expenseName').value.trim();
+    const amount = parseFloat(document.getElementById('expenseAmount').value);
+    const day = parseInt(document.getElementById('expenseDay').value);
     if (!amount || isNaN(day) || day < 1 || day > 31) {
-        showConfirmModal('Hata', 'Lütfen tutar ve geçerli bir gün girin (1-31).', () => {}, 'danger');
-        return;
+        showConfirm('Hata', 'Geçerli bir tutar ve gün (1-31) giriniz.', () => {}, 'danger'); return;
     }
     otherExpenses.push({ name: name || 'Gider', amount, day });
     await saveState();
     e.target.reset();
-    renderBudgetLists();
-    generateBudgetPlan();
+    renderBudgetLists(); generateBudgetPlan();
 });
 
 document.getElementById('btnGeneratePlan')?.addEventListener('click', generateBudgetPlan);
-document.getElementById('loanAmount')?.addEventListener('input', updatePreview);
-document.getElementById('monthlyPayment')?.addEventListener('input', updatePreview);
-document.getElementById('totalInstallments')?.addEventListener('input', updatePreview);
-document.getElementById('filterBankName')?.addEventListener('input', render);
-document.getElementById('filterCategory')?.addEventListener('change', render);
 
-// ============================================================
-// INIT  ✅ DÜZELTİLDİ - Dark mode önce uygulanır
-// ============================================================
-// Dark modu hemen uygula (flash önlemek için)
-applyDarkMode();
+// ================================================================
+// RECOMMENDATIONS
+// ================================================================
+const getBudget = () => { const v = parseFloat(document.getElementById('budgetInput')?.value); return isFinite(v) ? v : 0; };
 
-const ld = document.getElementById('loanDate');
-if (ld) ld.valueAsDate = new Date();
+const calculateSmartRecommendations = () => {
+    const budget = getBudget();
+    const resEl = document.getElementById('recommendationResults');
+    const noRecEl = document.getElementById('noRecommendation');
+    const noBudgetEl = document.getElementById('noBudget');
 
-// Önce local'den yükle (hızlı görünüm)
+    hideEl('noRecommendation'); hideEl('noBudget');
+    if (resEl) { resEl.classList.add('hidden'); resEl.style.display = ''; }
+
+    if (budget <= 0) { showEl('noBudget'); return; }
+
+    const active = loans.filter(l => !l.isEarlyClosed).map(loan => {
+        const total = Math.max(1, loan.totalInstallments);
+        const rem = loan.remainingInstallments || 0;
+        const monthly = parseFloat(loan.monthlyPayment) || 0;
+        const loanAmt = parseFloat(loan.loanAmount) || 0;
+        const ec = parseFloat(loan.earlyCloseAmount) || 0;
+        const remP = (rem / total) * loanAmt;
+        const cost = ec > 0 ? ec : remP;
+        const profit = (rem * monthly) - cost;
+        return { ...loan, cost, profit, relief: monthly, oi: loans.indexOf(loan) };
+    });
+
+    // Kâr planı
+    const ps = [...active].sort((a, b) => b.profit - a.profit);
+    const pp = { sel: [], cost: 0, profit: 0 };
+    let r1 = budget;
+    ps.forEach(l => { if (l.cost > 0 && l.cost <= r1 && l.profit > 0) { pp.sel.push(l); pp.cost += l.cost; pp.profit += l.profit; r1 -= l.cost; } });
+
+    // Rahatlama planı
+    const rs = [...active].sort((a, b) => (b.cost > 0 ? b.relief / b.cost : 0) - (a.cost > 0 ? a.relief / a.cost : 0));
+    const rp = { sel: [], cost: 0, relief: 0 };
+    let r2 = budget;
+    rs.forEach(l => { if (l.cost > 0 && l.cost <= r2) { rp.sel.push(l); rp.cost += l.cost; rp.relief += l.relief; r2 -= l.cost; } });
+
+    const renderList = (plan, listId, type) => {
+        const c = document.getElementById(listId);
+        if (!c) return;
+        c.innerHTML = '';
+        if (!plan.sel.length) { c.innerHTML = '<li class="text-xs text-slate-400 dark:text-slate-500 italic">Uygun kredi yok.</li>'; return; }
+        plan.sel.forEach(loan => {
+            const li = document.createElement('li');
+            li.className = 'bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-100 dark:border-slate-700 flex items-center justify-between gap-2';
+            li.innerHTML = `
+                <div class="flex-1 min-w-0">
+                    <div class="font-bold text-slate-700 dark:text-slate-200 text-sm truncate">${loan.bankName}</div>
+                    <div class="text-[10px] text-slate-400 dark:text-slate-500">Maliyet: ${fmt(loan.cost)}</div>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                    <span class="font-bold text-xs ${type === 'profit' ? 'text-emerald-600 dark:text-emerald-400' : 'text-blue-600 dark:text-blue-400'}">
+                        ${type === 'profit' ? `+${fmt(loan.profit)}` : `-${fmt(loan.relief)}/Ay`}
+                    </span>
+                    <button onclick="earlyCloseLoan(${loan.oi})" class="bg-red-500 hover:bg-red-600 text-white w-7 h-7 flex items-center justify-center rounded-lg transition-colors" title="Erken Kapat">
+                        <i class="fa-solid fa-power-off text-xs"></i>
+                    </button>
+                </div>`;
+            c.appendChild(li);
+        });
+    };
+
+    renderList(pp, 'profitList', 'profit');
+    document.getElementById('profitUsedBudget').textContent = fmt(pp.cost);
+    document.getElementById('profitTotalGain').textContent = fmt(pp.profit);
+
+    renderList(rp, 'reliefList', 'relief');
+    document.getElementById('reliefUsedBudget').textContent = fmt(rp.cost);
+    document.getElementById('reliefTotalGain').textContent = fmt(rp.relief) + '/Ay';
+
+    if (!pp.sel.length && !rp.sel.length) {
+        showEl('noRecommendation');
+    } else {
+        if (resEl) { resEl.classList.remove('hidden'); resEl.style.display = 'grid'; }
+    }
+};
+
+// ================================================================
+// INIT
+// ================================================================
 (async () => {
-    const localData = loadFromLocal();
-    if (localData) {
-        loans = localData.loans || [];
-        incomes = localData.incomes || [];
-        otherExpenses = localData.otherExpenses || [];
+    // Tarih alanını bugüne ayarla
+    const ld = document.getElementById('loanDate');
+    if (ld) ld.valueAsDate = new Date();
+
+    // Önce localStorage'dan yükle (hızlı gösterim)
+    const local = loadFromLocal();
+    if (local) {
+        loans = local.loans || [];
+        incomes = local.incomes || [];
+        otherExpenses = local.otherExpenses || [];
         render();
         updateBudgetUI();
     } else {
-        render(); // Boş state göster
+        render();
     }
 
-    // Cloud'dan yükle
-    const cloudData = await loadFromCloud();
-    if (cloudData) {
-        loans = cloudData.loans || [];
-        incomes = cloudData.incomes || [];
-        otherExpenses = cloudData.otherExpenses || [];
+    // Sonra cloud'dan yükle
+    const cloud = await loadFromCloud();
+    if (cloud) {
+        loans = cloud.loans || [];
+        incomes = cloud.incomes || [];
+        otherExpenses = cloud.otherExpenses || [];
         render();
         updateBudgetUI();
     }
@@ -1639,7 +1437,7 @@ if (ld) ld.valueAsDate = new Date();
 // Service Worker
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js?v=7').catch(e => console.log('[SW] Kayıt hatası:', e));
+        navigator.serviceWorker.register('./sw.js?v=7').catch(e => console.warn('SW:', e));
     });
 }
 </script>
