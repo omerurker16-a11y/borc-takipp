@@ -1425,8 +1425,10 @@
             loanCountEl.textContent = `${filteredLoans.length} Adet`;
         };
 
+        // Actions
         const addLoan = async (e) => {
-            e.preventDefault();
+            e.preventDefault(); // Sayfanın yenilenmesini ve formun donmasını engeller
+            
             const bankName = document.getElementById('bankName').value;
             const loanAmount = parseFloat(document.getElementById('loanAmount').value);
             const monthlyPayment = parseFloat(document.getElementById('monthlyPayment').value);
@@ -1435,9 +1437,23 @@
             const category = document.getElementById('category').value;
 
             const proceedToAdd = async () => {
-                const newLoan = { bankName, category, loanAmount, monthlyPayment, totalInstallments, remainingInstallments: totalInstallments, loanDate, earlyCloseAmount: 0, createdAt: new Date().toISOString() };
+                const newLoan = { 
+                    bankName, 
+                    category, 
+                    loanAmount, 
+                    monthlyPayment, 
+                    totalInstallments, 
+                    remainingInstallments: totalInstallments, 
+                    loanDate, 
+                    earlyCloseAmount: 0, 
+                    createdAt: new Date().toISOString() 
+                };
+                
                 loans.push(newLoan);
-                await saveState();
+                
+                // Formun donmasını engelleyen kritik asenkron bekletme (await)
+                await saveState(); 
+                
                 render();
                 form.reset();
                 paymentPreview.classList.add('hidden');
@@ -1447,10 +1463,18 @@
 
             const totalPayment = monthlyPayment * totalInstallments;
             if (totalPayment < loanAmount) {
-                showConfirmModal('Düşük Geri Ödeme Uyarısı', `Toplam geri ödeme (${formatCurrency(totalPayment)}), çekilen tutardan (${formatCurrency(loanAmount)}) düşük! Yine de devam edilsin mi?`, proceedToAdd, 'danger');
+                showConfirmModal(
+                    'Düşük Geri Ödeme Uyarısı', 
+                    `Toplam geri ödeme (${formatCurrency(totalPayment)}), çekilen tutardan (${formatCurrency(loanAmount)}) düşük! Yine de devam edilsin mi?`, 
+                    async () => {
+                        await proceedToAdd();
+                    }, 
+                    'danger'
+                );
             } else {
                 await proceedToAdd();
             }
+        };
         };
 
         window.updateEarlyClose = async (index, value) => {
