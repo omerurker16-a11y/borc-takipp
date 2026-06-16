@@ -1873,8 +1873,22 @@ let otherExpenses = [];
         document.getElementById('loanDate').valueAsDate = new Date();
         
         // Initial Render
-        updateBudgetUI();
-        render();
+updateBudgetUI();
+render();
+
+// CLOUD LOAD ON START
+window.addEventListener("DOMContentLoaded", async () => {
+  const cloudData = await loadFromCloud();
+
+  if (cloudData) {
+    loans = cloudData.loans || [];
+    incomes = cloudData.incomes || [];
+    otherExpenses = cloudData.otherExpenses || [];
+  }
+
+  updateBudgetUI();
+  render();
+});
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
