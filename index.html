@@ -801,9 +801,9 @@
         updateThemeColor(savedDarkMode);
 
         // State
-        let loans = JSON.parse(localStorage.getItem('loans')) || [];
-        let incomes = JSON.parse(localStorage.getItem('incomes')) || [];
-        let otherExpenses = JSON.parse(localStorage.getItem('otherExpenses')) || [];
+        let loans = [];
+let incomes = [];
+let otherExpenses = [];
 
         // DOM Elements
         const form = document.getElementById('loanForm');
@@ -902,11 +902,15 @@
 
         btnCancel.addEventListener('click', closeConfirmModal);
 
-        const saveState = () => {
-            localStorage.setItem('loans', JSON.stringify(loans));
-            localStorage.setItem('incomes', JSON.stringify(incomes));
-            localStorage.setItem('otherExpenses', JSON.stringify(otherExpenses));
-        };
+        const saveState = async () => {
+  const data = {
+    loans,
+    incomes,
+    otherExpenses
+  };
+
+  await saveToCloud(data);
+};
 
         // -------- Budget (Income/Expense) Helpers --------
         const renderBudgetLists = () => {
@@ -1844,5 +1848,49 @@
             });
         }
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+  const supabase = window.supabase.createClient(
+    "https://bicfoxsrhvryrouxsaml.supabase.co",
+    "sb_publishable_XXXX"
+  );
+
+  const SAVE_ID = "00000000-0000-0000-0000-000000000001";
+
+  async function saveToCloud(data) {
+    await supabase
+      .from("borclar")
+      .upsert({ id: SAVE_ID, data }, { onConflict: "id" });
+  }
+
+  async function loadFromCloud() {
+    const { data } = await supabase
+      .from("borclar")
+      .select("data")
+      .eq("id", SAVE_ID)
+      .single();
+
+    if (data && data.data) {
+      return data.data;
+    }
+    return null;
+  }
+</script>
+
+<script>
+window.addEventListener("DOMContentLoaded", async () => {
+  const cloudData = await loadFromCloud();
+
+  if (cloudData) {
+    loans = cloudData.loans || [];
+    incomes = cloudData.incomes || [];
+    otherExpenses = cloudData.otherExpenses || [];
+  }
+
+  updateBudgetUI();
+  render();
+});
+</script>
 </body>
 </html>
