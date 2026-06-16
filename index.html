@@ -1641,7 +1641,7 @@ document.getElementById('settingsModal')?.addEventListener('click', (e) => { if 
 // Service Worker
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js?v=6').catch(e => console.log('SW:', e));
+       navigator.serviceWorker.register('./sw.js?v=7');
     });
 }
 </script>
