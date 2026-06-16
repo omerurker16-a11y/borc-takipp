@@ -1441,5 +1441,140 @@ if ('serviceWorker' in navigator) {
     });
 }
 </script>
+    <script>
+// ================================================================
+// BİLDİRİM SİSTEMİ
+// ================================================================
+
+// İzin iste ve bildirimleri ayarla
+async function setupNotifications() {
+    if (!('Notification' in window)) {
+        showConfirm('Desteklenmiyor', 'Bu tarayıcı bildirimleri desteklemiyor.', () => {}, 'danger');
+        return false;
+    }
+
+    if (Notification.permission === 'granted') {
+        return true;
+    }
+
+    if (Notification.permission === 'denied') {
+        showConfirm('İzin Reddedildi', 
+            'Bildirim izni reddedilmiş.\n\nTarayıcı ayarlarından izin vermeniz gerekiyor:\nAyarlar → Site Ayarları → Bildirimler', 
+            () => {}, 'danger');
+        return false;
+    }
+
+    const permission = await Notification.requestPermission();
+    return permission === 'granted';
+}
+
+// Periyodik kontrol zamanlayıcısını kur
+async function scheduleNotificationCheck() {
+    const granted = await setupNotifications();
+    if (!granted) return;
+
+    // Service Worker'a mevcut kredileri gönder
+    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({
+            type: 'SCHEDULE_CHECK',
+            loans: loans
+        });
+    }
+
+    // Periodic Background Sync desteği varsa kaydet
+    if ('periodicSync' in navigator.serviceWorker) {
+        try {
+            const sw = await navigator.serviceWorker.ready;
+            await sw.periodicSync.register('payment-check', {
+                minInterval: 24 * 60 * 60 * 1000 // 24 saat
+            });
+            console.log('Periodic sync registered');
+        } catch(e) {
+            console.log('Periodic sync not supported:', e);
+        }
+    }
+
+    // Fallback: sayfa açıkken kontrol et
+    checkPaymentsNow();
+}
+
+// Anlık ödeme kontrolü (sayfa açıkken)
+function checkPaymentsNow() {
+    if (Notification.permission !== 'granted') return;
+
+    const now = new Date();
+
+    loans.forEach(loan => {
+        if (loan.isEarlyClosed || loan.remainingInstallments <= 0) return;
+
+        const loanDate = new Date(loan.loanDate);
+        const paid = loan.totalInstallments - loan.remainingInstallments;
+        const nextDate = new Date(loanDate);
+        nextDate.setMonth(nextDate.getMonth() + paid + 1);
+
+        const diffDays = Math.ceil((nextDate - now) / 86400000);
+        const amount = new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(loan.monthlyPayment);
+
+        // Daha önce bu bildirim gönderildi mi?
+        const key = `notif_${loan.bankName}_${diffDays}_${nextDate.toDateString()}`;
+        if (localStorage.getItem(key)) return;
+
+        let title = '', body = '', show = false;
+
+        if (diffDays === 7)  { title = '📅 7 Gün Kaldı'; body = `${loan.bankName} taksiti ${amount} - 7 gün sonra!`; show = true; }
+        if (diffDays === 3)  { title = '⚠️ 3 Gün Kaldı'; body = `${loan.bankName} taksiti ${amount} - 3 gün sonra!`; show = true; }
+        if (diffDays === 1)  { title = '🚨 Yarın Ödeme!'; body = `${loan.bankName}: ${amount} - YARIN!`; show = true; }
+        if (diffDays === 0)  { title = '🔴 Bugün Ödeme Günü!'; body = `${loan.bankName}: ${amount} - BUGÜN!`; show = true; }
+
+        if (show) {
+            new Notification(title, {
+                body,
+                icon: './icon.svg',
+                badge: './icon.svg',
+                tag: key,
+                vibrate: [300, 100, 300]
+            });
+            localStorage.setItem(key, '1');
+            // 2 günden eski kayıtları temizle
+            cleanOldNotifKeys();
+        }
+    });
+}
+
+// Eski bildirim kayıtlarını temizle
+function cleanOldNotifKeys() {
+    const keys = Object.keys(localStorage).filter(k => k.startsWith('notif_'));
+    if (keys.length > 100) {
+        keys.slice(0, 50).forEach(k => localStorage.removeItem(k));
+    }
+}
+
+// Bildirim durumunu güncelle (navbar'da göster)
+function updateNotifButton() {
+    const btn = document.getElementById('notifBtn');
+    if (!btn) return;
+    if (Notification.permission === 'granted') {
+        btn.className = btn.className.replace('text-slate-400 dark:text-slate-500', '');
+        btn.innerHTML = '<i class="fa-solid fa-bell text-sm text-emerald-500"></i>';
+        btn.title = 'Bildirimler Açık';
+    } else if (Notification.permission === 'denied') {
+        btn.innerHTML = '<i class="fa-solid fa-bell-slash text-sm text-red-500"></i>';
+        btn.title = 'Bildirimler Kapalı';
+    } else {
+        btn.innerHTML = '<i class="fa-solid fa-bell text-sm"></i>';
+        btn.title = 'Bildirimleri Aç';
+    }
+}
+
+// Sayfa görünür olduğunda kontrol et
+document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) checkPaymentsNow();
+});
+
+// Her saat başı kontrol et (sayfa açıkken)
+setInterval(() => {
+    checkPaymentsNow();
+}, 60 * 60 * 1000);
+</script>
 </body>
 </html>
