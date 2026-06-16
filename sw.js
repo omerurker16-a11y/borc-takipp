@@ -112,4 +112,5 @@ self.addEventListener('fetch', (event) => {
     })()
   );
 });
+
 // cache version bump v6
