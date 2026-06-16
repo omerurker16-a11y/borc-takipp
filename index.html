@@ -24,9 +24,7 @@
         })();
     </script>
 
-    <!-- 1. Önce Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- 2. Sonra config -->
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -199,6 +197,11 @@
                 <i class="fa-solid fa-cloud text-xs"></i>
                 <span id="cloudStatusText">...</span>
             </div>
+            <button id="notifBtn" onclick="handleNotifClick()"
+                class="w-9 h-9 flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 transition-colors"
+                title="Bildirimleri Aç">
+                <i class="fa-solid fa-bell text-sm"></i>
+            </button>
             <button onclick="toggleSettingsModal()" class="w-9 h-9 flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 transition-colors">
                 <i class="fa-solid fa-gear text-sm"></i>
             </button>
@@ -522,13 +525,11 @@
     </div>
 </div>
 
-<!-- SUPABASE -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const SUPABASE_URL  = "https://ejeapbjlyqrucidbarhg.supabase.co";
-const SUPABASE_KEY  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVqZWFwYmpseXFydWNpZGJhcmhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE2MTA5NDIsImV4cCI6MjA5NzE4Njk0Mn0.b-1xu-TMknnsTv7ijqp2hQKTE1V9yLEfHN3yNJnKD4g";
-const SAVE_ID       = "00000000-0000-0000-0000-000000000001";
-
+const SUPABASE_URL = "https://ejeapbjlyqrucidbarhg.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVqZWFwYmpseXFydWNpZGJhcmhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE2MTA5NDIsImV4cCI6MjA5NzE4Njk0Mn0.b-1xu-TMknnsTv7ijqp2hQKTE1V9yLEfHN3yNJnKD4g";
+const SAVE_ID = "00000000-0000-0000-0000-000000000001";
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 function setCloudStatus(type, text) {
@@ -537,18 +538,15 @@ function setCloudStatus(type, text) {
     if (!el || !wrap) return;
     el.textContent = text;
     const base = 'text-xs px-2 py-1 rounded-lg flex items-center gap-1 ';
-    if (type === 'ok')    wrap.className = base + 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400';
+    if (type === 'ok')  wrap.className = base + 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400';
     else if (type === 'err') wrap.className = base + 'bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400';
-    else                  wrap.className = base + 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400';
+    else wrap.className = base + 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400';
 }
 
 async function saveToCloud(data) {
     try {
         setCloudStatus('loading', 'Kaydediliyor...');
-        const { error } = await sb.from('borclar').upsert(
-            { id: SAVE_ID, data },
-            { onConflict: 'id' }
-        );
+        const { error } = await sb.from('borclar').upsert({ id: SAVE_ID, data }, { onConflict: 'id' });
         if (error) throw error;
         setCloudStatus('ok', 'Kaydedildi ✓');
         localStorage.setItem('btBackup', JSON.stringify(data));
@@ -587,43 +585,27 @@ function loadFromLocal() {
 </script>
 
 <script>
-// ================================================================
-// STATE
-// ================================================================
-let loans = [];
-let incomes = [];
-let otherExpenses = [];
+let loans = [], incomes = [], otherExpenses = [];
 
-// ================================================================
-// UTILS
-// ================================================================
 const fmt = (n) => new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(n || 0);
-
 const fmtDate = (v) => {
     if (!v) return '-';
     const d = v instanceof Date ? v : new Date(v);
     return isNaN(d) ? '-' : new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' }).format(d);
 };
-
 const nextPayDate = (loanDateStr, total, remaining) => {
     if (!loanDateStr) return new Date();
     const d = new Date(loanDateStr);
     d.setMonth(d.getMonth() + (total - remaining) + 1);
     return d;
 };
+const saveState = async () => { await saveToCloud({ loans, incomes, otherExpenses }); };
 
-const saveState = async () => {
-    await saveToCloud({ loans, incomes, otherExpenses });
-};
-
-// ================================================================
 // DARK MODE
-// ================================================================
 const updateDarkIcon = (isDark) => {
     const el = document.getElementById('darkModeIcon');
     if (el) el.className = isDark ? 'fa-solid fa-sun text-sm' : 'fa-solid fa-moon text-sm';
 };
-
 const toggleDarkMode = () => {
     const isDark = document.documentElement.classList.toggle('dark');
     localStorage.setItem('darkMode', isDark);
@@ -631,18 +613,13 @@ const toggleDarkMode = () => {
     const meta = document.getElementById('themeColor');
     if (meta) meta.content = isDark ? '#0f172a' : '#ffffff';
 };
-
-// İkon durumunu başlat
 updateDarkIcon(document.documentElement.classList.contains('dark'));
 
-// ================================================================
 // SCREEN SWITCH
-// ================================================================
 window.switchScreen = (s) => {
     ['loansScreen','addScreen','recommendationsScreen','budgetScreen'].forEach(id => {
         document.getElementById(id)?.classList.add('hidden');
     });
-
     const base = 'flex flex-col items-center justify-center w-full h-full gap-1 transition-all ';
     document.getElementById('navLoans').className = base + 'text-slate-400 dark:text-slate-500';
     document.getElementById('navRecs').className  = base + 'text-slate-400 dark:text-slate-500';
@@ -656,8 +633,7 @@ window.switchScreen = (s) => {
     } else if (s === 'recommendations') {
         document.getElementById('recommendationsScreen').classList.remove('hidden');
         document.getElementById('navRecs').className = base + 'text-purple-600 dark:text-purple-400';
-        if (getBudget() > 0) calculateSmartRecommendations();
-        else showEl('noBudget');
+        if (getBudget() > 0) calculateSmartRecommendations(); else showEl('noBudget');
     } else if (s === 'budget') {
         document.getElementById('budgetScreen').classList.remove('hidden');
         document.getElementById('navBudget').className = base + 'text-blue-600 dark:text-blue-400';
@@ -665,36 +641,22 @@ window.switchScreen = (s) => {
     }
 };
 
-// ================================================================
 // MODAL HELPERS
-// ================================================================
-const showModal = (id) => {
-    const m = document.getElementById(id);
-    if (m) { m.classList.remove('hidden'); m.classList.add('flex'); }
-};
-const hideModal = (id) => {
-    const m = document.getElementById(id);
-    if (m) { m.classList.add('hidden'); m.classList.remove('flex'); }
-};
+const showModal = (id) => { const m = document.getElementById(id); if (m) { m.classList.remove('hidden'); m.classList.add('flex'); } };
+const hideModal = (id) => { const m = document.getElementById(id); if (m) { m.classList.add('hidden'); m.classList.remove('flex'); } };
 const showEl = (id) => document.getElementById(id)?.classList.remove('hidden');
 const hideEl = (id) => document.getElementById(id)?.classList.add('hidden');
 
-// Modal dışı tıklama
 ['settingsModal','editModal','detailModal','confirmModal'].forEach(id => {
-    document.getElementById(id)?.addEventListener('click', (e) => {
-        if (e.target.id === id) hideModal(id);
-    });
+    document.getElementById(id)?.addEventListener('click', (e) => { if (e.target.id === id) hideModal(id); });
 });
 
-// ================================================================
 // SETTINGS
-// ================================================================
 const toggleSettingsModal = () => {
     const m = document.getElementById('settingsModal');
     if (!m) return;
     m.classList.contains('hidden') ? showModal('settingsModal') : hideModal('settingsModal');
 };
-
 const backupData = () => {
     const blob = new Blob([JSON.stringify({ loans, incomes, otherExpenses }, null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
@@ -705,7 +667,6 @@ const backupData = () => {
     hideModal('settingsModal');
     showConfirm('Başarılı', 'Yedek dosyası indirildi.', () => {}, 'success');
 };
-
 const restoreData = (input) => {
     const file = input.files[0];
     if (!file) return;
@@ -716,65 +677,42 @@ const restoreData = (input) => {
             const l = Array.isArray(imp) ? imp : (imp?.loans || null);
             if (!Array.isArray(l)) throw new Error();
             hideModal('settingsModal');
-            showConfirm('Geri Yükle', 'Mevcut veriler silinecek ve yedekten geri yüklenecek. Devam?', async () => {
-                loans = l;
-                incomes = imp?.incomes || [];
-                otherExpenses = imp?.otherExpenses || [];
-                await saveState();
-                render();
-                updateBudgetUI();
+            showConfirm('Geri Yükle', 'Mevcut veriler silinecek. Devam?', async () => {
+                loans = l; incomes = imp?.incomes || []; otherExpenses = imp?.otherExpenses || [];
+                await saveState(); render(); updateBudgetUI();
                 showConfirm('Başarılı', 'Veriler geri yüklendi.', () => {}, 'success');
             }, 'danger');
-        } catch {
-            showConfirm('Hata', 'Geçersiz yedek dosyası!', () => {}, 'danger');
-        }
+        } catch { showConfirm('Hata', 'Geçersiz yedek dosyası!', () => {}, 'danger'); }
     };
     reader.readAsText(file);
     input.value = '';
 };
 
-// ================================================================
 // CONFIRM MODAL
-// ================================================================
 let confirmCb = null;
-
 const showConfirm = (title, msg, cb, type = 'info') => {
     document.getElementById('confirmTitle').textContent = title;
     document.getElementById('confirmMessage').innerHTML = msg.replace(/\n/g, '<br>');
     confirmCb = cb;
-
     const cfgs = {
         danger:  { ic: 'bg-red-50 dark:bg-red-900/20 text-red-500',     icon: 'fa-triangle-exclamation', btn: 'bg-red-600 hover:bg-red-700',     txt: 'Evet, Devam Et' },
         success: { ic: 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-500', icon: 'fa-circle-check', btn: 'bg-emerald-600 hover:bg-emerald-700', txt: 'Tamam' },
         info:    { ic: 'bg-blue-50 dark:bg-blue-900/20 text-blue-500',   icon: 'fa-circle-question',     btn: 'bg-blue-600 hover:bg-blue-700',     txt: 'Onayla' }
     };
     const c = cfgs[type] || cfgs.info;
-
     document.getElementById('confirmIconContainer').className = `w-16 h-16 ${c.ic} rounded-full flex items-center justify-center mx-auto mb-4`;
     document.getElementById('confirmIcon').className = `fa-solid ${c.icon} text-3xl`;
     const btn = document.getElementById('btnConfirm');
     btn.className = `flex-1 py-3 px-4 ${c.btn} text-white rounded-xl font-medium transition-colors text-sm`;
     btn.textContent = c.txt;
-
     showModal('confirmModal');
 };
+document.getElementById('btnConfirm').addEventListener('click', () => { if (confirmCb) confirmCb(); hideModal('confirmModal'); confirmCb = null; });
+document.getElementById('btnCancel').addEventListener('click', () => { hideModal('confirmModal'); confirmCb = null; });
 
-document.getElementById('btnConfirm').addEventListener('click', () => {
-    if (confirmCb) confirmCb();
-    hideModal('confirmModal');
-    confirmCb = null;
-});
-document.getElementById('btnCancel').addEventListener('click', () => {
-    hideModal('confirmModal');
-    confirmCb = null;
-});
-
-// ================================================================
 // EDIT MODAL
-// ================================================================
 window.openEditModal = (idx) => {
-    const loan = loans[idx];
-    if (!loan) return;
+    const loan = loans[idx]; if (!loan) return;
     document.getElementById('editIndex').value = idx;
     document.getElementById('editBankName').value = loan.bankName || '';
     document.getElementById('editCategory').value = loan.category || 'İhtiyaç';
@@ -784,9 +722,7 @@ window.openEditModal = (idx) => {
     document.getElementById('editEarlyCloseAmount').value = loan.earlyCloseAmount || '';
     showModal('editModal');
 };
-
 window.closeEditModal = () => hideModal('editModal');
-
 document.getElementById('editForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const idx = parseInt(document.getElementById('editIndex').value);
@@ -797,28 +733,22 @@ document.getElementById('editForm').addEventListener('submit', async (e) => {
     loans[idx].totalInstallments = parseInt(document.getElementById('editTotalInstallments').value) || 1;
     loans[idx].loanDate = document.getElementById('editLoanDate').value;
     loans[idx].earlyCloseAmount = parseFloat(document.getElementById('editEarlyCloseAmount').value) || 0;
-    await saveState();
-    hideModal('editModal');
-    render();
+    await saveState(); hideModal('editModal'); render();
 });
 
-// ================================================================
 // DETAIL MODAL
-// ================================================================
 window.openDetailModal = (idx) => {
-    const loan = loans[idx];
-    if (!loan) return;
+    const loan = loans[idx]; if (!loan) return;
     const total = Math.max(1, loan.totalInstallments || 1);
     const rem = loan.isEarlyClosed ? 0 : (loan.remainingInstallments || 0);
     const monthly = parseFloat(loan.monthlyPayment) || 0;
     const loanAmt = parseFloat(loan.loanAmount) || 0;
     const paid = total - (loan.isEarlyClosed ? (loan.savedInstallments || 0) : rem);
     const totalPaid = paid * monthly;
-    const remPrincipal = loan.isEarlyClosed ? 0 : (rem / total) * loanAmt;
+    const remP = loan.isEarlyClosed ? 0 : (rem / total) * loanAmt;
     const ec = parseFloat(loan.earlyCloseAmount) || 0;
     const profit = ec > 0 ? (rem * monthly) - ec : 0;
     const nd = loan.isEarlyClosed ? null : nextPayDate(loan.loanDate, total, rem);
-
     document.getElementById('detailContent').innerHTML = `
         <div class="grid grid-cols-2 gap-2 text-sm">
             <div class="col-span-2 bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl">
@@ -855,7 +785,7 @@ window.openDetailModal = (idx) => {
             </div>
             <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl">
                 <div class="text-[10px] text-slate-400 uppercase mb-0.5">Kalan Anapara</div>
-                <div class="font-bold text-red-500 dark:text-red-400">${fmt(remPrincipal)}</div>
+                <div class="font-bold text-red-500 dark:text-red-400">${fmt(remP)}</div>
             </div>
             <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl">
                 <div class="text-[10px] text-slate-400 uppercase mb-0.5">Kullanım Tarihi</div>
@@ -865,8 +795,7 @@ window.openDetailModal = (idx) => {
                 <div class="text-[10px] text-slate-400 uppercase mb-0.5">Sonraki Ödeme</div>
                 <div class="font-bold text-slate-700 dark:text-slate-200">${loan.isEarlyClosed ? 'Kapatıldı' : fmtDate(nd)}</div>
             </div>
-            ${ec > 0 ? `
-            <div class="col-span-2 bg-emerald-50 dark:bg-emerald-900/20 p-3 rounded-xl border border-emerald-100 dark:border-emerald-900/30">
+            ${ec > 0 ? `<div class="col-span-2 bg-emerald-50 dark:bg-emerald-900/20 p-3 rounded-xl border border-emerald-100 dark:border-emerald-900/30">
                 <div class="text-[10px] text-emerald-600 dark:text-emerald-400 uppercase mb-0.5">Erken Kapama Kâr/Zarar</div>
                 <div class="font-bold text-lg ${profit >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500'}">${profit >= 0 ? '+' : ''}${fmt(profit)}</div>
                 <div class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Erken kapama tutarı: ${fmt(ec)}</div>
@@ -884,37 +813,27 @@ window.openDetailModal = (idx) => {
     `;
     showModal('detailModal');
 };
-
 window.closeDetailModal = () => hideModal('detailModal');
 
-// ================================================================
 // LOAN FORM PREVIEW
-// ================================================================
 const updatePreview = () => {
     const m = parseFloat(document.getElementById('monthlyPayment')?.value) || 0;
     const t = parseInt(document.getElementById('totalInstallments')?.value) || 0;
     const l = parseFloat(document.getElementById('loanAmount')?.value) || 0;
     const prev = document.getElementById('paymentPreview');
     const warn = document.getElementById('previewWarning');
-
     if (m > 0 && t > 0) {
         const tp = m * t;
         document.getElementById('previewTotalAmount').textContent = fmt(tp);
         prev?.classList.remove('hidden');
-        if (l > 0 && tp < l) warn?.classList.remove('hidden');
-        else warn?.classList.add('hidden');
-    } else {
-        prev?.classList.add('hidden');
-    }
+        if (l > 0 && tp < l) warn?.classList.remove('hidden'); else warn?.classList.add('hidden');
+    } else { prev?.classList.add('hidden'); }
 };
-
 document.getElementById('loanAmount')?.addEventListener('input', updatePreview);
 document.getElementById('monthlyPayment')?.addEventListener('input', updatePreview);
 document.getElementById('totalInstallments')?.addEventListener('input', updatePreview);
 
-// ================================================================
 // ADD LOAN
-// ================================================================
 document.getElementById('loanForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const bankName = document.getElementById('bankName').value.trim();
@@ -923,116 +842,80 @@ document.getElementById('loanForm')?.addEventListener('submit', async (e) => {
     const totalInstallments = parseInt(document.getElementById('totalInstallments').value);
     const loanDate = document.getElementById('loanDate').value;
     const category = document.getElementById('category').value;
-
     if (!bankName || isNaN(loanAmount) || isNaN(monthlyPayment) || isNaN(totalInstallments) || !loanDate) {
-        showConfirm('Eksik Bilgi', 'Lütfen tüm zorunlu alanları (*) doldurun.', () => {}, 'danger');
-        return;
+        showConfirm('Eksik Bilgi', 'Lütfen tüm zorunlu alanları (*) doldurun.', () => {}, 'danger'); return;
     }
-
     const proceed = async () => {
         loans.push({ bankName, category, loanAmount, monthlyPayment, totalInstallments, remainingInstallments: totalInstallments, loanDate, earlyCloseAmount: 0, paymentHistory: [] });
-        await saveState();
-        render();
+        await saveState(); render();
         document.getElementById('loanForm').reset();
         document.getElementById('paymentPreview')?.classList.add('hidden');
         document.getElementById('loanDate').valueAsDate = new Date();
         switchScreen('loans');
     };
-
     const tp = monthlyPayment * totalInstallments;
-    if (tp < loanAmount) {
-        showConfirm('Uyarı', `Toplam geri ödeme (${fmt(tp)}) çekilen tutardan (${fmt(loanAmount)}) düşük!\n\nYine de devam edilsin mi?`, proceed, 'danger');
-    } else {
-        await proceed();
-    }
+    if (tp < loanAmount) { showConfirm('Uyarı', `Toplam geri ödeme (${fmt(tp)}) çekilen tutardan (${fmt(loanAmount)}) düşük!\n\nYine de devam?`, proceed, 'danger'); }
+    else { await proceed(); }
 });
 
-// ================================================================
 // LOAN ACTIONS
-// ================================================================
 window.updateEarlyClose = async (idx, val) => {
     if (!loans[idx]) return;
     loans[idx].earlyCloseAmount = parseFloat(val) || 0;
-    await saveState();
-    render();
+    await saveState(); render();
 };
-
 window.earlyCloseLoan = (idx) => {
-    const loan = loans[idx];
-    if (!loan || loan.isEarlyClosed) return;
+    const loan = loans[idx]; if (!loan || loan.isEarlyClosed) return;
     const future = loan.remainingInstallments * loan.monthlyPayment;
     const profit = future - loan.earlyCloseAmount;
     showConfirm('Erken Kapama',
-        `${loan.bankName} kredisini kapatmak istiyor musunuz?\n\nErken kapama tutarı: ${fmt(loan.earlyCloseAmount)}\nKâr/Zarar: ${profit >= 0 ? '+' : ''}${fmt(profit)}`,
+        `${loan.bankName} kredisini kapatmak istiyor musunuz?\n\nErken kapama: ${fmt(loan.earlyCloseAmount)}\nKâr/Zarar: ${profit >= 0 ? '+' : ''}${fmt(profit)}`,
         async () => {
             const cost = loan.earlyCloseAmount;
-            loan.isEarlyClosed = true;
-            loan.savedInstallments = loan.remainingInstallments;
-            loan.remainingInstallments = 0;
-            loan.closedAt = new Date().toISOString();
-            await saveState();
-            render();
-            updateBudgetUI();
+            loan.isEarlyClosed = true; loan.savedInstallments = loan.remainingInstallments;
+            loan.remainingInstallments = 0; loan.closedAt = new Date().toISOString();
+            await saveState(); render(); updateBudgetUI();
             const bi = document.getElementById('budgetInput');
             if (bi?.value) { const c = parseFloat(bi.value); if (!isNaN(c)) bi.value = Math.max(0, c - cost).toFixed(2); }
         }, 'info');
 };
-
 window.deleteLoan = (idx) => {
     if (!loans[idx]) return;
     showConfirm('Sil', `"${loans[idx].bankName}" kredisini silmek istediğinize emin misiniz?`, async () => {
-        loans.splice(idx, 1);
-        await saveState();
-        render();
+        loans.splice(idx, 1); await saveState(); render();
     }, 'danger');
 };
-
 window.payInstallment = (idx) => {
     if (!loans[idx] || loans[idx].remainingInstallments <= 0) return;
     showConfirm('Taksit Öde', `${loans[idx].bankName} için ${fmt(loans[idx].monthlyPayment)} taksit ödensin mi?`, async () => {
         loans[idx].remainingInstallments--;
         if (!loans[idx].paymentHistory) loans[idx].paymentHistory = [];
         loans[idx].paymentHistory.push({ date: new Date().toISOString(), amount: loans[idx].monthlyPayment });
-        await saveState();
-        render();
+        await saveState(); render();
     }, 'success');
 };
-
 window.undoInstallment = (idx) => {
     if (!loans[idx] || loans[idx].remainingInstallments >= loans[idx].totalInstallments) return;
     showConfirm('Geri Al', 'Son taksit ödemesini geri almak istiyor musunuz?', async () => {
         loans[idx].remainingInstallments++;
         if (loans[idx].paymentHistory?.length) loans[idx].paymentHistory.pop();
-        await saveState();
-        render();
+        await saveState(); render();
     }, 'danger');
 };
 
-// ================================================================
 // RENDER
-// ================================================================
 const render = () => {
     const list = document.getElementById('loanList');
     const empty = document.getElementById('emptyState');
     if (!list) return;
-
     const fb = (document.getElementById('filterBankName')?.value || '').toLowerCase();
     const fc = document.getElementById('filterCategory')?.value || 'all';
-
-    const filtered = loans.filter(l =>
-        (l.bankName || '').toLowerCase().includes(fb) &&
-        (fc === 'all' || l.category === fc)
-    );
-
+    const filtered = loans.filter(l => (l.bankName || '').toLowerCase().includes(fb) && (fc === 'all' || l.category === fc));
     list.innerHTML = '';
-    if (filtered.length === 0) {
-        if (empty) { list.appendChild(empty); empty.style.display = 'block'; }
-    } else {
-        if (empty) empty.style.display = 'none';
-    }
+    if (filtered.length === 0) { if (empty) { list.appendChild(empty); empty.style.display = 'block'; } }
+    else { if (empty) empty.style.display = 'none'; }
 
-    let totMonthly = 0, totDebt = 0, totProfit = 0;
-
+    let totM = 0, totD = 0, totP = 0;
     filtered.forEach(loan => {
         const oi = loans.indexOf(loan);
         const total = Math.max(1, loan.totalInstallments || 1);
@@ -1045,12 +928,11 @@ const render = () => {
         const hasEC = ec > 0;
         const profit = hasEC ? future - ec : 0;
         const paid = total - (loan.isEarlyClosed ? (loan.savedInstallments || 0) : rem);
-
         const nd = loan.isEarlyClosed ? null : nextPayDate(loan.loanDate, total, rem);
-        const urgent = nd ? Math.ceil((nd - new Date()) / 86400000) <= 3 && Math.ceil((nd - new Date()) / 86400000) >= 0 : false;
-
-        if (!loan.isEarlyClosed) { totMonthly += monthly; totDebt += remP; }
-        if (hasEC) totProfit += profit;
+        const diffDays = nd ? Math.ceil((nd - new Date()) / 86400000) : 999;
+        const urgent = diffDays >= 0 && diffDays <= 3;
+        if (!loan.isEarlyClosed) { totM += monthly; totD += remP; }
+        if (hasEC) totP += profit;
 
         let border = 'border-l-4 border-l-slate-300 dark:border-l-slate-600';
         if (loan.isEarlyClosed) border = 'border-l-4 border-l-emerald-500 bg-emerald-50/30 dark:bg-emerald-900/10';
@@ -1061,19 +943,16 @@ const render = () => {
         item.className = `p-5 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors relative border-b border-slate-100 dark:border-slate-700 last:border-b-0 ${border}`;
         item.innerHTML = `
             ${loan.isEarlyClosed ? `<span class="absolute top-4 right-4 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold px-2 py-1 rounded-md border border-emerald-200 dark:border-emerald-800">KAPATILDI</span>` : ''}
-            ${urgent && !loan.isEarlyClosed ? `<span class="absolute top-4 right-4 bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-300 text-[10px] font-bold px-2 py-1 rounded-md animate-pulse border border-red-200 dark:border-red-800"><i class="fa-solid fa-bell mr-1"></i>YAKLAŞIYOR</span>` : ''}
-
+            ${urgent && !loan.isEarlyClosed ? `<span class="absolute top-4 right-4 bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-300 text-[10px] font-bold px-2 py-1 rounded-md animate-pulse border border-red-200 dark:border-red-800"><i class="fa-solid fa-bell mr-1"></i>${diffDays === 0 ? 'BUGÜN!' : diffDays + ' GÜN!'}</span>` : ''}
             <div class="flex flex-wrap items-center gap-2 pr-28 mb-2">
                 <h3 class="text-base font-bold text-slate-800 dark:text-white">${loan.bankName}</h3>
                 <span class="text-[10px] bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded-full font-medium">${loan.category}</span>
                 ${hasEC ? `<span class="text-[10px] px-2 py-0.5 rounded-full font-bold border ${profit >= 0 ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800' : 'bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400 border-red-200 dark:border-red-800'}">${profit >= 0 ? 'Kârlı' : 'Zararlı'}</span>` : ''}
             </div>
-
             <div class="flex justify-between items-center text-xs bg-slate-50 dark:bg-slate-700/30 px-3 py-2 rounded-lg border border-slate-100 dark:border-slate-600/50 mb-3">
                 <span class="text-slate-500 dark:text-slate-400">Sonraki: <strong class="${urgent ? 'text-red-600 dark:text-red-400' : 'text-slate-700 dark:text-slate-200'}">${loan.isEarlyClosed ? '-' : fmtDate(nd)}</strong></span>
                 <span class="text-indigo-600 dark:text-indigo-400 font-bold">Ödenen: ${paid}/${total}</span>
             </div>
-
             <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
                 <div class="bg-white dark:bg-slate-800/50 p-2 rounded-lg border border-slate-100 dark:border-slate-700/50">
                     <div class="text-[10px] text-slate-400 uppercase mb-0.5">Çekilen</div>
@@ -1098,7 +977,6 @@ const render = () => {
                     </div>
                 </div>
             </div>
-
             <div class="flex flex-wrap gap-2 pt-3 border-t border-slate-100 dark:border-slate-700/50">
                 ${!loan.isEarlyClosed ? `
                     <button onclick="undoInstallment(${oi})" class="w-8 h-8 bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 rounded-lg flex items-center justify-center transition-colors" title="Geri Al">
@@ -1121,24 +999,17 @@ const render = () => {
         `;
         list.appendChild(item);
     });
-
-    document.getElementById('totalMonthlyPayment').textContent = fmt(totMonthly);
-    document.getElementById('totalRemainingDebt').textContent = fmt(totDebt);
-    document.getElementById('totalProfit').textContent = fmt(totProfit);
+    document.getElementById('totalMonthlyPayment').textContent = fmt(totM);
+    document.getElementById('totalRemainingDebt').textContent = fmt(totD);
+    document.getElementById('totalProfit').textContent = fmt(totP);
     document.getElementById('loanCount').textContent = `${filtered.length} Adet`;
 };
 
-// ================================================================
-// FILTER
-// ================================================================
 document.getElementById('filterBankName')?.addEventListener('input', render);
 document.getElementById('filterCategory')?.addEventListener('change', render);
 
-// ================================================================
 // BUDGET
-// ================================================================
 const renderBudgetLists = () => {
-    // Gelirler
     const il = document.getElementById('incomeList');
     if (il) {
         il.innerHTML = '';
@@ -1146,46 +1017,27 @@ const renderBudgetLists = () => {
         incomes.forEach((it, i) => {
             const d = document.createElement('div');
             d.className = 'flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-700/30 rounded-lg border border-slate-100 dark:border-slate-700 text-xs';
-            d.innerHTML = `
-                <div>
-                    <div class="font-bold text-slate-700 dark:text-slate-200">${it.name || 'Gelir'}</div>
-                    <div class="text-slate-500 dark:text-slate-400"><span class="font-bold text-emerald-600 dark:text-emerald-400">+${fmt(it.amount)}</span> • Ayın ${it.day}. günü</div>
-                </div>
-                <button data-i="${i}" class="del-income text-red-500 px-2 py-1 rounded bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 hover:bg-red-100 transition-colors">Sil</button>`;
+            d.innerHTML = `<div><div class="font-bold text-slate-700 dark:text-slate-200">${it.name || 'Gelir'}</div><div class="text-slate-500 dark:text-slate-400"><span class="font-bold text-emerald-600 dark:text-emerald-400">+${fmt(it.amount)}</span> • Ayın ${it.day}. günü</div></div><button data-i="${i}" class="del-income text-red-500 px-2 py-1 rounded bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800">Sil</button>`;
             il.appendChild(d);
         });
-        il.querySelectorAll('.del-income').forEach(b => b.addEventListener('click', async e => {
-            incomes.splice(+e.currentTarget.dataset.i, 1);
-            await saveState(); renderBudgetLists(); generateBudgetPlan();
-        }));
+        il.querySelectorAll('.del-income').forEach(b => b.addEventListener('click', async e => { incomes.splice(+e.currentTarget.dataset.i, 1); await saveState(); renderBudgetLists(); generateBudgetPlan(); }));
     }
-
-    // Kredi taksitleri
     const ll = document.getElementById('loanExpenseList');
     if (ll) {
         ll.innerHTML = '';
         const now = new Date();
-        const items = loans.filter(l => !l.isEarlyClosed && l.remainingInstallments > 0)
-            .map(l => {
-                const nd = nextPayDate(l.loanDate, l.totalInstallments, l.remainingInstallments);
-                return nd.getFullYear() === now.getFullYear() && nd.getMonth() === now.getMonth()
-                    ? { name: l.bankName, day: nd.getDate(), amount: parseFloat(l.monthlyPayment) || 0 } : null;
-            }).filter(Boolean).sort((a, b) => a.day - b.day);
-
+        const items = loans.filter(l => !l.isEarlyClosed && l.remainingInstallments > 0).map(l => {
+            const nd = nextPayDate(l.loanDate, l.totalInstallments, l.remainingInstallments);
+            return nd.getFullYear() === now.getFullYear() && nd.getMonth() === now.getMonth() ? { name: l.bankName, day: nd.getDate(), amount: parseFloat(l.monthlyPayment) || 0 } : null;
+        }).filter(Boolean).sort((a, b) => a.day - b.day);
         if (!items.length) { ll.innerHTML = '<p class="text-xs text-slate-400 dark:text-slate-500">Bu ay için taksit yok.</p>'; }
         items.forEach(it => {
             const d = document.createElement('div');
             d.className = 'flex items-center justify-between p-2 bg-red-50/60 dark:bg-red-900/20 rounded-lg border border-red-100 dark:border-red-800 text-xs';
-            d.innerHTML = `
-                <div>
-                    <div class="font-bold text-slate-700 dark:text-slate-200">${it.name}</div>
-                    <div class="text-slate-500 dark:text-slate-400">Ayın ${it.day}. günü • <span class="font-bold text-red-600 dark:text-red-400">-${fmt(it.amount)}</span></div>
-                </div>`;
+            d.innerHTML = `<div><div class="font-bold text-slate-700 dark:text-slate-200">${it.name}</div><div class="text-slate-500 dark:text-slate-400">Ayın ${it.day}. günü • <span class="font-bold text-red-600 dark:text-red-400">-${fmt(it.amount)}</span></div></div>`;
             ll.appendChild(d);
         });
     }
-
-    // Diğer giderler
     const el = document.getElementById('expenseList');
     if (el) {
         el.innerHTML = '';
@@ -1193,18 +1045,10 @@ const renderBudgetLists = () => {
         otherExpenses.forEach((it, i) => {
             const d = document.createElement('div');
             d.className = 'flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-700/30 rounded-lg border border-slate-100 dark:border-slate-700 text-xs';
-            d.innerHTML = `
-                <div>
-                    <div class="font-bold text-slate-700 dark:text-slate-200">${it.name || 'Gider'}</div>
-                    <div class="text-slate-500 dark:text-slate-400"><span class="font-bold text-red-600 dark:text-red-400">-${fmt(it.amount)}</span> • Ayın ${it.day}. günü</div>
-                </div>
-                <button data-i="${i}" class="del-expense text-red-500 px-2 py-1 rounded bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 hover:bg-red-100 transition-colors">Sil</button>`;
+            d.innerHTML = `<div><div class="font-bold text-slate-700 dark:text-slate-200">${it.name || 'Gider'}</div><div class="text-slate-500 dark:text-slate-400"><span class="font-bold text-red-600 dark:text-red-400">-${fmt(it.amount)}</span> • Ayın ${it.day}. günü</div></div><button data-i="${i}" class="del-expense text-red-500 px-2 py-1 rounded bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800">Sil</button>`;
             el.appendChild(d);
         });
-        el.querySelectorAll('.del-expense').forEach(b => b.addEventListener('click', async e => {
-            otherExpenses.splice(+e.currentTarget.dataset.i, 1);
-            await saveState(); renderBudgetLists(); generateBudgetPlan();
-        }));
+        el.querySelectorAll('.del-expense').forEach(b => b.addEventListener('click', async e => { otherExpenses.splice(+e.currentTarget.dataset.i, 1); await saveState(); renderBudgetLists(); generateBudgetPlan(); }));
     }
 };
 
@@ -1212,41 +1056,24 @@ const generateBudgetPlan = () => {
     const container = document.getElementById('planResults');
     if (!container) return;
     container.innerHTML = '';
-
     const now = new Date();
     const y = now.getFullYear(), m = now.getMonth();
     const dim = new Date(y, m + 1, 0).getDate();
-
     const incB = Array(dim + 2).fill(0), expB = Array(dim + 2).fill(0);
     const incI = Array.from({ length: dim + 2 }, () => []);
     const expI = Array.from({ length: dim + 2 }, () => []);
 
-    incomes.forEach(it => {
-        const d = Math.min(Math.max(1, +it.day || 1), dim);
-        const a = parseFloat(it.amount) || 0;
-        incB[d] += a; incI[d].push({ label: it.name || 'Gelir', amount: a });
-    });
-
-    otherExpenses.forEach(it => {
-        const d = Math.min(Math.max(1, +it.day || 1), dim);
-        const a = parseFloat(it.amount) || 0;
-        expB[d] += a; expI[d].push({ label: it.name || 'Gider', amount: a });
-    });
-
+    incomes.forEach(it => { const d = Math.min(Math.max(1, +it.day || 1), dim); const a = parseFloat(it.amount) || 0; incB[d] += a; incI[d].push({ label: it.name || 'Gelir', amount: a }); });
+    otherExpenses.forEach(it => { const d = Math.min(Math.max(1, +it.day || 1), dim); const a = parseFloat(it.amount) || 0; expB[d] += a; expI[d].push({ label: it.name || 'Gider', amount: a }); });
     loans.forEach(loan => {
         if (loan.isEarlyClosed || loan.remainingInstallments <= 0) return;
         const nd = nextPayDate(loan.loanDate, loan.totalInstallments, loan.remainingInstallments);
-        if (nd.getFullYear() === y && nd.getMonth() === m) {
-            const d = nd.getDate();
-            const a = parseFloat(loan.monthlyPayment) || 0;
-            expB[d] += a; expI[d].push({ label: `Kredi: ${loan.bankName}`, amount: a });
-        }
+        if (nd.getFullYear() === y && nd.getMonth() === m) { const d = nd.getDate(); const a = parseFloat(loan.monthlyPayment) || 0; expB[d] += a; expI[d].push({ label: `Kredi: ${loan.bankName}`, amount: a }); }
     });
 
     const totInc = incB.reduce((a, b) => a + b, 0);
     const totExp = expB.reduce((a, b) => a + b, 0);
     const rem = totInc - totExp;
-
     document.getElementById('planTotalIncome').textContent = fmt(totInc);
     document.getElementById('planTotalExpense').textContent = fmt(totExp);
     const rb = document.getElementById('planRemainingBudget');
@@ -1258,7 +1085,6 @@ const generateBudgetPlan = () => {
         hasAny = true;
         balance += incB[d] - expB[d];
         const risky = balance < 0;
-
         const box = document.createElement('div');
         box.className = `p-3 rounded-xl border ${risky ? 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800' : 'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700'}`;
         box.innerHTML = `
@@ -1287,7 +1113,6 @@ const generateBudgetPlan = () => {
             </div>`;
         container.appendChild(box);
     }
-
     if (!hasAny) container.innerHTML = '<p class="text-sm text-slate-400 dark:text-slate-500 text-center py-8">Bu ay için gelir veya gider bulunmuyor.</p>';
 };
 
@@ -1298,13 +1123,9 @@ document.getElementById('incomeForm')?.addEventListener('submit', async (e) => {
     const name = document.getElementById('incomeName').value.trim();
     const amount = parseFloat(document.getElementById('incomeAmount').value);
     const day = parseInt(document.getElementById('incomeDay').value);
-    if (!amount || isNaN(day) || day < 1 || day > 31) {
-        showConfirm('Hata', 'Geçerli bir tutar ve gün (1-31) giriniz.', () => {}, 'danger'); return;
-    }
+    if (!amount || isNaN(day) || day < 1 || day > 31) { showConfirm('Hata', 'Geçerli tutar ve gün (1-31) giriniz.', () => {}, 'danger'); return; }
     incomes.push({ name: name || 'Gelir', amount, day });
-    await saveState();
-    e.target.reset();
-    renderBudgetLists(); generateBudgetPlan();
+    await saveState(); e.target.reset(); renderBudgetLists(); generateBudgetPlan();
 });
 
 document.getElementById('expenseForm')?.addEventListener('submit', async (e) => {
@@ -1312,31 +1133,22 @@ document.getElementById('expenseForm')?.addEventListener('submit', async (e) => 
     const name = document.getElementById('expenseName').value.trim();
     const amount = parseFloat(document.getElementById('expenseAmount').value);
     const day = parseInt(document.getElementById('expenseDay').value);
-    if (!amount || isNaN(day) || day < 1 || day > 31) {
-        showConfirm('Hata', 'Geçerli bir tutar ve gün (1-31) giriniz.', () => {}, 'danger'); return;
-    }
+    if (!amount || isNaN(day) || day < 1 || day > 31) { showConfirm('Hata', 'Geçerli tutar ve gün (1-31) giriniz.', () => {}, 'danger'); return; }
     otherExpenses.push({ name: name || 'Gider', amount, day });
-    await saveState();
-    e.target.reset();
-    renderBudgetLists(); generateBudgetPlan();
+    await saveState(); e.target.reset(); renderBudgetLists(); generateBudgetPlan();
 });
 
 document.getElementById('btnGeneratePlan')?.addEventListener('click', generateBudgetPlan);
 
-// ================================================================
 // RECOMMENDATIONS
-// ================================================================
 const getBudget = () => { const v = parseFloat(document.getElementById('budgetInput')?.value); return isFinite(v) ? v : 0; };
-
 const calculateSmartRecommendations = () => {
     const budget = getBudget();
     const resEl = document.getElementById('recommendationResults');
     const noRecEl = document.getElementById('noRecommendation');
     const noBudgetEl = document.getElementById('noBudget');
-
     hideEl('noRecommendation'); hideEl('noBudget');
     if (resEl) { resEl.classList.add('hidden'); resEl.style.display = ''; }
-
     if (budget <= 0) { showEl('noBudget'); return; }
 
     const active = loans.filter(l => !l.isEarlyClosed).map(loan => {
@@ -1351,39 +1163,24 @@ const calculateSmartRecommendations = () => {
         return { ...loan, cost, profit, relief: monthly, oi: loans.indexOf(loan) };
     });
 
-    // Kâr planı
     const ps = [...active].sort((a, b) => b.profit - a.profit);
     const pp = { sel: [], cost: 0, profit: 0 };
     let r1 = budget;
     ps.forEach(l => { if (l.cost > 0 && l.cost <= r1 && l.profit > 0) { pp.sel.push(l); pp.cost += l.cost; pp.profit += l.profit; r1 -= l.cost; } });
 
-    // Rahatlama planı
     const rs = [...active].sort((a, b) => (b.cost > 0 ? b.relief / b.cost : 0) - (a.cost > 0 ? a.relief / a.cost : 0));
     const rp = { sel: [], cost: 0, relief: 0 };
     let r2 = budget;
     rs.forEach(l => { if (l.cost > 0 && l.cost <= r2) { rp.sel.push(l); rp.cost += l.cost; rp.relief += l.relief; r2 -= l.cost; } });
 
     const renderList = (plan, listId, type) => {
-        const c = document.getElementById(listId);
-        if (!c) return;
+        const c = document.getElementById(listId); if (!c) return;
         c.innerHTML = '';
         if (!plan.sel.length) { c.innerHTML = '<li class="text-xs text-slate-400 dark:text-slate-500 italic">Uygun kredi yok.</li>'; return; }
         plan.sel.forEach(loan => {
             const li = document.createElement('li');
             li.className = 'bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-100 dark:border-slate-700 flex items-center justify-between gap-2';
-            li.innerHTML = `
-                <div class="flex-1 min-w-0">
-                    <div class="font-bold text-slate-700 dark:text-slate-200 text-sm truncate">${loan.bankName}</div>
-                    <div class="text-[10px] text-slate-400 dark:text-slate-500">Maliyet: ${fmt(loan.cost)}</div>
-                </div>
-                <div class="flex items-center gap-2 shrink-0">
-                    <span class="font-bold text-xs ${type === 'profit' ? 'text-emerald-600 dark:text-emerald-400' : 'text-blue-600 dark:text-blue-400'}">
-                        ${type === 'profit' ? `+${fmt(loan.profit)}` : `-${fmt(loan.relief)}/Ay`}
-                    </span>
-                    <button onclick="earlyCloseLoan(${loan.oi})" class="bg-red-500 hover:bg-red-600 text-white w-7 h-7 flex items-center justify-center rounded-lg transition-colors" title="Erken Kapat">
-                        <i class="fa-solid fa-power-off text-xs"></i>
-                    </button>
-                </div>`;
+            li.innerHTML = `<div class="flex-1 min-w-0"><div class="font-bold text-slate-700 dark:text-slate-200 text-sm truncate">${loan.bankName}</div><div class="text-[10px] text-slate-400 dark:text-slate-500">Maliyet: ${fmt(loan.cost)}</div></div><div class="flex items-center gap-2 shrink-0"><span class="font-bold text-xs ${type === 'profit' ? 'text-emerald-600 dark:text-emerald-400' : 'text-blue-600 dark:text-blue-400'}">${type === 'profit' ? `+${fmt(loan.profit)}` : `-${fmt(loan.relief)}/Ay`}</span><button onclick="earlyCloseLoan(${loan.oi})" class="bg-red-500 hover:bg-red-600 text-white w-7 h-7 flex items-center justify-center rounded-lg transition-colors" title="Erken Kapat"><i class="fa-solid fa-power-off text-xs"></i></button></div>`;
             c.appendChild(li);
         });
     };
@@ -1391,27 +1188,119 @@ const calculateSmartRecommendations = () => {
     renderList(pp, 'profitList', 'profit');
     document.getElementById('profitUsedBudget').textContent = fmt(pp.cost);
     document.getElementById('profitTotalGain').textContent = fmt(pp.profit);
-
     renderList(rp, 'reliefList', 'relief');
     document.getElementById('reliefUsedBudget').textContent = fmt(rp.cost);
     document.getElementById('reliefTotalGain').textContent = fmt(rp.relief) + '/Ay';
 
-    if (!pp.sel.length && !rp.sel.length) {
-        showEl('noRecommendation');
-    } else {
-        if (resEl) { resEl.classList.remove('hidden'); resEl.style.display = 'grid'; }
-    }
+    if (!pp.sel.length && !rp.sel.length) { showEl('noRecommendation'); }
+    else { if (resEl) { resEl.classList.remove('hidden'); resEl.style.display = 'grid'; } }
 };
+
+// ================================================================
+// BİLDİRİM SİSTEMİ
+// ================================================================
+function updateNotifButton() {
+    const btn = document.getElementById('notifBtn');
+    if (!btn) return;
+    if (!('Notification' in window)) {
+        btn.innerHTML = '<i class="fa-solid fa-bell-slash text-sm text-slate-400"></i>';
+        btn.title = 'Bildirimler desteklenmiyor';
+        return;
+    }
+    if (Notification.permission === 'granted') {
+        btn.innerHTML = '<i class="fa-solid fa-bell text-sm text-emerald-500"></i>';
+        btn.title = 'Bildirimler Açık ✓';
+    } else if (Notification.permission === 'denied') {
+        btn.innerHTML = '<i class="fa-solid fa-bell-slash text-sm text-red-500"></i>';
+        btn.title = 'Bildirimler Kapalı - Tarayıcı ayarlarından açın';
+    } else {
+        btn.innerHTML = '<i class="fa-solid fa-bell text-sm"></i>';
+        btn.title = 'Bildirimleri Açmak İçin Tıkla';
+    }
+}
+
+async function handleNotifClick() {
+    if (!('Notification' in window)) {
+        showConfirm('Desteklenmiyor', 'Bu tarayıcı bildirimleri desteklemiyor.', () => {}, 'danger');
+        return;
+    }
+    if (Notification.permission === 'denied') {
+        showConfirm('İzin Gerekli',
+            'Bildirim izni reddedilmiş.\n\nTarayıcı adres çubuğundaki kilit/bilgi ikonuna tıklayıp bildirim iznini "İzin Ver" yapın, sonra sayfayı yenileyin.',
+            () => {}, 'danger');
+        return;
+    }
+    if (Notification.permission === 'granted') {
+        showConfirm('Bildirimler Açık', 'Bildirimler zaten açık! Ödeme günlerinde otomatik hatırlatma alacaksınız.', () => {}, 'success');
+        return;
+    }
+    const permission = await Notification.requestPermission();
+    if (permission === 'granted') {
+        updateNotifButton();
+        await scheduleNotificationCheck();
+        showConfirm('Başarılı!', 'Bildirimler açıldı! Ödeme günlerinde hatırlatma alacaksınız:\n\n• 7 gün önce\n• 3 gün önce\n• 1 gün önce\n• Ödeme günü', () => {}, 'success');
+    } else {
+        updateNotifButton();
+        showConfirm('Reddedildi', 'Bildirim izni verilmedi.', () => {}, 'danger');
+    }
+}
+
+async function scheduleNotificationCheck() {
+    if (Notification.permission !== 'granted') return;
+    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+        navigator.serviceWorker.controller.postMessage({ type: 'SCHEDULE_CHECK', loans });
+    }
+    if ('periodicSync' in (navigator.serviceWorker || {})) {
+        try {
+            const sw = await navigator.serviceWorker.ready;
+            await sw.periodicSync.register('payment-check', { minInterval: 24 * 60 * 60 * 1000 });
+        } catch(e) { console.log('Periodic sync:', e); }
+    }
+    checkPaymentsNow();
+}
+
+function checkPaymentsNow() {
+    if (Notification.permission !== 'granted') return;
+    const now = new Date();
+    loans.forEach(loan => {
+        if (loan.isEarlyClosed || loan.remainingInstallments <= 0) return;
+        const nd = nextPayDate(loan.loanDate, loan.totalInstallments, loan.remainingInstallments);
+        const diffDays = Math.ceil((nd - now) / 86400000);
+        const amount = fmt(loan.monthlyPayment);
+        const key = `notif_${loan.bankName}_${diffDays}_${nd.toDateString()}`;
+        if (localStorage.getItem(key)) return;
+
+        let title = '', body = '', show = false;
+        if (diffDays === 7)  { title = '📅 7 Gün Kaldı';      body = `${loan.bankName} taksiti ${amount} — 7 gün sonra!`; show = true; }
+        if (diffDays === 3)  { title = '⚠️ 3 Gün Kaldı';      body = `${loan.bankName} taksiti ${amount} — 3 gün sonra!`; show = true; }
+        if (diffDays === 1)  { title = '🚨 Yarın Ödeme Var!';  body = `${loan.bankName}: ${amount} — YARIN son gün!`;      show = true; }
+        if (diffDays === 0)  { title = '🔴 BUGÜN Ödeme Günü!'; body = `${loan.bankName}: ${amount} — BUGÜN öde!`;          show = true; }
+
+        if (show) {
+            try {
+                new Notification(title, { body, icon: './icon.svg', badge: './icon.svg', tag: key, vibrate: [300, 100, 300] });
+                localStorage.setItem(key, '1');
+            } catch(e) { console.warn('Notification error:', e); }
+        }
+    });
+    cleanOldNotifKeys();
+}
+
+function cleanOldNotifKeys() {
+    const keys = Object.keys(localStorage).filter(k => k.startsWith('notif_'));
+    if (keys.length > 200) keys.slice(0, 100).forEach(k => localStorage.removeItem(k));
+}
+
+document.addEventListener('visibilitychange', () => { if (!document.hidden) checkPaymentsNow(); });
+setInterval(checkPaymentsNow, 60 * 60 * 1000);
 
 // ================================================================
 // INIT
 // ================================================================
 (async () => {
-    // Tarih alanını bugüne ayarla
     const ld = document.getElementById('loanDate');
     if (ld) ld.valueAsDate = new Date();
 
-    // Önce localStorage'dan yükle (hızlı gösterim)
     const local = loadFromLocal();
     if (local) {
         loans = local.loans || [];
@@ -1423,7 +1312,6 @@ const calculateSmartRecommendations = () => {
         render();
     }
 
-    // Sonra cloud'dan yükle
     const cloud = await loadFromCloud();
     if (cloud) {
         loans = cloud.loans || [];
@@ -1432,149 +1320,21 @@ const calculateSmartRecommendations = () => {
         render();
         updateBudgetUI();
     }
+
+    // Bildirim sistemini başlat
+    setTimeout(() => {
+        updateNotifButton();
+        if (Notification.permission === 'granted') {
+            scheduleNotificationCheck();
+        }
+    }, 2000);
 })();
 
-// Service Worker
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js?v=7').catch(e => console.warn('SW:', e));
+        navigator.serviceWorker.register('./sw.js?v=8').catch(e => console.warn('SW:', e));
     });
 }
-</script>
-    <script>
-// ================================================================
-// BİLDİRİM SİSTEMİ
-// ================================================================
-
-// İzin iste ve bildirimleri ayarla
-async function setupNotifications() {
-    if (!('Notification' in window)) {
-        showConfirm('Desteklenmiyor', 'Bu tarayıcı bildirimleri desteklemiyor.', () => {}, 'danger');
-        return false;
-    }
-
-    if (Notification.permission === 'granted') {
-        return true;
-    }
-
-    if (Notification.permission === 'denied') {
-        showConfirm('İzin Reddedildi', 
-            'Bildirim izni reddedilmiş.\n\nTarayıcı ayarlarından izin vermeniz gerekiyor:\nAyarlar → Site Ayarları → Bildirimler', 
-            () => {}, 'danger');
-        return false;
-    }
-
-    const permission = await Notification.requestPermission();
-    return permission === 'granted';
-}
-
-// Periyodik kontrol zamanlayıcısını kur
-async function scheduleNotificationCheck() {
-    const granted = await setupNotifications();
-    if (!granted) return;
-
-    // Service Worker'a mevcut kredileri gönder
-    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-        navigator.serviceWorker.controller.postMessage({
-            type: 'SCHEDULE_CHECK',
-            loans: loans
-        });
-    }
-
-    // Periodic Background Sync desteği varsa kaydet
-    if ('periodicSync' in navigator.serviceWorker) {
-        try {
-            const sw = await navigator.serviceWorker.ready;
-            await sw.periodicSync.register('payment-check', {
-                minInterval: 24 * 60 * 60 * 1000 // 24 saat
-            });
-            console.log('Periodic sync registered');
-        } catch(e) {
-            console.log('Periodic sync not supported:', e);
-        }
-    }
-
-    // Fallback: sayfa açıkken kontrol et
-    checkPaymentsNow();
-}
-
-// Anlık ödeme kontrolü (sayfa açıkken)
-function checkPaymentsNow() {
-    if (Notification.permission !== 'granted') return;
-
-    const now = new Date();
-
-    loans.forEach(loan => {
-        if (loan.isEarlyClosed || loan.remainingInstallments <= 0) return;
-
-        const loanDate = new Date(loan.loanDate);
-        const paid = loan.totalInstallments - loan.remainingInstallments;
-        const nextDate = new Date(loanDate);
-        nextDate.setMonth(nextDate.getMonth() + paid + 1);
-
-        const diffDays = Math.ceil((nextDate - now) / 86400000);
-        const amount = new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(loan.monthlyPayment);
-
-        // Daha önce bu bildirim gönderildi mi?
-        const key = `notif_${loan.bankName}_${diffDays}_${nextDate.toDateString()}`;
-        if (localStorage.getItem(key)) return;
-
-        let title = '', body = '', show = false;
-
-        if (diffDays === 7)  { title = '📅 7 Gün Kaldı'; body = `${loan.bankName} taksiti ${amount} - 7 gün sonra!`; show = true; }
-        if (diffDays === 3)  { title = '⚠️ 3 Gün Kaldı'; body = `${loan.bankName} taksiti ${amount} - 3 gün sonra!`; show = true; }
-        if (diffDays === 1)  { title = '🚨 Yarın Ödeme!'; body = `${loan.bankName}: ${amount} - YARIN!`; show = true; }
-        if (diffDays === 0)  { title = '🔴 Bugün Ödeme Günü!'; body = `${loan.bankName}: ${amount} - BUGÜN!`; show = true; }
-
-        if (show) {
-            new Notification(title, {
-                body,
-                icon: './icon.svg',
-                badge: './icon.svg',
-                tag: key,
-                vibrate: [300, 100, 300]
-            });
-            localStorage.setItem(key, '1');
-            // 2 günden eski kayıtları temizle
-            cleanOldNotifKeys();
-        }
-    });
-}
-
-// Eski bildirim kayıtlarını temizle
-function cleanOldNotifKeys() {
-    const keys = Object.keys(localStorage).filter(k => k.startsWith('notif_'));
-    if (keys.length > 100) {
-        keys.slice(0, 50).forEach(k => localStorage.removeItem(k));
-    }
-}
-
-// Bildirim durumunu güncelle (navbar'da göster)
-function updateNotifButton() {
-    const btn = document.getElementById('notifBtn');
-    if (!btn) return;
-    if (Notification.permission === 'granted') {
-        btn.className = btn.className.replace('text-slate-400 dark:text-slate-500', '');
-        btn.innerHTML = '<i class="fa-solid fa-bell text-sm text-emerald-500"></i>';
-        btn.title = 'Bildirimler Açık';
-    } else if (Notification.permission === 'denied') {
-        btn.innerHTML = '<i class="fa-solid fa-bell-slash text-sm text-red-500"></i>';
-        btn.title = 'Bildirimler Kapalı';
-    } else {
-        btn.innerHTML = '<i class="fa-solid fa-bell text-sm"></i>';
-        btn.title = 'Bildirimleri Aç';
-    }
-}
-
-// Sayfa görünür olduğunda kontrol et
-document.addEventListener('visibilitychange', () => {
-    if (!document.hidden) checkPaymentsNow();
-});
-
-// Her saat başı kontrol et (sayfa açıkken)
-setInterval(() => {
-    checkPaymentsNow();
-}, 60 * 60 * 1000);
 </script>
 </body>
 </html>
