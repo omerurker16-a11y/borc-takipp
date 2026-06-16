@@ -1655,33 +1655,40 @@
 
         window.closeEditModal = () => editModal.classList.add('hidden');
 
-        editForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const index = document.getElementById('editIndex').value;
-            loans[index].bankName = document.getElementById('editBankName').value;
-            loans[index].category = document.getElementById('editCategory').value;
-            loans[index].monthlyPayment = parseFloat(document.getElementById('editMonthlyPayment').value);
-            loans[index].totalInstallments = parseInt(document.getElementById('editTotalInstallments').value);
-            loans[index].loanDate = document.getElementById('editLoanDate').value;
-            loans[index].earlyCloseAmount = parseFloat(document.getElementById('editEarlyCloseAmount').value);
-            await saveState();
-            closeEditModal();
-            render();
-        });
+        // --- Düzeltilmiş Init ve Tetikleyici Alanı ---
+        
+        // Formun HTML submit davranışını tamamen devre dışı bırakıyoruz (Donmayı engeller)
+        if (form) {
+            form.onSubmit = (e) => { e.preventDefault(); };
+            form.addEventListener('submit', (e) => { e.preventDefault(); });
+        }
 
-        // Init
+        // Kaydet butonunu doğrudan addLoan fonksiyonuna bağlıyoruz
+        const submitBtn = document.querySelector('#loanForm button[type="submit"]');
+        if (submitBtn) {
+            // HTML tipini submit'ten normal buton'a çeviriyoruz ki tarayıcı formu kilitlemesin
+            submitBtn.setAttribute('type', 'button'); 
+            submitBtn.addEventListener('click', async (e) => {
+                await addLoan(e);
+            });
+        }
+
+        // Modalların dışına tıklayınca kapanma mantığı
         window.onclick = (e) => {
             if (e.target == editModal) closeEditModal();
             if (e.target == detailModal) closeDetailModal();
             if (e.target == confirmModal) closeConfirmModal();
         }
-        document.getElementById('loanDate').valueAsDate = new Date();
         
-        // Initial Local Render
+        // Tarih alanını bugüne eşitle
+        const loanDateInput = document.getElementById('loanDate');
+        if (loanDateInput) loanDateInput.valueAsDate = new Date();
+        
+        // İlk açılış render adımları
         updateBudgetUI();
         render();
 
-        // CLOUD LOAD ON START
+        // CLOUD LOAD ON START (Buluttan veri çekme senkronizasyonu)
         window.addEventListener("DOMContentLoaded", async () => {
             const cloudData = await loadFromCloud();
             if (cloudData) {
@@ -1689,6 +1696,7 @@
                 incomes = cloudData.incomes || [];
                 otherExpenses = cloudData.otherExpenses || [];
             }
+            // Buluttan veri geldikten sonra arayüzü zorunlu olarak tazeletiyoruz
             updateBudgetUI();
             render();
         });
