@@ -631,7 +631,41 @@
             </div>
         </div>
     </div>
+<!-- SUPABASE CLOUD INTEGRATION -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const supabase = window.supabase.createClient(
+    "https://bicfoxsrhvryrouxsaml.supabase.co",
+    "sb_publishable_lkWkHfj18mI2u19RBR2kIg_7F0XtH5-"
+  );
 
+  const SAVE_ID = "00000000-0000-0000-0000-000000000001";
+
+  async function saveToCloud(data) {
+    const { error } = await supabase
+      .from("borclar")
+      .upsert({ id: SAVE_ID, data }, { onConflict: "id" });
+
+    if (error) {
+      console.error("Supabase save error:", error);
+    }
+  }
+
+  async function loadFromCloud() {
+    const { data, error } = await supabase
+      .from("borclar")
+      .select("data")
+      .eq("id", SAVE_ID)
+      .single();
+
+    if (error) {
+      console.warn("Supabase load error:", error.message);
+      return null;
+    }
+
+    return data?.data || null;
+  }
+</script>
     <!-- JavaScript Logic -->
     <script>
         // Screen Switching Logic
@@ -1844,53 +1878,11 @@ let otherExpenses = [];
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js?v=5');
+                navigator.serviceWorker.register('./sw.js?v=6');
             });
         }
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+   
 
-<script>
-  const supabase = window.supabase.createClient(
-    "https://bicfoxsrhvryrouxsaml.supabase.co",
-    "sb_publishable_XXXX"
-  );
-
-  const SAVE_ID = "00000000-0000-0000-0000-000000000001";
-
-  async function saveToCloud(data) {
-    await supabase
-      .from("borclar")
-      .upsert({ id: SAVE_ID, data }, { onConflict: "id" });
-  }
-
-  async function loadFromCloud() {
-    const { data } = await supabase
-      .from("borclar")
-      .select("data")
-      .eq("id", SAVE_ID)
-      .single();
-
-    if (data && data.data) {
-      return data.data;
-    }
-    return null;
-  }
-</script>
-
-<script>
-window.addEventListener("DOMContentLoaded", async () => {
-  const cloudData = await loadFromCloud();
-
-  if (cloudData) {
-    loans = cloudData.loans || [];
-    incomes = cloudData.incomes || [];
-    otherExpenses = cloudData.otherExpenses || [];
-  }
-
-  updateBudgetUI();
-  render();
-});
-</script>
 </body>
 </html>
