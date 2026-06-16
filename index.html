@@ -1646,6 +1646,7 @@
         });
 
         // Init
+        form.addEventListener('submit', addLoan);
         window.onclick = (e) => {
             if (e.target == editModal) closeEditModal();
             if (e.target == detailModal) closeDetailModal();
