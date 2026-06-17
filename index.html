@@ -4,15 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Borç Takip Sistemi</title>
-    <link rel="manifest" href="manifest.json?v=4">
-    <link rel="icon" type="image/svg+xml" href="icon.svg?v=4">
-    <link rel="apple-touch-icon" href="icon.svg?v=4">
+    <link rel="manifest" href="manifest.json?v=5">
+    <link rel="icon" type="image/svg+xml" href="icon.svg?v=5">
+    <link rel="apple-touch-icon" href="icon.svg?v=5">
     <meta name="theme-color" id="themeColor" content="#ffffff">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
-    <!-- Dark mode flash önleme -->
     <script>
         (function() {
             try {
@@ -26,22 +25,17 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: { extend: {} }
-        }
+        tailwind.config = { darkMode: 'class', theme: { extend: {} } }
     </script>
-
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-    <!-- PDF.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script>
         if (typeof pdfjsLib !== 'undefined') {
             pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
         }
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         * { font-family: 'Inter', sans-serif; }
@@ -50,13 +44,73 @@
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
         .dark ::-webkit-scrollbar-thumb { background: #475569; }
         .animate-fade-in { animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(8px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .chart-container { position: relative; height: 260px; }
+        .tab-active { border-bottom: 2px solid #6366f1; color: #6366f1; }
+        .dark .tab-active { color: #818cf8; border-color: #818cf8; }
     </style>
 </head>
 <body class="bg-slate-50 dark:bg-slate-900 min-h-screen text-slate-800 dark:text-slate-100 transition-colors duration-200 pb-24">
+
+<!-- ==================== LOGIN MODAL ==================== -->
+<div id="loginModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[80] items-center justify-center p-4 flex">
+    <div class="bg-white dark:bg-slate-800 w-full max-w-sm shadow-2xl rounded-2xl border border-slate-100 dark:border-slate-700">
+        <div class="p-8">
+            <div class="text-center mb-6">
+                <div class="bg-indigo-600 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-indigo-600/30">
+                    <i class="fa-solid fa-wallet text-3xl text-white"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-800 dark:text-white">Borç Takip</h2>
+                <p class="text-slate-500 dark:text-slate-400 text-sm mt-1">Finansal asistanınıza hoş geldiniz</p>
+            </div>
+            <div id="loginForm" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">E-posta</label>
+                    <input type="email" id="loginEmail" placeholder="ornek@email.com" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:text-white text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Şifre</label>
+                    <div class="relative">
+                        <input type="password" id="loginPassword" placeholder="••••••••" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:text-white text-sm pr-10">
+                        <button type="button" onclick="togglePwVis('loginPassword')" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"><i class="fa-solid fa-eye text-sm"></i></button>
+                    </div>
+                </div>
+                <div id="loginError" class="hidden text-xs text-red-500 bg-red-50 dark:bg-red-900/20 p-2 rounded-lg"></div>
+                <button onclick="loginWithEmail()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-bold text-sm transition-all active:scale-95 shadow-lg shadow-indigo-600/20">
+                    <i class="fa-solid fa-right-to-bracket mr-2"></i> Giriş Yap
+                </button>
+                <div class="relative"><div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-200 dark:border-slate-700"></div></div><div class="relative flex justify-center"><span class="bg-white dark:bg-slate-800 px-3 text-xs text-slate-400">veya</span></div></div>
+                <button onclick="loginAnonymous()" class="w-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 py-3 rounded-xl font-bold text-sm transition-all active:scale-95">
+                    <i class="fa-solid fa-user-secret mr-2"></i> Misafir Olarak Devam Et
+                </button>
+                <p class="text-center text-xs text-slate-400">
+                    Hesabınız yok mu? <button onclick="showRegisterForm()" class="text-indigo-600 dark:text-indigo-400 font-bold hover:underline">Kayıt Ol</button>
+                </p>
+            </div>
+            <div id="registerForm" class="hidden space-y-4">
+                <h3 class="text-base font-bold text-slate-700 dark:text-slate-200 text-center">Hesap Oluştur</h3>
+                <div>
+                    <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">E-posta</label>
+                    <input type="email" id="regEmail" placeholder="ornek@email.com" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:text-white text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Şifre</label>
+                    <div class="relative">
+                        <input type="password" id="regPassword" placeholder="Min 6 karakter" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:text-white text-sm pr-10">
+                        <button type="button" onclick="togglePwVis('regPassword')" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"><i class="fa-solid fa-eye text-sm"></i></button>
+                    </div>
+                </div>
+                <div id="regError" class="hidden text-xs text-red-500 bg-red-50 dark:bg-red-900/20 p-2 rounded-lg"></div>
+                <button onclick="registerWithEmail()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl font-bold text-sm transition-all active:scale-95">
+                    <i class="fa-solid fa-user-plus mr-2"></i> Kayıt Ol
+                </button>
+                <p class="text-center text-xs text-slate-400">
+                    Zaten hesabınız var mı? <button onclick="showLoginForm()" class="text-indigo-600 dark:text-indigo-400 font-bold hover:underline">Giriş Yap</button>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- ==================== MODALS ==================== -->
 
@@ -68,13 +122,31 @@
                 <span class="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 p-1.5 rounded-lg"><i class="fa-solid fa-gear text-xs"></i></span>
                 Ayarlar ve Yedekleme
             </h3>
+            <div id="userInfoBar" class="mb-4 p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl border border-indigo-100 dark:border-indigo-800 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center"><i class="fa-solid fa-user text-white text-xs"></i></div>
+                    <div>
+                        <div class="text-xs font-bold text-indigo-700 dark:text-indigo-300" id="userEmailDisplay">Misafir</div>
+                        <div class="text-[10px] text-indigo-500 dark:text-indigo-400" id="userTypeDisplay">Yerel kayıt</div>
+                    </div>
+                </div>
+                <button onclick="logoutUser()" class="text-xs bg-red-100 hover:bg-red-200 dark:bg-red-900/30 text-red-600 dark:text-red-400 px-2 py-1 rounded-lg font-bold">Çıkış</button>
+            </div>
             <div class="space-y-3">
                 <button onclick="backupData()" class="w-full bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 text-blue-600 dark:text-blue-400 p-4 rounded-xl flex items-center gap-3 transition-colors border border-blue-100 dark:border-blue-800">
                     <div class="bg-blue-100 dark:bg-blue-800 p-2 rounded-full w-10 h-10 flex items-center justify-center"><i class="fa-solid fa-cloud-arrow-down"></i></div>
-                    <div class="text-left"><div class="font-bold text-sm">Verileri Yedekle</div><div class="text-xs opacity-75">Tüm verileri dosyaya kaydet</div></div>
+                    <div class="text-left"><div class="font-bold text-sm">Verileri Yedekle (JSON)</div><div class="text-xs opacity-75">Tüm verileri dosyaya kaydet</div></div>
                 </button>
-                <button onclick="document.getElementById('restoreInput').click()" class="w-full bg-emerald-50 dark:bg-emerald-900/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 p-4 rounded-xl flex items-center gap-3 transition-colors border border-emerald-100 dark:border-emerald-800">
-                    <div class="bg-emerald-100 dark:bg-emerald-800 p-2 rounded-full w-10 h-10 flex items-center justify-center"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                <button onclick="exportToCSV()" class="w-full bg-emerald-50 dark:bg-emerald-900/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 p-4 rounded-xl flex items-center gap-3 transition-colors border border-emerald-100 dark:border-emerald-800">
+                    <div class="bg-emerald-100 dark:bg-emerald-800 p-2 rounded-full w-10 h-10 flex items-center justify-center"><i class="fa-solid fa-file-csv"></i></div>
+                    <div class="text-left"><div class="font-bold text-sm">CSV Olarak Dışa Aktar</div><div class="text-xs opacity-75">Excel'de açılabilir format</div></div>
+                </button>
+                <button onclick="shareReport()" class="w-full bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-900/30 text-purple-600 dark:text-purple-400 p-4 rounded-xl flex items-center gap-3 transition-colors border border-purple-100 dark:border-purple-800">
+                    <div class="bg-purple-100 dark:bg-purple-800 p-2 rounded-full w-10 h-10 flex items-center justify-center"><i class="fa-solid fa-share-nodes"></i></div>
+                    <div class="text-left"><div class="font-bold text-sm">Raporu Paylaş</div><div class="text-xs opacity-75">Borç özetini paylaş</div></div>
+                </button>
+                <button onclick="document.getElementById('restoreInput').click()" class="w-full bg-orange-50 dark:bg-orange-900/20 hover:bg-orange-100 dark:hover:bg-orange-900/30 text-orange-600 dark:text-orange-400 p-4 rounded-xl flex items-center gap-3 transition-colors border border-orange-100 dark:border-orange-800">
+                    <div class="bg-orange-100 dark:bg-orange-800 p-2 rounded-full w-10 h-10 flex items-center justify-center"><i class="fa-solid fa-cloud-arrow-up"></i></div>
                     <div class="text-left"><div class="font-bold text-sm">Verileri Geri Yükle</div><div class="text-xs opacity-75">Dosyadan verileri içe aktar</div></div>
                 </button>
                 <input type="file" id="restoreInput" accept=".json" class="hidden" onchange="restoreData(this)">
@@ -88,7 +160,7 @@
 
 <!-- EDIT MODAL -->
 <div id="editModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden z-[60] items-center justify-center p-4">
-    <div class="bg-white dark:bg-slate-800 w-full max-w-sm shadow-2xl rounded-2xl border border-slate-100 dark:border-slate-700">
+    <div class="bg-white dark:bg-slate-800 w-full max-w-sm shadow-2xl rounded-2xl border border-slate-100 dark:border-slate-700 max-h-[90vh] overflow-y-auto">
         <div class="p-6">
             <h3 class="text-lg font-bold text-slate-800 dark:text-white border-b border-slate-100 dark:border-slate-700 pb-3 mb-4 flex items-center gap-2">
                 <span class="bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 p-1.5 rounded-lg"><i class="fa-solid fa-pen text-xs"></i></span>
@@ -126,9 +198,13 @@
                         <input type="date" id="editLoanDate" required class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:text-white text-sm">
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Erken Kapama (₺)</label>
-                        <input type="number" step="0.01" id="editEarlyCloseAmount" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:text-white text-sm">
+                        <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Aylık Faiz (%)</label>
+                        <input type="number" step="0.01" id="editInterestRate" placeholder="1.89" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:text-white text-sm">
                     </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Erken Kapama (₺)</label>
+                    <input type="number" step="0.01" id="editEarlyCloseAmount" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:text-white text-sm">
                 </div>
                 <div class="flex gap-3 pt-2">
                     <button type="button" onclick="closeEditModal()" class="flex-1 py-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 rounded-xl font-medium text-sm transition-colors">Vazgeç</button>
@@ -180,22 +256,17 @@
                 <span class="bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 p-1.5 rounded-lg"><i class="fa-solid fa-file-pdf text-xs"></i></span>
                 PDF Ödeme Planı Yükle
             </h3>
-
-            <!-- Adım 1: Yükleme -->
             <div id="pdfStep1">
                 <div class="border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-2xl p-8 text-center hover:border-indigo-400 dark:hover:border-indigo-500 transition-colors cursor-pointer" id="pdfDropZone" onclick="document.getElementById('pdfFileInput').click()">
-                    <div class="w-16 h-16 bg-orange-50 dark:bg-orange-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fa-solid fa-file-pdf text-3xl text-orange-500"></i>
-                    </div>
+                    <div class="w-16 h-16 bg-orange-50 dark:bg-orange-900/20 rounded-full flex items-center justify-center mx-auto mb-4"><i class="fa-solid fa-file-pdf text-3xl text-orange-500"></i></div>
                     <p class="text-slate-600 dark:text-slate-300 font-bold mb-1">PDF dosyasını buraya sürükle</p>
                     <p class="text-slate-400 dark:text-slate-500 text-sm">veya tıklayarak seç</p>
-                    <p class="text-xs text-slate-400 dark:text-slate-500 mt-3">Banka ödeme planı PDF'leri desteklenir</p>
                 </div>
                 <input type="file" id="pdfFileInput" accept=".pdf" class="hidden" onchange="handlePdfUpload(this)">
                 <div class="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800">
                     <p class="text-xs text-blue-700 dark:text-blue-300 font-bold mb-2">💡 Desteklenen Bankalar:</p>
                     <div class="flex flex-wrap gap-2">
-                        <span class="text-xs bg-white dark:bg-slate-800 px-2 py-1 rounded-lg border border-blue-200 dark:border-blue-800 text-slate-600 dark:text-slate-300">Ziraat Bankası</span>
+                        <span class="text-xs bg-white dark:bg-slate-800 px-2 py-1 rounded-lg border border-blue-200 dark:border-blue-800 text-slate-600 dark:text-slate-300">Ziraat</span>
                         <span class="text-xs bg-white dark:bg-slate-800 px-2 py-1 rounded-lg border border-blue-200 dark:border-blue-800 text-slate-600 dark:text-slate-300">Garanti BBVA</span>
                         <span class="text-xs bg-white dark:bg-slate-800 px-2 py-1 rounded-lg border border-blue-200 dark:border-blue-800 text-slate-600 dark:text-slate-300">İş Bankası</span>
                         <span class="text-xs bg-white dark:bg-slate-800 px-2 py-1 rounded-lg border border-blue-200 dark:border-blue-800 text-slate-600 dark:text-slate-300">Halkbank</span>
@@ -203,22 +274,15 @@
                         <span class="text-xs bg-white dark:bg-slate-800 px-2 py-1 rounded-lg border border-blue-200 dark:border-blue-800 text-slate-600 dark:text-slate-300">Akbank</span>
                         <span class="text-xs bg-white dark:bg-slate-800 px-2 py-1 rounded-lg border border-blue-200 dark:border-blue-800 text-slate-600 dark:text-slate-300">Yapı Kredi</span>
                         <span class="text-xs bg-white dark:bg-slate-800 px-2 py-1 rounded-lg border border-blue-200 dark:border-blue-800 text-slate-600 dark:text-slate-300">QNB Finansbank</span>
-                        <span class="text-xs bg-white dark:bg-slate-800 px-2 py-1 rounded-lg border border-blue-200 dark:border-blue-800 text-slate-600 dark:text-slate-300">TEB</span>
                         <span class="text-xs bg-white dark:bg-slate-800 px-2 py-1 rounded-lg border border-blue-200 dark:border-blue-800 text-slate-600 dark:text-slate-300">Denizbank</span>
                     </div>
                 </div>
             </div>
-
-            <!-- Adım 2: İşleniyor -->
             <div id="pdfStep2" class="hidden text-center py-8">
-                <div class="w-16 h-16 bg-indigo-50 dark:bg-indigo-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i class="fa-solid fa-circle-notch text-3xl text-indigo-500 animate-spin"></i>
-                </div>
+                <div class="w-16 h-16 bg-indigo-50 dark:bg-indigo-900/20 rounded-full flex items-center justify-center mx-auto mb-4"><i class="fa-solid fa-circle-notch text-3xl text-indigo-500 animate-spin"></i></div>
                 <p class="text-slate-700 dark:text-slate-200 font-bold">PDF okunuyor...</p>
                 <p class="text-slate-400 dark:text-slate-500 text-sm mt-1" id="pdfProgressText">Metin çıkarılıyor...</p>
             </div>
-
-            <!-- Adım 3: Sonuç -->
             <div id="pdfStep3" class="hidden">
                 <div class="mb-4 p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border border-emerald-100 dark:border-emerald-800 flex items-center gap-2">
                     <i class="fa-solid fa-circle-check text-emerald-500"></i>
@@ -226,88 +290,65 @@
                 </div>
                 <form id="pdfResultForm" class="space-y-4">
                     <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Banka / Kredi Adı *</label>
-                            <input type="text" id="pdfBankName" required class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:text-white text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Kategori *</label>
-                            <select id="pdfCategory" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:text-white text-sm">
-                                <option value="İhtiyaç">İhtiyaç Kredisi</option>
-                                <option value="Taşıt">Taşıt Kredisi</option>
-                                <option value="Konut">Konut Kredisi</option>
-                                <option value="Kredi Kartı">Kredi Kartı</option>
-                                <option value="Diğer">Diğer</option>
-                            </select>
-                        </div>
+                        <div><label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Banka / Kredi Adı *</label><input type="text" id="pdfBankName" required class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:text-white text-sm"></div>
+                        <div><label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Kategori *</label><select id="pdfCategory" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:text-white text-sm"><option value="İhtiyaç">İhtiyaç Kredisi</option><option value="Taşıt">Taşıt Kredisi</option><option value="Konut">Konut Kredisi</option><option value="Kredi Kartı">Kredi Kartı</option><option value="Diğer">Diğer</option></select></div>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Çekilen Tutar (₺)</label>
-                            <input type="number" step="0.01" id="pdfLoanAmount" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:text-white text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Aylık Taksit (₺)</label>
-                            <input type="number" step="0.01" id="pdfMonthlyPayment" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:text-white text-sm">
-                        </div>
+                        <div><label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Çekilen Tutar (₺)</label><input type="number" step="0.01" id="pdfLoanAmount" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:text-white text-sm"></div>
+                        <div><label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Aylık Taksit (₺)</label><input type="number" step="0.01" id="pdfMonthlyPayment" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:text-white text-sm"></div>
                     </div>
-                    <div class="grid grid-cols-3 gap-4">
-                        <div>
-                            <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Toplam Taksit</label>
-                            <input type="number" id="pdfTotalInstallments" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:text-white text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Ödenen Taksit</label>
-                            <input type="number" id="pdfPaidInstallments" value="0" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:text-white text-sm">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Kullanım Tarihi</label>
-                            <input type="date" id="pdfLoanDate" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:text-white text-sm">
-                        </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Aylık Faiz (%)</label><input type="number" step="0.01" id="pdfInterestRate" placeholder="1.89" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:text-white text-sm"></div>
+                        <div><label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Toplam Taksit</label><input type="number" id="pdfTotalInstallments" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:text-white text-sm"></div>
                     </div>
-
-                    <!-- Taksit Tablosu -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div><label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Ödenen Taksit</label><input type="number" id="pdfPaidInstallments" value="0" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:text-white text-sm"></div>
+                        <div><label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Kullanım Tarihi</label><input type="date" id="pdfLoanDate" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:text-white text-sm"></div>
+                    </div>
                     <div id="pdfInstallmentTable" class="hidden">
                         <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-2">Bulunan Taksit Planı</label>
                         <div class="bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden max-h-52 overflow-y-auto">
-                            <table class="w-full text-xs">
-                                <thead class="bg-slate-100 dark:bg-slate-800 sticky top-0">
-                                    <tr>
-                                        <th class="text-left px-3 py-2 text-slate-600 dark:text-slate-300 font-bold">#</th>
-                                        <th class="text-left px-3 py-2 text-slate-600 dark:text-slate-300 font-bold">Tarih</th>
-                                        <th class="text-right px-3 py-2 text-slate-600 dark:text-slate-300 font-bold">Taksit</th>
-                                        <th class="text-right px-3 py-2 text-slate-600 dark:text-slate-300 font-bold">Anapara</th>
-                                        <th class="text-right px-3 py-2 text-slate-600 dark:text-slate-300 font-bold">Faiz</th>
-                                        <th class="text-center px-3 py-2 text-slate-600 dark:text-slate-300 font-bold">Durum</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="pdfTableBody" class="divide-y divide-slate-100 dark:divide-slate-700/50"></tbody>
-                            </table>
+                            <table class="w-full text-xs"><thead class="bg-slate-100 dark:bg-slate-800 sticky top-0"><tr><th class="text-left px-3 py-2 text-slate-600 dark:text-slate-300 font-bold">#</th><th class="text-left px-3 py-2 text-slate-600 dark:text-slate-300 font-bold">Tarih</th><th class="text-right px-3 py-2 text-slate-600 dark:text-slate-300 font-bold">Taksit</th><th class="text-right px-3 py-2 text-slate-600 dark:text-slate-300 font-bold">Anapara</th><th class="text-right px-3 py-2 text-slate-600 dark:text-slate-300 font-bold">Faiz</th><th class="text-center px-3 py-2 text-slate-600 dark:text-slate-300 font-bold">Durum</th></tr></thead><tbody id="pdfTableBody" class="divide-y divide-slate-100 dark:divide-slate-700/50"></tbody></table>
                         </div>
                     </div>
-
-                    <details class="mt-2">
-                        <summary class="text-xs text-slate-400 cursor-pointer hover:text-slate-600 dark:hover:text-slate-300">Ham PDF metni (hata ayıklama için)</summary>
-                        <textarea id="pdfRawText" rows="5" readonly class="mt-2 w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-500 dark:text-slate-400 font-mono resize-none"></textarea>
-                    </details>
+                    <details class="mt-2"><summary class="text-xs text-slate-400 cursor-pointer hover:text-slate-600 dark:hover:text-slate-300">Ham PDF metni</summary><textarea id="pdfRawText" rows="4" readonly class="mt-2 w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-500 dark:text-slate-400 font-mono resize-none"></textarea></details>
                 </form>
             </div>
-
-            <!-- Adım 4: Hata -->
             <div id="pdfStep4" class="hidden text-center py-8">
-                <div class="w-16 h-16 bg-red-50 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i class="fa-solid fa-triangle-exclamation text-3xl text-red-500"></i>
-                </div>
+                <div class="w-16 h-16 bg-red-50 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-4"><i class="fa-solid fa-triangle-exclamation text-3xl text-red-500"></i></div>
                 <p class="text-slate-700 dark:text-slate-200 font-bold mb-2">PDF okunamadı</p>
                 <p class="text-slate-400 dark:text-slate-500 text-sm" id="pdfErrorText">Bilinmeyen hata</p>
-                <button onclick="resetPdfModal()" class="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm font-bold transition-colors">Tekrar Dene</button>
+                <button onclick="resetPdfModal()" class="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm font-bold">Tekrar Dene</button>
             </div>
-
             <div class="flex gap-3 mt-6 pt-4 border-t border-slate-100 dark:border-slate-700">
                 <button onclick="closePdfModal()" class="flex-1 py-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 rounded-xl font-medium text-sm transition-colors">Kapat</button>
-                <button id="pdfSaveBtn" onclick="savePdfLoan()" class="hidden flex-1 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium text-sm transition-colors shadow-lg shadow-indigo-600/20">
-                    <i class="fa-solid fa-check mr-2"></i> Krediye Ekle
-                </button>
+                <button id="pdfSaveBtn" onclick="savePdfLoan()" class="hidden flex-1 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium text-sm transition-colors shadow-lg shadow-indigo-600/20"><i class="fa-solid fa-check mr-2"></i> Krediye Ekle</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SIMULATOR MODAL -->
+<div id="simulatorModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden z-[60] items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-800 w-full max-w-lg shadow-2xl rounded-2xl border border-slate-100 dark:border-slate-700 max-h-[90vh] overflow-y-auto">
+        <div class="p-6">
+            <h3 class="text-lg font-bold text-slate-800 dark:text-white border-b border-slate-100 dark:border-slate-700 pb-3 mb-4 flex items-center gap-2">
+                <span class="bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 p-1.5 rounded-lg"><i class="fa-solid fa-calculator text-xs"></i></span>
+                Erken Ödeme Simülatörü
+            </h3>
+            <div class="space-y-4">
+                <div class="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-700">
+                    <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-2">Aylık Ekstra Ödeme Miktarı (₺)</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-3 flex items-center text-slate-400 font-bold">₺</span>
+                        <input type="number" id="simExtraPayment" step="100" placeholder="Örn: 1000" oninput="runSimulator()" class="w-full pl-8 px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/30 dark:text-white text-sm font-bold">
+                    </div>
+                    <p class="text-xs text-slate-400 mt-1">"Ayda X₺ ekstra ödesem ne zaman biter?" hesabı yapar.</p>
+                </div>
+                <div id="simResults" class="space-y-3"></div>
+            </div>
+            <div class="mt-6 flex justify-end">
+                <button onclick="hideModal('simulatorModal')" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 py-2.5 px-5 rounded-xl text-sm font-bold transition-colors">Kapat</button>
             </div>
         </div>
     </div>
@@ -326,7 +367,7 @@
             </div>
         </div>
         <div class="flex items-center gap-2">
-            <div id="cloudStatus" class="text-xs px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 flex items-center gap-1">
+            <div id="cloudStatus" class="text-xs px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 flex items-center gap-1 cursor-pointer" onclick="syncNow()">
                 <i class="fa-solid fa-cloud text-xs"></i>
                 <span id="cloudStatusText">...</span>
             </div>
@@ -348,30 +389,39 @@
 
     <!-- LOANS SCREEN -->
     <div id="loansScreen" class="animate-fade-in">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 relative overflow-hidden">
-                <div class="absolute right-0 top-0 w-24 h-24 bg-blue-50 dark:bg-blue-900/20 rounded-bl-full -mr-4 -mt-4"></div>
+        <!-- Özet Kartları -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+            <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 relative overflow-hidden">
+                <div class="absolute right-0 top-0 w-20 h-20 bg-blue-50 dark:bg-blue-900/20 rounded-bl-full -mr-3 -mt-3"></div>
                 <div class="relative z-10">
-                    <div class="text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase tracking-wider mb-1">Toplam Aylık Ödeme</div>
-                    <div class="text-2xl font-bold text-slate-800 dark:text-white" id="totalMonthlyPayment">₺0,00</div>
+                    <div class="text-slate-500 dark:text-slate-400 text-[10px] font-semibold uppercase tracking-wider mb-1">Aylık Ödeme</div>
+                    <div class="text-xl font-bold text-slate-800 dark:text-white" id="totalMonthlyPayment">₺0</div>
                 </div>
             </div>
-            <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 relative overflow-hidden">
-                <div class="absolute right-0 top-0 w-24 h-24 bg-red-50 dark:bg-red-900/20 rounded-bl-full -mr-4 -mt-4"></div>
+            <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 relative overflow-hidden">
+                <div class="absolute right-0 top-0 w-20 h-20 bg-red-50 dark:bg-red-900/20 rounded-bl-full -mr-3 -mt-3"></div>
                 <div class="relative z-10">
-                    <div class="text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase tracking-wider mb-1">Toplam Kalan Anapara</div>
-                    <div class="text-2xl font-bold text-slate-800 dark:text-white" id="totalRemainingDebt">₺0,00</div>
+                    <div class="text-slate-500 dark:text-slate-400 text-[10px] font-semibold uppercase tracking-wider mb-1">Kalan Anapara</div>
+                    <div class="text-xl font-bold text-slate-800 dark:text-white" id="totalRemainingDebt">₺0</div>
                 </div>
             </div>
-            <div class="bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 relative overflow-hidden">
-                <div class="absolute right-0 top-0 w-24 h-24 bg-emerald-50 dark:bg-emerald-900/20 rounded-bl-full -mr-4 -mt-4"></div>
+            <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 relative overflow-hidden">
+                <div class="absolute right-0 top-0 w-20 h-20 bg-orange-50 dark:bg-orange-900/20 rounded-bl-full -mr-3 -mt-3"></div>
                 <div class="relative z-10">
-                    <div class="text-slate-500 dark:text-slate-400 text-xs font-semibold uppercase tracking-wider mb-1">Toplam Erken Kapama Kârı</div>
-                    <div class="text-2xl font-bold text-emerald-600 dark:text-emerald-400" id="totalProfit">₺0,00</div>
+                    <div class="text-slate-500 dark:text-slate-400 text-[10px] font-semibold uppercase tracking-wider mb-1">Toplam Faiz</div>
+                    <div class="text-xl font-bold text-orange-600 dark:text-orange-400" id="totalInterestCost">₺0</div>
+                </div>
+            </div>
+            <div class="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 relative overflow-hidden">
+                <div class="absolute right-0 top-0 w-20 h-20 bg-emerald-50 dark:bg-emerald-900/20 rounded-bl-full -mr-3 -mt-3"></div>
+                <div class="relative z-10">
+                    <div class="text-slate-500 dark:text-slate-400 text-[10px] font-semibold uppercase tracking-wider mb-1">Erken Kapama Kârı</div>
+                    <div class="text-xl font-bold text-emerald-600 dark:text-emerald-400" id="totalProfit">₺0</div>
                 </div>
             </div>
         </div>
 
+        <!-- Kredi Listesi -->
         <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 overflow-hidden">
             <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex flex-col md:flex-row justify-between items-center gap-3 bg-slate-50/50 dark:bg-slate-800/50">
                 <div class="flex items-center gap-3 w-full md:w-auto">
@@ -388,13 +438,16 @@
                         <option value="Kredi Kartı">Kredi Kartı</option>
                         <option value="Diğer">Diğer</option>
                     </select>
+                    <select id="filterStatus" class="px-3 py-2 text-sm border border-slate-200 dark:border-slate-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/30 bg-white dark:bg-slate-700 dark:text-white">
+                        <option value="all">Tüm Durum</option>
+                        <option value="active">Aktif</option>
+                        <option value="closed">Kapatıldı</option>
+                    </select>
                 </div>
             </div>
             <div id="loanList" class="divide-y divide-slate-100 dark:divide-slate-700/50">
                 <div class="p-12 text-center text-slate-400 dark:text-slate-500" id="emptyState">
-                    <div class="w-16 h-16 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fa-solid fa-file-invoice-dollar text-2xl opacity-50"></i>
-                    </div>
+                    <div class="w-16 h-16 bg-slate-100 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-4"><i class="fa-solid fa-file-invoice-dollar text-2xl opacity-50"></i></div>
                     <p class="text-sm font-medium">Henüz kayıtlı kredi bulunmuyor.</p>
                     <p class="text-xs mt-1 opacity-70">Sağ alttaki + butonuna tıklayın.</p>
                 </div>
@@ -415,28 +468,15 @@
                         <span class="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 p-2 rounded-lg"><i class="fa-solid fa-plus text-sm"></i></span>
                         Yeni Kredi Ekle
                     </h2>
-                    <button onclick="switchScreen('loans')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
-                        <i class="fa-solid fa-xmark text-xl"></i>
-                    </button>
+                    <button onclick="switchScreen('loans')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"><i class="fa-solid fa-xmark text-xl"></i></button>
                 </div>
-
-                <!-- PDF ile otomatik doldur -->
                 <div class="mb-5 p-4 bg-orange-50 dark:bg-orange-900/20 rounded-xl border border-orange-100 dark:border-orange-800">
-                    <p class="text-sm font-bold text-orange-700 dark:text-orange-300 mb-1 flex items-center gap-2">
-                        <i class="fa-solid fa-wand-magic-sparkles"></i> Otomatik Doldur
-                    </p>
+                    <p class="text-sm font-bold text-orange-700 dark:text-orange-300 mb-1 flex items-center gap-2"><i class="fa-solid fa-wand-magic-sparkles"></i> Otomatik Doldur</p>
                     <p class="text-xs text-orange-600 dark:text-orange-400 mb-3">Bankanızın ödeme planı PDF'ini yükleyin, bilgiler otomatik dolsun.</p>
-                    <button onclick="openPdfModal()" class="w-full bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-file-pdf"></i> PDF'den Otomatik Doldur
-                    </button>
+                    <button onclick="openPdfModal()" class="w-full bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2"><i class="fa-solid fa-file-pdf"></i> PDF'den Otomatik Doldur</button>
                 </div>
-
-                <div class="relative mb-5">
-                    <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-200 dark:border-slate-700"></div></div>
-                    <div class="relative flex justify-center"><span class="bg-white dark:bg-slate-800 px-3 text-xs text-slate-400">veya manuel girin</span></div>
-                </div>
-
-                <form id="loanForm" class="space-y-5">
+                <div class="relative mb-5"><div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-200 dark:border-slate-700"></div></div><div class="relative flex justify-center"><span class="bg-white dark:bg-slate-800 px-3 text-xs text-slate-400">veya manuel girin</span></div></div>
+                <form id="loanForm" class="space-y-4">
                     <div>
                         <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">Kredi Adı / Banka *</label>
                         <input type="text" id="bankName" placeholder="Örn: Ziraat Bankası İhtiyaç" required class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:text-white text-sm">
@@ -467,21 +507,65 @@
                             <input type="number" id="totalInstallments" min="1" placeholder="12" required class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:text-white text-sm">
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">Kullanım Tarihi *</label>
-                            <input type="date" id="loanDate" required class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:text-white text-sm">
+                            <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">Aylık Faiz Oranı (%)</label>
+                            <input type="number" id="interestRate" step="0.01" placeholder="1.89 (opsiyonel)" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:text-white text-sm">
                         </div>
                     </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">Kullanım Tarihi *</label>
+                        <input type="date" id="loanDate" required class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:text-white text-sm">
+                    </div>
+                    <!-- Önizleme -->
                     <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl border border-blue-100 dark:border-blue-800/50 hidden" id="paymentPreview">
-                        <div class="text-[10px] uppercase tracking-wide text-blue-600 dark:text-blue-400 mb-0.5">Toplam Geri Ödeme</div>
-                        <div class="font-bold text-blue-800 dark:text-blue-300 text-lg" id="previewTotalAmount">₺0,00</div>
-                        <div class="text-xs text-red-500 dark:text-red-400 mt-1 hidden" id="previewWarning">
-                            <i class="fa-solid fa-triangle-exclamation mr-1"></i> Anaparadan düşük!
+                        <div class="grid grid-cols-3 gap-3 text-center">
+                            <div><div class="text-[10px] uppercase tracking-wide text-blue-600 dark:text-blue-400 mb-0.5">Toplam Geri Ödeme</div><div class="font-bold text-blue-800 dark:text-blue-300 text-sm" id="previewTotalAmount">₺0</div></div>
+                            <div><div class="text-[10px] uppercase tracking-wide text-orange-600 dark:text-orange-400 mb-0.5">Toplam Faiz</div><div class="font-bold text-orange-600 dark:text-orange-400 text-sm" id="previewTotalInterest">₺0</div></div>
+                            <div><div class="text-[10px] uppercase tracking-wide text-slate-500 dark:text-slate-400 mb-0.5">Bitiş Tarihi</div><div class="font-bold text-slate-700 dark:text-slate-200 text-sm" id="previewEndDate">-</div></div>
                         </div>
+                        <div class="text-xs text-red-500 dark:text-red-400 mt-2 hidden" id="previewWarning"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Toplam geri ödeme anaparadan düşük!</div>
                     </div>
                     <button type="submit" class="w-full flex justify-center items-center py-4 rounded-xl text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 transition-all active:scale-[0.98] shadow-lg shadow-indigo-600/20">
                         <i class="fa-solid fa-check mr-2"></i> Kaydet
                     </button>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- STATS SCREEN -->
+    <div id="statsScreen" class="hidden animate-fade-in">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Borç Dağılımı Pasta -->
+            <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+                <h3 class="text-base font-bold mb-4 text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                    <span class="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 p-1.5 rounded-lg"><i class="fa-solid fa-chart-pie text-xs"></i></span>
+                    Borç Dağılımı (Kategoriye Göre)
+                </h3>
+                <div class="chart-container"><canvas id="debtPieChart"></canvas></div>
+            </div>
+            <!-- Aylık Ödeme Bar -->
+            <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+                <h3 class="text-base font-bold mb-4 text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                    <span class="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 p-1.5 rounded-lg"><i class="fa-solid fa-chart-bar text-xs"></i></span>
+                    Kredi Başına Aylık Taksit
+                </h3>
+                <div class="chart-container"><canvas id="monthlyBarChart"></canvas></div>
+            </div>
+            <!-- Borç Azalma Projeksiyonu -->
+            <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 lg:col-span-2">
+                <h3 class="text-base font-bold mb-4 text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                    <span class="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 p-1.5 rounded-lg"><i class="fa-solid fa-chart-line text-xs"></i></span>
+                    24 Aylık Borç Azalma Projeksiyonu
+                </h3>
+                <div style="position:relative;height:280px;"><canvas id="debtProjectionChart"></canvas></div>
+            </div>
+            <!-- Faiz vs Anapara Karşılaştırma -->
+            <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 lg:col-span-2">
+                <h3 class="text-base font-bold mb-4 text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                    <span class="bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 p-1.5 rounded-lg"><i class="fa-solid fa-scale-balanced text-xs"></i></span>
+                    Anapara vs Faiz Maliyeti
+                </h3>
+                <div id="interestBreakdown" class="space-y-3"></div>
             </div>
         </div>
     </div>
@@ -505,16 +589,13 @@
                     </form>
                     <div id="incomeList" class="mt-4 space-y-2"></div>
                 </div>
-
                 <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
                     <h3 class="text-base font-bold mb-3 text-slate-800 dark:text-slate-200 flex items-center gap-2">
                         <span class="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 p-1.5 rounded-lg"><i class="fa-solid fa-credit-card text-xs"></i></span>
                         Kredi Taksitleri (Bu Ay)
                     </h3>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-3">Bu aya ait taksitler otomatik listelenir.</p>
                     <div id="loanExpenseList" class="space-y-2"></div>
                 </div>
-
                 <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
                     <h3 class="text-base font-bold mb-4 text-slate-800 dark:text-slate-200 flex items-center gap-2">
                         <span class="bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 p-1.5 rounded-lg"><i class="fa-solid fa-basket-shopping text-xs"></i></span>
@@ -531,7 +612,6 @@
                     <div id="expenseList" class="mt-4 space-y-2"></div>
                 </div>
             </div>
-
             <div class="lg:col-span-2">
                 <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
                     <div class="flex items-center justify-between mb-4">
@@ -563,7 +643,7 @@
 
     <!-- RECOMMENDATIONS SCREEN -->
     <div id="recommendationsScreen" class="hidden animate-fade-in">
-        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 mb-6">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                 <div>
                     <h3 class="text-xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
@@ -578,10 +658,12 @@
                         <input id="budgetInput" type="number" step="0.01" placeholder="Bütçe girin" class="pl-8 w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/30 dark:text-white text-sm font-bold">
                     </div>
                     <button onclick="calculateSmartRecommendations()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-3 rounded-xl text-sm font-bold transition-all active:scale-95 whitespace-nowrap">Analiz Et</button>
+                    <button onclick="showModal('simulatorModal'); runSimulator();" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 px-3 py-3 rounded-xl text-sm font-bold transition-all active:scale-95 whitespace-nowrap" title="Simülatör">
+                        <i class="fa-solid fa-calculator"></i>
+                    </button>
                 </div>
             </div>
-
-            <div id="recommendationResults" class="hidden grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div id="recommendationResults" class="grid grid-cols-1 md:grid-cols-2 gap-6 hidden">
                 <div class="border border-emerald-100 dark:border-emerald-900/30 bg-emerald-50/50 dark:bg-emerald-900/10 rounded-2xl p-5">
                     <div class="flex items-center gap-3 mb-5">
                         <div class="bg-white dark:bg-emerald-900/50 p-2.5 rounded-xl shadow-sm"><i class="fa-solid fa-piggy-bank text-emerald-600 dark:text-emerald-400 text-lg"></i></div>
@@ -605,12 +687,11 @@
                     </div>
                 </div>
             </div>
-
             <div id="noRecommendation" class="hidden py-12 text-center text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-900/30 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700 mt-4">
                 <i class="fa-solid fa-circle-info text-3xl mb-3 block opacity-50"></i>
                 <p class="text-sm">Bu bütçe ile kapatılabilecek kredi bulunamadı.</p>
             </div>
-            <div id="noBudget" class="hidden py-12 text-center text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-900/30 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700 mt-4">
+            <div id="noBudget" class="py-12 text-center text-slate-400 dark:text-slate-500 bg-slate-50 dark:bg-slate-900/30 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700 mt-4">
                 <i class="fa-solid fa-wallet text-3xl mb-3 block opacity-50"></i>
                 <p class="text-sm font-medium">Analiz için bütçe girmeniz gerekiyor.</p>
             </div>
@@ -623,6 +704,10 @@
     <div class="flex justify-around items-center h-16 max-w-lg mx-auto">
         <button onclick="switchScreen('loans')" id="navLoans" class="flex flex-col items-center justify-center w-full h-full gap-1 transition-all text-indigo-600">
             <i class="fa-solid fa-list-ul text-lg"></i><span class="text-[10px] font-bold">Borçlar</span>
+        </button>
+        <div class="w-px h-8 bg-slate-100 dark:bg-slate-800"></div>
+        <button onclick="switchScreen('stats')" id="navStats" class="flex flex-col items-center justify-center w-full h-full gap-1 transition-all text-slate-400 dark:text-slate-500">
+            <i class="fa-solid fa-chart-pie text-lg"></i><span class="text-[10px] font-bold">Grafikler</span>
         </button>
         <div class="w-px h-8 bg-slate-100 dark:bg-slate-800"></div>
         <button onclick="switchScreen('recommendations')" id="navRecs" class="flex flex-col items-center justify-center w-full h-full gap-1 transition-all text-slate-400 dark:text-slate-500">
@@ -639,60 +724,181 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // ================================================================
-// SUPABASE
+// SUPABASE & AUTH
 // ================================================================
 const SUPABASE_URL = "https://ejeapbjlyqrucidbarhg.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVqZWFwYmpseXFydWNpZGJhcmhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE2MTA5NDIsImV4cCI6MjA5NzE4Njk0Mn0.b-1xu-TMknnsTv7ijqp2hQKTE1V9yLEfHN3yNJnKD4g";
-const SAVE_ID = "00000000-0000-0000-0000-000000000001";
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+let currentUserId = null;
+let isAnonymous = false;
+
+// ---- Auth Helpers ----
+function togglePwVis(id) {
+    const inp = document.getElementById(id);
+    inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+function showLoginForm() {
+    document.getElementById('loginForm').classList.remove('hidden');
+    document.getElementById('registerForm').classList.add('hidden');
+}
+function showRegisterForm() {
+    document.getElementById('loginForm').classList.add('hidden');
+    document.getElementById('registerForm').classList.remove('hidden');
+}
+
+async function loginWithEmail() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    const errEl = document.getElementById('loginError');
+    errEl.classList.add('hidden');
+    if (!email || !password) { errEl.textContent = 'E-posta ve şifre giriniz.'; errEl.classList.remove('hidden'); return; }
+    try {
+        const { data, error } = await sb.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        currentUserId = data.user.id;
+        isAnonymous = false;
+        onLoginSuccess(data.user);
+    } catch(e) {
+        errEl.textContent = e.message || 'Giriş başarısız.';
+        errEl.classList.remove('hidden');
+    }
+}
+
+async function registerWithEmail() {
+    const email = document.getElementById('regEmail').value.trim();
+    const password = document.getElementById('regPassword').value;
+    const errEl = document.getElementById('regError');
+    errEl.classList.add('hidden');
+    if (!email || !password || password.length < 6) { errEl.textContent = 'Geçerli e-posta ve en az 6 karakterli şifre giriniz.'; errEl.classList.remove('hidden'); return; }
+    try {
+        const { data, error } = await sb.auth.signUp({ email, password });
+        if (error) throw error;
+        errEl.className = 'text-xs text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 p-2 rounded-lg';
+        errEl.textContent = 'Kayıt başarılı! E-postanızı onaylayın veya giriş yapın.';
+        errEl.classList.remove('hidden');
+        if (data.user && !data.user.identities?.length === 0) {
+            currentUserId = data.user.id;
+            onLoginSuccess(data.user);
+        }
+    } catch(e) {
+        errEl.textContent = e.message || 'Kayıt başarısız.';
+        errEl.classList.remove('hidden');
+    }
+}
+
+async function loginAnonymous() {
+    isAnonymous = true;
+    currentUserId = 'local_' + (localStorage.getItem('localUserId') || (() => { const id = Math.random().toString(36).slice(2); localStorage.setItem('localUserId', id); return id; })());
+    hideModal('loginModal');
+    await initAppData();
+    updateUserInfoBar();
+}
+
+async function logoutUser() {
+    if (!isAnonymous) {
+        await sb.auth.signOut();
+    }
+    currentUserId = null;
+    isAnonymous = false;
+    loans = []; incomes = []; otherExpenses = [];
+    hideModal('settingsModal');
+    showModal('loginModal');
+}
+
+function onLoginSuccess(user) {
+    currentUserId = user.id;
+    isAnonymous = false;
+    hideModal('loginModal');
+    initAppData();
+    updateUserInfoBar();
+}
+
+function updateUserInfoBar() {
+    const emailEl = document.getElementById('userEmailDisplay');
+    const typeEl = document.getElementById('userTypeDisplay');
+    if (!emailEl || !typeEl) return;
+    if (isAnonymous) {
+        emailEl.textContent = 'Misafir Kullanıcı';
+        typeEl.textContent = 'Yerel kayıt (bulut yok)';
+    } else {
+        sb.auth.getUser().then(({ data }) => {
+            emailEl.textContent = data?.user?.email || 'Kullanıcı';
+            typeEl.textContent = 'Bulut senkronizasyonu aktif ✓';
+        });
+    }
+}
+
+// ---- Cloud Helpers ----
 function setCloudStatus(type, text) {
     const el = document.getElementById('cloudStatusText');
     const wrap = document.getElementById('cloudStatus');
     if (!el || !wrap) return;
     el.textContent = text;
-    const base = 'text-xs px-2 py-1 rounded-lg flex items-center gap-1 ';
-    if (type === 'ok') wrap.className = base + 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400';
+    const base = 'text-xs px-2 py-1 rounded-lg flex items-center gap-1 cursor-pointer ';
+    if (type === 'ok')   wrap.className = base + 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400';
     else if (type === 'err') wrap.className = base + 'bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400';
     else wrap.className = base + 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400';
 }
 
 async function saveToCloud(data) {
+    const localKey = `btBackup_${currentUserId || 'guest'}`;
+    localStorage.setItem(localKey, JSON.stringify(data));
+    if (isAnonymous || !currentUserId) { setCloudStatus('ok', 'Yerel ✓'); return; }
     try {
         setCloudStatus('loading', 'Kaydediliyor...');
-        const { error } = await sb.from('borclar').upsert({ id: SAVE_ID, data }, { onConflict: 'id' });
+        const { error } = await sb.from('borclar').upsert({ id: currentUserId, user_id: currentUserId, data }, { onConflict: 'id' });
         if (error) throw error;
         setCloudStatus('ok', 'Kaydedildi ✓');
-        localStorage.setItem('btBackup', JSON.stringify(data));
     } catch(e) {
         console.error('saveToCloud:', e);
         setCloudStatus('err', 'Hata!');
-        localStorage.setItem('btBackup', JSON.stringify(data));
     }
 }
 
 async function loadFromCloud() {
+    const localKey = `btBackup_${currentUserId || 'guest'}`;
+    if (isAnonymous || !currentUserId) {
+        try { const r = localStorage.getItem(localKey); return r ? JSON.parse(r) : null; } catch { return null; }
+    }
+    // Önce local'den yükle (hız için)
+    let localData = null;
+    try { const r = localStorage.getItem(localKey); if (r) localData = JSON.parse(r); } catch {}
     try {
         setCloudStatus('loading', 'Yükleniyor...');
-        const { data, error } = await sb.from('borclar').select('data').eq('id', SAVE_ID).maybeSingle();
+        const { data, error } = await sb.from('borclar').select('data').eq('user_id', currentUserId).maybeSingle();
         if (error) throw error;
-        if (data?.data) {
-            setCloudStatus('ok', 'Bulut ✓');
-            localStorage.setItem('btBackup', JSON.stringify(data.data));
-            return data.data;
-        }
+        if (data?.data) { setCloudStatus('ok', 'Bulut ✓'); localStorage.setItem(localKey, JSON.stringify(data.data)); return data.data; }
         setCloudStatus('ok', 'Hazır');
-        return null;
+        return localData;
     } catch(e) {
         console.error('loadFromCloud:', e);
         setCloudStatus('err', 'Çevrimdışı');
-        return null;
+        return localData;
     }
 }
 
-function loadFromLocal() {
-    try { const r = localStorage.getItem('btBackup'); return r ? JSON.parse(r) : null; } catch(e) { return null; }
+async function syncNow() {
+    if (!isAnonymous) {
+        await saveToCloud({ loans, incomes, otherExpenses });
+        showConfirm('Senkronizasyon', 'Veriler buluta kaydedildi!', () => {}, 'success');
+    } else {
+        showConfirm('Bilgi', 'Misafir modunda bulut senkronizasyonu kullanılamaz.\n\nHesap oluşturarak verilerinizi güvende tutabilirsiniz.', () => {}, 'info');
+    }
 }
+
+async function initAppData() {
+    const cloud = await loadFromCloud();
+    if (cloud) {
+        loans = cloud.loans || [];
+        incomes = cloud.incomes || [];
+        otherExpenses = cloud.otherExpenses || [];
+    }
+    render();
+    updateBudgetUI();
+}
+
+const saveState = async () => { await saveToCloud({ loans, incomes, otherExpenses }); };
 </script>
 
 <script>
@@ -700,6 +906,7 @@ function loadFromLocal() {
 // STATE & UTILS
 // ================================================================
 let loans = [], incomes = [], otherExpenses = [];
+let chartInstances = {};
 
 const fmt = (n) => new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(n || 0);
 const fmtDate = (v) => {
@@ -707,13 +914,80 @@ const fmtDate = (v) => {
     const d = v instanceof Date ? v : new Date(v);
     return isNaN(d) ? '-' : new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' }).format(d);
 };
+const fmtDateShort = (v) => {
+    if (!v) return '-';
+    const d = v instanceof Date ? v : new Date(v);
+    return isNaN(d) ? '-' : `${d.getDate()}.${d.getMonth()+1}.${d.getFullYear()}`;
+};
+
+// DÜZELTME: Doğru nextPayDate hesabı
 const nextPayDate = (loanDateStr, total, remaining) => {
     if (!loanDateStr) return new Date();
     const d = new Date(loanDateStr);
-    d.setMonth(d.getMonth() + (total - remaining) + 1);
+    const paid = Math.max(0, total - remaining);
+    d.setMonth(d.getMonth() + paid + 1);
     return d;
 };
-const saveState = async () => { await saveToCloud({ loans, incomes, otherExpenses }); };
+
+// DÜZELTME: Doğru kalan anapara (annüite formülü)
+const calcRemainingPrincipal = (loan) => {
+    const monthly = parseFloat(loan.monthlyPayment) || 0;
+    const loanAmt = parseFloat(loan.loanAmount) || 0;
+    const rem = loan.isEarlyClosed ? 0 : (loan.remainingInstallments || 0);
+    const total = Math.max(1, loan.totalInstallments || 1);
+    const rate = (parseFloat(loan.interestRate) || 0) / 100;
+
+    if (rate > 0 && loanAmt > 0) {
+        // Annüite formülü ile gerçek anapara hesabı
+        let balance = loanAmt;
+        const paidCount = total - rem;
+        for (let i = 0; i < paidCount; i++) {
+            const interestPayment = balance * rate;
+            const principalPayment = monthly - interestPayment;
+            balance = Math.max(0, balance - principalPayment);
+        }
+        return balance;
+    }
+    // Faiz oranı yoksa basit oransal hesap
+    return (rem / total) * loanAmt;
+};
+
+// Toplam faiz maliyeti hesabı
+const calcTotalInterest = (loan) => {
+    const monthly = parseFloat(loan.monthlyPayment) || 0;
+    const loanAmt = parseFloat(loan.loanAmount) || 0;
+    const total = Math.max(1, loan.totalInstallments || 1);
+    const totalPay = monthly * total;
+    return Math.max(0, totalPay - loanAmt);
+};
+
+// Kalan faiz maliyeti (sadece kalan taksitler için)
+const calcRemainingInterest = (loan) => {
+    const monthly = parseFloat(loan.monthlyPayment) || 0;
+    const rem = loan.isEarlyClosed ? 0 : (loan.remainingInstallments || 0);
+    const remP = calcRemainingPrincipal(loan);
+    return Math.max(0, (monthly * rem) - remP);
+};
+
+// Amortizasyon tablosu (taksit planı) oluştur
+const generateAmortizationSchedule = (loan) => {
+    const schedule = [];
+    const monthly = parseFloat(loan.monthlyPayment) || 0;
+    const loanAmt = parseFloat(loan.loanAmount) || 0;
+    const total = Math.max(1, loan.totalInstallments || 1);
+    const rate = (parseFloat(loan.interestRate) || 0) / 100;
+    let balance = loanAmt;
+
+    for (let i = 1; i <= total; i++) {
+        const interest = rate > 0 ? balance * rate : 0;
+        const principal = monthly - interest;
+        balance = Math.max(0, balance - principal);
+        const date = new Date(loan.loanDate || new Date());
+        date.setMonth(date.getMonth() + i);
+        schedule.push({ no: i, date, total: monthly, interest, principal, remainingBalance: balance });
+    }
+    return schedule;
+};
 
 // ================================================================
 // DARK MODE
@@ -726,8 +1000,11 @@ const toggleDarkMode = () => {
     const isDark = document.documentElement.classList.toggle('dark');
     localStorage.setItem('darkMode', isDark);
     updateDarkIcon(isDark);
-    const meta = document.getElementById('themeColor');
-    if (meta) meta.content = isDark ? '#0f172a' : '#ffffff';
+    document.getElementById('themeColor').content = isDark ? '#0f172a' : '#ffffff';
+    // Grafikleri yenile
+    if (document.getElementById('statsScreen') && !document.getElementById('statsScreen').classList.contains('hidden')) {
+        renderCharts();
+    }
 };
 updateDarkIcon(document.documentElement.classList.contains('dark'));
 
@@ -735,19 +1012,29 @@ updateDarkIcon(document.documentElement.classList.contains('dark'));
 // SCREEN SWITCH
 // ================================================================
 window.switchScreen = (s) => {
-    ['loansScreen','addScreen','recommendationsScreen','budgetScreen'].forEach(id => document.getElementById(id)?.classList.add('hidden'));
+    ['loansScreen','addScreen','recommendationsScreen','budgetScreen','statsScreen'].forEach(id => {
+        document.getElementById(id)?.classList.add('hidden');
+    });
     const base = 'flex flex-col items-center justify-center w-full h-full gap-1 transition-all ';
-    ['navLoans','navRecs','navBudget'].forEach(id => { const el = document.getElementById(id); if (el) el.className = base + 'text-slate-400 dark:text-slate-500'; });
+    ['navLoans','navStats','navRecs','navBudget'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.className = base + 'text-slate-400 dark:text-slate-500';
+    });
 
     if (s === 'loans') {
         document.getElementById('loansScreen').classList.remove('hidden');
-        document.getElementById('navLoans').className = base + 'text-indigo-600';
+        document.getElementById('navLoans').className = base + 'text-indigo-600 dark:text-indigo-400';
     } else if (s === 'add') {
         document.getElementById('addScreen').classList.remove('hidden');
+    } else if (s === 'stats') {
+        document.getElementById('statsScreen').classList.remove('hidden');
+        document.getElementById('navStats').className = base + 'text-indigo-600 dark:text-indigo-400';
+        renderCharts();
     } else if (s === 'recommendations') {
         document.getElementById('recommendationsScreen').classList.remove('hidden');
         document.getElementById('navRecs').className = base + 'text-purple-600 dark:text-purple-400';
-        if (getBudget() > 0) calculateSmartRecommendations(); else showEl('noBudget');
+        const bv = getBudget();
+        if (bv > 0) calculateSmartRecommendations();
     } else if (s === 'budget') {
         document.getElementById('budgetScreen').classList.remove('hidden');
         document.getElementById('navBudget').className = base + 'text-blue-600 dark:text-blue-400';
@@ -763,7 +1050,7 @@ const hideModal = (id) => { const m = document.getElementById(id); if (m) { m.cl
 const showEl = (id) => document.getElementById(id)?.classList.remove('hidden');
 const hideEl = (id) => document.getElementById(id)?.classList.add('hidden');
 
-['settingsModal','editModal','detailModal','confirmModal','pdfModal'].forEach(id => {
+['settingsModal','editModal','detailModal','confirmModal','pdfModal','simulatorModal'].forEach(id => {
     document.getElementById(id)?.addEventListener('click', (e) => { if (e.target.id === id) hideModal(id); });
 });
 
@@ -773,16 +1060,81 @@ const hideEl = (id) => document.getElementById(id)?.classList.add('hidden');
 const toggleSettingsModal = () => {
     const m = document.getElementById('settingsModal');
     m?.classList.contains('hidden') ? showModal('settingsModal') : hideModal('settingsModal');
+    updateUserInfoBar();
 };
+
+// JSON Yedek
 const backupData = () => {
     const blob = new Blob([JSON.stringify({ loans, incomes, otherExpenses }, null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = `borc_yedek_${new Date().toISOString().slice(0,10)}.json`;
-    a.click(); URL.revokeObjectURL(a.href);
+    a.click();
+    URL.revokeObjectURL(a.href);
     hideModal('settingsModal');
-    showConfirm('Başarılı', 'Yedek dosyası indirildi.', () => {}, 'success');
+    showConfirm('Başarılı', 'JSON yedek dosyası indirildi.', () => {}, 'success');
 };
+
+// CSV Export - YENİ
+const exportToCSV = () => {
+    if (!loans.length) { showConfirm('Bilgi', 'Dışa aktarılacak kredi yok.', () => {}, 'info'); return; }
+    const headers = ['Banka/Kredi Adı','Kategori','Çekilen Tutar','Aylık Taksit','Faiz Oranı (%)','Toplam Taksit','Kalan Taksit','Kullanım Tarihi','Toplam Faiz Maliyeti','Kalan Anapara','Erken Kapama','Durum'];
+    const rows = loans.map(l => {
+        const remP = calcRemainingPrincipal(l);
+        const totalInt = calcTotalInterest(l);
+        return [
+            `"${l.bankName || ''}"`,
+            l.category || '',
+            (l.loanAmount || 0),
+            (l.monthlyPayment || 0),
+            (l.interestRate || 0),
+            (l.totalInstallments || 0),
+            (l.remainingInstallments || 0),
+            l.loanDate || '',
+            totalInt.toFixed(2),
+            remP.toFixed(2),
+            (l.earlyCloseAmount || 0),
+            l.isEarlyClosed ? 'Kapatıldı' : 'Aktif'
+        ].join(';');
+    });
+    const csv = '\uFEFF' + [headers.join(';'), ...rows].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `borclar_${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+    hideModal('settingsModal');
+    showConfirm('Başarılı', 'CSV dosyası indirildi. Excel ile açabilirsiniz.', () => {}, 'success');
+};
+
+// Rapor Paylaşma - YENİ
+const shareReport = async () => {
+    const active = loans.filter(l => !l.isEarlyClosed);
+    const totMonthly = active.reduce((s, l) => s + (parseFloat(l.monthlyPayment) || 0), 0);
+    const totDebt = active.reduce((s, l) => s + calcRemainingPrincipal(l), 0);
+    const lines = [
+        '📊 Borç Takip Raporum',
+        `📅 ${fmtDateShort(new Date())}`,
+        '',
+        `💰 Toplam Aylık Ödeme: ${fmt(totMonthly)}`,
+        `💸 Toplam Kalan Borç: ${fmt(totDebt)}`,
+        '',
+        '📋 Kredilerim:',
+        ...active.map(l => `• ${l.bankName}: ${fmt(l.monthlyPayment)}/ay (${l.remainingInstallments} taksit kaldı)`),
+        '',
+        '#BorçTakip #FinansYönetimi'
+    ];
+    const text = lines.join('\n');
+    if (navigator.share) {
+        try { await navigator.share({ title: 'Borç Takip Raporum', text }); } catch {}
+    } else {
+        await navigator.clipboard.writeText(text);
+        showConfirm('Kopyalandı!', 'Borç raporu panoya kopyalandı.\n\nWhatsApp, not defteri veya e-postaya yapıştırabilirsiniz.', () => {}, 'success');
+    }
+    hideModal('settingsModal');
+};
+
 const restoreData = (input) => {
     const file = input.files[0]; if (!file) return;
     const reader = new FileReader();
@@ -792,14 +1144,19 @@ const restoreData = (input) => {
             const l = Array.isArray(imp) ? imp : (imp?.loans || null);
             if (!Array.isArray(l)) throw new Error();
             hideModal('settingsModal');
-            showConfirm('Geri Yükle', 'Mevcut veriler silinecek. Devam?', async () => {
-                loans = l; incomes = imp?.incomes || []; otherExpenses = imp?.otherExpenses || [];
-                await saveState(); render(); updateBudgetUI();
-                showConfirm('Başarılı', 'Veriler geri yüklendi.', () => {}, 'success');
+            showConfirm('Geri Yükle', 'Mevcut veriler silinecek ve dosyadan yüklenen veriler aktarılacak.\n\nDevam etmek istiyor musunuz?', async () => {
+                loans = l;
+                incomes = imp?.incomes || [];
+                otherExpenses = imp?.otherExpenses || [];
+                await saveState();
+                render();
+                updateBudgetUI();
+                showConfirm('Başarılı', 'Veriler başarıyla geri yüklendi.', () => {}, 'success');
             }, 'danger');
         } catch { showConfirm('Hata', 'Geçersiz yedek dosyası!', () => {}, 'danger'); }
     };
-    reader.readAsText(file); input.value = '';
+    reader.readAsText(file);
+    input.value = '';
 };
 
 // ================================================================
@@ -811,9 +1168,9 @@ const showConfirm = (title, msg, cb, type = 'info') => {
     document.getElementById('confirmMessage').innerHTML = msg.replace(/\n/g, '<br>');
     confirmCb = cb;
     const cfgs = {
-        danger:  { ic: 'bg-red-50 dark:bg-red-900/20 text-red-500',     icon: 'fa-triangle-exclamation', btn: 'bg-red-600 hover:bg-red-700',     txt: 'Evet, Devam Et' },
-        success: { ic: 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-500', icon: 'fa-circle-check', btn: 'bg-emerald-600 hover:bg-emerald-700', txt: 'Tamam' },
-        info:    { ic: 'bg-blue-50 dark:bg-blue-900/20 text-blue-500',   icon: 'fa-circle-question',     btn: 'bg-blue-600 hover:bg-blue-700',     txt: 'Onayla' }
+        danger:  { ic: 'bg-red-50 dark:bg-red-900/20 text-red-500',           icon: 'fa-triangle-exclamation', btn: 'bg-red-600 hover:bg-red-700',     txt: 'Evet, Devam Et' },
+        success: { ic: 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-500', icon: 'fa-circle-check',        btn: 'bg-emerald-600 hover:bg-emerald-700', txt: 'Tamam' },
+        info:    { ic: 'bg-blue-50 dark:bg-blue-900/20 text-blue-500',          icon: 'fa-circle-question',     btn: 'bg-blue-600 hover:bg-blue-700',     txt: 'Onayla' }
     };
     const c = cfgs[type] || cfgs.info;
     document.getElementById('confirmIconContainer').className = `w-16 h-16 ${c.ic} rounded-full flex items-center justify-center mx-auto mb-4`;
@@ -837,10 +1194,12 @@ window.openEditModal = (idx) => {
     document.getElementById('editMonthlyPayment').value = loan.monthlyPayment || '';
     document.getElementById('editTotalInstallments').value = loan.totalInstallments || '';
     document.getElementById('editLoanDate').value = loan.loanDate || '';
+    document.getElementById('editInterestRate').value = loan.interestRate || '';
     document.getElementById('editEarlyCloseAmount').value = loan.earlyCloseAmount || '';
     showModal('editModal');
 };
 window.closeEditModal = () => hideModal('editModal');
+
 document.getElementById('editForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const idx = parseInt(document.getElementById('editIndex').value);
@@ -850,8 +1209,11 @@ document.getElementById('editForm').addEventListener('submit', async (e) => {
     loans[idx].monthlyPayment = parseFloat(document.getElementById('editMonthlyPayment').value) || 0;
     loans[idx].totalInstallments = parseInt(document.getElementById('editTotalInstallments').value) || 1;
     loans[idx].loanDate = document.getElementById('editLoanDate').value;
+    loans[idx].interestRate = parseFloat(document.getElementById('editInterestRate').value) || 0;
     loans[idx].earlyCloseAmount = parseFloat(document.getElementById('editEarlyCloseAmount').value) || 0;
-    await saveState(); hideModal('editModal'); render();
+    await saveState();
+    hideModal('editModal');
+    render();
 });
 
 // ================================================================
@@ -864,86 +1226,102 @@ window.openDetailModal = (idx) => {
     const monthly = parseFloat(loan.monthlyPayment) || 0;
     const loanAmt = parseFloat(loan.loanAmount) || 0;
     const paid = total - (loan.isEarlyClosed ? (loan.savedInstallments || 0) : rem);
-    const remP = loan.isEarlyClosed ? 0 : (rem / total) * loanAmt;
+    const remP = calcRemainingPrincipal(loan);
     const ec = parseFloat(loan.earlyCloseAmount) || 0;
-    const profit = ec > 0 ? (rem * monthly) - ec : 0;
+    const future = rem * monthly;
+    const profit = ec > 0 ? future - ec : 0;
+    const totalInterest = calcTotalInterest(loan);
+    const remInterest = calcRemainingInterest(loan);
     const nd = loan.isEarlyClosed ? null : nextPayDate(loan.loanDate, total, rem);
+    const endDate = (() => { const d = new Date(loan.loanDate || new Date()); d.setMonth(d.getMonth() + total); return d; })();
+
+    // Amortizasyon tablosu
+    let amortHtml = '';
+    if (loan.interestRate > 0 && loanAmt > 0) {
+        const schedule = generateAmortizationSchedule(loan);
+        const paidCount = paid;
+        const sliceStart = Math.max(0, paidCount - 1);
+        const sliceEnd = Math.min(schedule.length, paidCount + 4);
+        const shown = schedule.slice(sliceStart, sliceEnd);
+        amortHtml = `
+        <div class="mt-4">
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-2">Taksit Planı (${paidCount}/${total} ödendi)</div>
+            <div class="bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                <table class="w-full text-xs">
+                    <thead class="bg-slate-100 dark:bg-slate-800">
+                        <tr>
+                            <th class="text-left px-2 py-1.5 text-slate-500 dark:text-slate-400">#</th>
+                            <th class="text-left px-2 py-1.5 text-slate-500 dark:text-slate-400">Tarih</th>
+                            <th class="text-right px-2 py-1.5 text-slate-500 dark:text-slate-400">Taksit</th>
+                            <th class="text-right px-2 py-1.5 text-slate-500 dark:text-slate-400">Anapara</th>
+                            <th class="text-right px-2 py-1.5 text-slate-500 dark:text-slate-400">Faiz</th>
+                            <th class="text-right px-2 py-1.5 text-slate-500 dark:text-slate-400">Kalan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${shown.map((row, i) => {
+                            const isPaid = row.no <= paidCount;
+                            const isNext = row.no === paidCount + 1;
+                            return `<tr class="${isPaid ? 'bg-emerald-50/50 dark:bg-emerald-900/10' : isNext ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''}">
+                                <td class="px-2 py-1 text-slate-400">${row.no}</td>
+                                <td class="px-2 py-1 ${isNext ? 'font-bold text-blue-600 dark:text-blue-400' : 'text-slate-600 dark:text-slate-300'}">${fmtDateShort(row.date)}</td>
+                                <td class="px-2 py-1 text-right font-bold text-slate-700 dark:text-slate-200">${fmt(row.total)}</td>
+                                <td class="px-2 py-1 text-right text-emerald-600 dark:text-emerald-400">${fmt(row.principal)}</td>
+                                <td class="px-2 py-1 text-right text-orange-500 dark:text-orange-400">${fmt(row.interest)}</td>
+                                <td class="px-2 py-1 text-right text-red-500 dark:text-red-400">${fmt(row.remainingBalance)}</td>
+                            </tr>`;
+                        }).join('')}
+                    </tbody>
+                </table>
+                ${schedule.length > 5 ? `<div class="px-3 py-2 text-center text-[10px] text-slate-400">Toplam ${schedule.length} taksit • Yakın taksitler gösteriliyor</div>` : ''}
+            </div>
+        </div>`;
+    }
 
     document.getElementById('detailContent').innerHTML = `
         <div class="grid grid-cols-2 gap-2 text-sm">
-            <div class="col-span-2 bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl">
-                <div class="text-[10px] text-slate-400 uppercase mb-0.5">Kredi Adı</div>
-                <div class="font-bold text-slate-700 dark:text-slate-200">${loan.bankName}</div>
+            <div class="col-span-2 bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl flex items-center justify-between">
+                <div><div class="text-[10px] text-slate-400 uppercase mb-0.5">Kredi Adı</div><div class="font-bold text-slate-700 dark:text-slate-200">${loan.bankName}</div></div>
+                <span class="text-[10px] px-2 py-1 rounded-full font-bold ${loan.isEarlyClosed ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400' : 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'}">${loan.isEarlyClosed ? '✓ Kapatıldı' : '⏳ Devam'}</span>
             </div>
-            <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl">
-                <div class="text-[10px] text-slate-400 uppercase mb-0.5">Kategori</div>
-                <div class="font-bold text-slate-700 dark:text-slate-200">${loan.category}</div>
-            </div>
-            <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl">
-                <div class="text-[10px] text-slate-400 uppercase mb-0.5">Durum</div>
-                <div class="font-bold ${loan.isEarlyClosed ? 'text-emerald-600 dark:text-emerald-400' : 'text-blue-600 dark:text-blue-400'}">${loan.isEarlyClosed ? '✓ Kapatıldı' : '⏳ Devam Ediyor'}</div>
-            </div>
-            <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl">
-                <div class="text-[10px] text-slate-400 uppercase mb-0.5">Çekilen Tutar</div>
-                <div class="font-bold text-slate-700 dark:text-slate-200">${fmt(loanAmt)}</div>
-            </div>
-            <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl">
-                <div class="text-[10px] text-slate-400 uppercase mb-0.5">Aylık Taksit</div>
-                <div class="font-bold text-slate-700 dark:text-slate-200">${fmt(monthly)}</div>
-            </div>
-            <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl">
-                <div class="text-[10px] text-slate-400 uppercase mb-0.5">Ödenen / Toplam</div>
-                <div class="font-bold text-emerald-600 dark:text-emerald-400">${paid} / ${total}</div>
-            </div>
-            <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl">
-                <div class="text-[10px] text-slate-400 uppercase mb-0.5">Kalan Taksit</div>
-                <div class="font-bold text-red-500 dark:text-red-400">${rem}</div>
-            </div>
-            <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl">
-                <div class="text-[10px] text-slate-400 uppercase mb-0.5">Toplam Ödenen</div>
-                <div class="font-bold text-slate-700 dark:text-slate-200">${fmt(paid * monthly)}</div>
-            </div>
-            <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl">
-                <div class="text-[10px] text-slate-400 uppercase mb-0.5">Kalan Anapara</div>
-                <div class="font-bold text-red-500 dark:text-red-400">${fmt(remP)}</div>
-            </div>
-            <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl">
-                <div class="text-[10px] text-slate-400 uppercase mb-0.5">Kullanım Tarihi</div>
-                <div class="font-bold text-slate-700 dark:text-slate-200">${fmtDate(loan.loanDate)}</div>
-            </div>
-            <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl">
-                <div class="text-[10px] text-slate-400 uppercase mb-0.5">Sonraki Ödeme</div>
-                <div class="font-bold text-slate-700 dark:text-slate-200">${loan.isEarlyClosed ? 'Kapatıldı' : fmtDate(nd)}</div>
+            <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl"><div class="text-[10px] text-slate-400 uppercase mb-0.5">Kategori</div><div class="font-bold text-slate-700 dark:text-slate-200">${loan.category}</div></div>
+            <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl"><div class="text-[10px] text-slate-400 uppercase mb-0.5">Çekilen Tutar</div><div class="font-bold text-slate-700 dark:text-slate-200">${fmt(loanAmt)}</div></div>
+            <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl"><div class="text-[10px] text-slate-400 uppercase mb-0.5">Aylık Taksit</div><div class="font-bold text-slate-700 dark:text-slate-200">${fmt(monthly)}</div></div>
+            <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl"><div class="text-[10px] text-slate-400 uppercase mb-0.5">Faiz Oranı</div><div class="font-bold text-slate-700 dark:text-slate-200">${loan.interestRate ? '%' + loan.interestRate + '/ay' : 'Belirtilmedi'}</div></div>
+            <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl"><div class="text-[10px] text-slate-400 uppercase mb-0.5">Ödenen / Toplam</div><div class="font-bold text-emerald-600 dark:text-emerald-400">${paid} / ${total}</div></div>
+            <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl"><div class="text-[10px] text-slate-400 uppercase mb-0.5">Kalan Taksit</div><div class="font-bold text-red-500 dark:text-red-400">${rem}</div></div>
+            <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl"><div class="text-[10px] text-slate-400 uppercase mb-0.5">Kalan Anapara</div><div class="font-bold text-red-500 dark:text-red-400">${fmt(remP)}</div></div>
+            <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl"><div class="text-[10px] text-slate-400 uppercase mb-0.5">Kalan Faiz Yükü</div><div class="font-bold text-orange-500 dark:text-orange-400">${fmt(remInterest)}</div></div>
+            <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl"><div class="text-[10px] text-slate-400 uppercase mb-0.5">Kullanım Tarihi</div><div class="font-bold text-slate-700 dark:text-slate-200">${fmtDate(loan.loanDate)}</div></div>
+            <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl"><div class="text-[10px] text-slate-400 uppercase mb-0.5">Bitiş Tarihi</div><div class="font-bold text-slate-700 dark:text-slate-200">${fmtDate(endDate)}</div></div>
+            <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl"><div class="text-[10px] text-slate-400 uppercase mb-0.5">Sonraki Ödeme</div><div class="font-bold text-slate-700 dark:text-slate-200">${loan.isEarlyClosed ? 'Kapatıldı' : fmtDate(nd)}</div></div>
+            <div class="col-span-2 bg-orange-50 dark:bg-orange-900/20 p-3 rounded-xl border border-orange-100 dark:border-orange-900/30">
+                <div class="text-[10px] text-orange-600 dark:text-orange-400 uppercase mb-0.5">Toplam Faiz Maliyeti</div>
+                <div class="font-bold text-lg text-orange-600 dark:text-orange-400">${fmt(totalInterest)}</div>
+                <div class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Toplam geri ödeme: ${fmt(monthly * total)}</div>
             </div>
             ${ec > 0 ? `<div class="col-span-2 bg-emerald-50 dark:bg-emerald-900/20 p-3 rounded-xl border border-emerald-100 dark:border-emerald-900/30">
-                <div class="text-[10px] text-emerald-600 dark:text-emerald-400 uppercase mb-0.5">Erken Kapama Kâr/Zarar</div>
-                <div class="font-bold text-lg ${profit >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500'}">${profit >= 0 ? '+' : ''}${fmt(profit)}</div>
-                <div class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Erken kapama tutarı: ${fmt(ec)}</div>
+                <div class="text-[10px] text-emerald-600 dark:text-emerald-400 uppercase mb-0.5">Erken Kapama Analizi</div>
+                <div class="font-bold text-lg ${profit >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500'}">${profit >= 0 ? '+' : ''}${fmt(profit)} ${profit >= 0 ? 'kâr' : 'zarar'}</div>
+                <div class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Erken kapama tutarı: ${fmt(ec)} • Kalan taksit toplamı: ${fmt(future)}</div>
             </div>` : ''}
-            ${loan.importedFromPdf ? `<div class="col-span-2 bg-orange-50 dark:bg-orange-900/20 p-2 rounded-xl border border-orange-100 dark:border-orange-800 flex items-center gap-2">
-                <i class="fa-solid fa-file-pdf text-orange-500 text-xs"></i>
-                <span class="text-xs text-orange-600 dark:text-orange-400 font-medium">PDF'den içe aktarıldı</span>
-            </div>` : ''}
+            ${loan.importedFromPdf ? `<div class="col-span-2 bg-orange-50 dark:bg-orange-900/20 p-2 rounded-xl border border-orange-100 dark:border-orange-800 flex items-center gap-2"><i class="fa-solid fa-file-pdf text-orange-500 text-xs"></i><span class="text-xs text-orange-600 dark:text-orange-400 font-medium">PDF'den içe aktarıldı</span></div>` : ''}
         </div>
+        ${amortHtml}
         ${loan.installmentPlan?.length ? `
         <div class="mt-4">
-            <div class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-2">Taksit Planı (PDF'den)</div>
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-2">PDF'den Yüklenen Taksit Planı</div>
             <div class="bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden max-h-48 overflow-y-auto">
                 <table class="w-full text-xs">
                     <thead class="bg-slate-100 dark:bg-slate-800 sticky top-0">
-                        <tr>
-                            <th class="text-left px-2 py-1.5 text-slate-600 dark:text-slate-300">#</th>
-                            <th class="text-left px-2 py-1.5 text-slate-600 dark:text-slate-300">Tarih</th>
-                            <th class="text-right px-2 py-1.5 text-slate-600 dark:text-slate-300">Taksit</th>
-                            <th class="text-center px-2 py-1.5 text-slate-600 dark:text-slate-300">Durum</th>
-                        </tr>
+                        <tr><th class="text-left px-2 py-1.5 text-slate-500">#</th><th class="text-left px-2 py-1.5 text-slate-500">Tarih</th><th class="text-right px-2 py-1.5 text-slate-500">Taksit</th><th class="text-center px-2 py-1.5 text-slate-500">Durum</th></tr>
                     </thead>
                     <tbody>
                         ${loan.installmentPlan.map((inst, i) => {
                             const isPaid = new Date(inst.date) < new Date();
                             return `<tr class="${isPaid ? 'bg-emerald-50/50 dark:bg-emerald-900/10' : ''}">
                                 <td class="px-2 py-1 text-slate-400">${inst.no || i+1}</td>
-                                <td class="px-2 py-1 text-slate-600 dark:text-slate-300">${fmtDate(inst.date)}</td>
+                                <td class="px-2 py-1 text-slate-600 dark:text-slate-300">${fmtDateShort(inst.date)}</td>
                                 <td class="px-2 py-1 text-right font-bold text-slate-700 dark:text-slate-200">${fmt(inst.total)}</td>
                                 <td class="px-2 py-1 text-center">${isPaid ? '<span class="text-[10px] text-emerald-600 font-bold">✓</span>' : '<span class="text-[10px] text-slate-400">-</span>'}</td>
                             </tr>`;
@@ -973,18 +1351,31 @@ const updatePreview = () => {
     const m = parseFloat(document.getElementById('monthlyPayment')?.value) || 0;
     const t = parseInt(document.getElementById('totalInstallments')?.value) || 0;
     const l = parseFloat(document.getElementById('loanAmount')?.value) || 0;
+    const date = document.getElementById('loanDate')?.value;
     const prev = document.getElementById('paymentPreview');
     const warn = document.getElementById('previewWarning');
+
     if (m > 0 && t > 0) {
         const tp = m * t;
+        const interest = Math.max(0, tp - l);
         document.getElementById('previewTotalAmount').textContent = fmt(tp);
+        document.getElementById('previewTotalInterest').textContent = fmt(interest);
+
+        if (date) {
+            const endDate = new Date(date);
+            endDate.setMonth(endDate.getMonth() + t);
+            document.getElementById('previewEndDate').textContent = fmtDateShort(endDate);
+        }
         prev?.classList.remove('hidden');
         if (l > 0 && tp < l) warn?.classList.remove('hidden'); else warn?.classList.add('hidden');
-    } else { prev?.classList.add('hidden'); }
+    } else {
+        prev?.classList.add('hidden');
+    }
 };
-document.getElementById('loanAmount')?.addEventListener('input', updatePreview);
-document.getElementById('monthlyPayment')?.addEventListener('input', updatePreview);
-document.getElementById('totalInstallments')?.addEventListener('input', updatePreview);
+['loanAmount','monthlyPayment','totalInstallments','loanDate'].forEach(id => {
+    document.getElementById(id)?.addEventListener('input', updatePreview);
+    document.getElementById(id)?.addEventListener('change', updatePreview);
+});
 
 // ================================================================
 // ADD LOAN
@@ -997,20 +1388,33 @@ document.getElementById('loanForm')?.addEventListener('submit', async (e) => {
     const totalInstallments = parseInt(document.getElementById('totalInstallments').value);
     const loanDate = document.getElementById('loanDate').value;
     const category = document.getElementById('category').value;
+    const interestRate = parseFloat(document.getElementById('interestRate').value) || 0;
+
     if (!bankName || isNaN(loanAmount) || isNaN(monthlyPayment) || isNaN(totalInstallments) || !loanDate) {
         showConfirm('Eksik Bilgi', 'Lütfen tüm zorunlu alanları (*) doldurun.', () => {}, 'danger'); return;
     }
+
     const proceed = async () => {
-        loans.push({ bankName, category, loanAmount, monthlyPayment, totalInstallments, remainingInstallments: totalInstallments, loanDate, earlyCloseAmount: 0, paymentHistory: [] });
-        await saveState(); render();
+        loans.push({
+            bankName, category, loanAmount, monthlyPayment, totalInstallments,
+            remainingInstallments: totalInstallments,
+            loanDate, interestRate,
+            earlyCloseAmount: 0, paymentHistory: []
+        });
+        await saveState();
+        render();
         document.getElementById('loanForm').reset();
         document.getElementById('paymentPreview')?.classList.add('hidden');
         document.getElementById('loanDate').valueAsDate = new Date();
         switchScreen('loans');
     };
+
     const tp = monthlyPayment * totalInstallments;
-    if (tp < loanAmount) { showConfirm('Uyarı', `Toplam geri ödeme (${fmt(tp)}) çekilen tutardan (${fmt(loanAmount)}) düşük!\n\nYine de devam?`, proceed, 'danger'); }
-    else { await proceed(); }
+    if (tp < loanAmount) {
+        showConfirm('Uyarı', `Toplam geri ödeme (${fmt(tp)}) çekilen tutardan (${fmt(loanAmount)}) düşük!\n\nYine de devam etmek istiyor musunuz?`, proceed, 'danger');
+    } else {
+        await proceed();
+    }
 });
 
 // ================================================================
@@ -1019,44 +1423,67 @@ document.getElementById('loanForm')?.addEventListener('submit', async (e) => {
 window.updateEarlyClose = async (idx, val) => {
     if (!loans[idx]) return;
     loans[idx].earlyCloseAmount = parseFloat(val) || 0;
-    await saveState(); render();
+    await saveState();
+    render();
 };
+
 window.earlyCloseLoan = (idx) => {
     const loan = loans[idx]; if (!loan || loan.isEarlyClosed) return;
     const future = loan.remainingInstallments * loan.monthlyPayment;
-    const profit = future - loan.earlyCloseAmount;
-    showConfirm('Erken Kapama',
-        `${loan.bankName} kredisini kapatmak istiyor musunuz?\n\nErken kapama: ${fmt(loan.earlyCloseAmount)}\nKâr/Zarar: ${profit >= 0 ? '+' : ''}${fmt(profit)}`,
+    const ec = loan.earlyCloseAmount || 0;
+    const profit = future - ec;
+    showConfirm('Erken Kapama Onayı',
+        `<strong>${loan.bankName}</strong> kredisini erken kapatmak istiyor musunuz?\n\nKalan taksit toplamı: <strong>${fmt(future)}</strong>\nErken kapama tutarı: <strong>${fmt(ec)}</strong>\nKâr/Zarar: <strong class="${profit >= 0 ? 'text-emerald-600' : 'text-red-600'}">${profit >= 0 ? '+' : ''}${fmt(profit)}</strong>`,
         async () => {
-            const cost = loan.earlyCloseAmount;
-            loan.isEarlyClosed = true; loan.savedInstallments = loan.remainingInstallments;
-            loan.remainingInstallments = 0; loan.closedAt = new Date().toISOString();
-            await saveState(); render(); updateBudgetUI();
-            const bi = document.getElementById('budgetInput');
-            if (bi?.value) { const c = parseFloat(bi.value); if (!isNaN(c)) bi.value = Math.max(0, c - cost).toFixed(2); }
+            loan.isEarlyClosed = true;
+            loan.savedInstallments = loan.remainingInstallments;
+            loan.remainingInstallments = 0;
+            loan.closedAt = new Date().toISOString();
+            await saveState();
+            render();
+            updateBudgetUI();
         }, 'info');
 };
+
 window.deleteLoan = (idx) => {
     if (!loans[idx]) return;
-    showConfirm('Sil', `"${loans[idx].bankName}" kredisini silmek istediğinize emin misiniz?`, async () => {
-        loans.splice(idx, 1); await saveState(); render();
+    showConfirm('Sil', `"${loans[idx].bankName}" kredisini silmek istediğinize emin misiniz?\n\nBu işlem geri alınamaz!`, async () => {
+        loans.splice(idx, 1);
+        await saveState();
+        render();
     }, 'danger');
 };
+
 window.payInstallment = (idx) => {
     if (!loans[idx] || loans[idx].remainingInstallments <= 0) return;
-    showConfirm('Taksit Öde', `${loans[idx].bankName} için ${fmt(loans[idx].monthlyPayment)} taksit ödensin mi?`, async () => {
+    showConfirm('Taksit Öde', `<strong>${loans[idx].bankName}</strong> için <strong>${fmt(loans[idx].monthlyPayment)}</strong> taksit ödendi olarak işaretlensin mi?`, async () => {
         loans[idx].remainingInstallments--;
         if (!loans[idx].paymentHistory) loans[idx].paymentHistory = [];
         loans[idx].paymentHistory.push({ date: new Date().toISOString(), amount: loans[idx].monthlyPayment });
-        await saveState(); render();
+        if (loans[idx].remainingInstallments === 0) {
+            loans[idx].isEarlyClosed = true;
+            loans[idx].closedAt = new Date().toISOString();
+            loans[idx].savedInstallments = 0;
+        }
+        await saveState();
+        render();
     }, 'success');
 };
+
 window.undoInstallment = (idx) => {
-    if (!loans[idx] || loans[idx].remainingInstallments >= loans[idx].totalInstallments) return;
+    if (!loans[idx]) return;
+    const total = loans[idx].totalInstallments;
+    const rem = loans[idx].remainingInstallments;
+    if (rem >= total) return;
     showConfirm('Geri Al', 'Son taksit ödemesini geri almak istiyor musunuz?', async () => {
-        loans[idx].remainingInstallments++;
+        if (loans[idx].isEarlyClosed && loans[idx].savedInstallments === 0) {
+            loans[idx].isEarlyClosed = false;
+            loans[idx].closedAt = null;
+        }
+        loans[idx].remainingInstallments = Math.min(total, loans[idx].remainingInstallments + 1);
         if (loans[idx].paymentHistory?.length) loans[idx].paymentHistory.pop();
-        await saveState(); render();
+        await saveState();
+        render();
     }, 'danger');
 };
 
@@ -1067,14 +1494,27 @@ const render = () => {
     const list = document.getElementById('loanList');
     const empty = document.getElementById('emptyState');
     if (!list) return;
+
     const fb = (document.getElementById('filterBankName')?.value || '').toLowerCase();
     const fc = document.getElementById('filterCategory')?.value || 'all';
-    const filtered = loans.filter(l => (l.bankName || '').toLowerCase().includes(fb) && (fc === 'all' || l.category === fc));
-    list.innerHTML = '';
-    if (filtered.length === 0) { if (empty) { list.appendChild(empty); empty.style.display = 'block'; } }
-    else { if (empty) empty.style.display = 'none'; }
+    const fs = document.getElementById('filterStatus')?.value || 'all';
 
-    let totM = 0, totD = 0, totP = 0;
+    const filtered = loans.filter(l => {
+        const nameMatch = (l.bankName || '').toLowerCase().includes(fb);
+        const catMatch = fc === 'all' || l.category === fc;
+        const statusMatch = fs === 'all' || (fs === 'active' && !l.isEarlyClosed) || (fs === 'closed' && l.isEarlyClosed);
+        return nameMatch && catMatch && statusMatch;
+    });
+
+    list.innerHTML = '';
+    if (filtered.length === 0) {
+        if (empty) { list.appendChild(empty); empty.style.display = 'block'; }
+    } else {
+        if (empty) empty.style.display = 'none';
+    }
+
+    let totM = 0, totD = 0, totP = 0, totInt = 0;
+
     filtered.forEach(loan => {
         const oi = loans.indexOf(loan);
         const total = Math.max(1, loan.totalInstallments || 1);
@@ -1082,39 +1522,58 @@ const render = () => {
         const monthly = parseFloat(loan.monthlyPayment) || 0;
         const loanAmt = parseFloat(loan.loanAmount) || 0;
         const ec = parseFloat(loan.earlyCloseAmount) || 0;
-        const remP = loan.isEarlyClosed ? 0 : (rem / total) * loanAmt;
+        const remP = calcRemainingPrincipal(loan);
         const future = rem * monthly;
         const hasEC = ec > 0;
         const profit = hasEC ? future - ec : 0;
         const paid = total - (loan.isEarlyClosed ? (loan.savedInstallments || 0) : rem);
+        const progress = Math.round((paid / total) * 100);
         const nd = loan.isEarlyClosed ? null : nextPayDate(loan.loanDate, total, rem);
         const diffDays = nd ? Math.ceil((nd - new Date()) / 86400000) : 999;
-        const urgent = diffDays >= 0 && diffDays <= 3;
-        if (!loan.isEarlyClosed) { totM += monthly; totD += remP; }
-        if (hasEC) totP += profit;
+        const urgent = !loan.isEarlyClosed && diffDays >= 0 && diffDays <= 3;
+        const totalInt = calcTotalInterest(loan);
 
-        let border = 'border-l-4 border-l-slate-300 dark:border-l-slate-600';
-        if (loan.isEarlyClosed) border = 'border-l-4 border-l-emerald-500 bg-emerald-50/30 dark:bg-emerald-900/10';
-        else if (urgent) border = 'border-l-4 border-l-red-500 bg-red-50/50 dark:bg-red-900/10';
-        else if (hasEC) border = profit >= 0 ? 'border-l-4 border-l-emerald-400' : 'border-l-4 border-l-red-400';
+        if (!loan.isEarlyClosed) { totM += monthly; totD += remP; totInt += totalInt; }
+        if (hasEC && profit > 0) totP += profit;
+
+        // Renk sınıfı
+        let border = 'border-l-4 border-l-slate-200 dark:border-l-slate-600';
+        if (loan.isEarlyClosed) border = 'border-l-4 border-l-emerald-500';
+        else if (urgent) border = 'border-l-4 border-l-red-500';
+        else if (hasEC && profit >= 0) border = 'border-l-4 border-l-emerald-400';
+        else if (hasEC && profit < 0) border = 'border-l-4 border-l-red-400';
 
         const item = document.createElement('div');
-        item.className = `p-5 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors relative border-b border-slate-100 dark:border-slate-700 last:border-b-0 ${border}`;
+        item.className = `p-5 hover:bg-slate-50/80 dark:hover:bg-slate-700/20 transition-colors relative border-b border-slate-100 dark:border-slate-700 last:border-b-0 ${border} ${loan.isEarlyClosed ? 'opacity-70' : ''}`;
         item.innerHTML = `
             ${loan.isEarlyClosed ? `<span class="absolute top-4 right-4 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold px-2 py-1 rounded-md border border-emerald-200 dark:border-emerald-800">KAPATILDI</span>` : ''}
             ${urgent && !loan.isEarlyClosed ? `<span class="absolute top-4 right-4 bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-300 text-[10px] font-bold px-2 py-1 rounded-md animate-pulse border border-red-200 dark:border-red-800"><i class="fa-solid fa-bell mr-1"></i>${diffDays === 0 ? 'BUGÜN!' : diffDays + ' GÜN!'}</span>` : ''}
-            ${loan.importedFromPdf ? `<span class="absolute top-4 ${loan.isEarlyClosed || urgent ? 'right-24' : 'right-4'} bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 text-[10px] font-bold px-1.5 py-0.5 rounded border border-orange-200 dark:border-orange-800"><i class="fa-solid fa-file-pdf mr-0.5"></i>PDF</span>` : ''}
+            ${loan.importedFromPdf ? `<span class="absolute top-10 right-4 bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 text-[10px] font-bold px-1.5 py-0.5 rounded border border-orange-200 dark:border-orange-800"><i class="fa-solid fa-file-pdf mr-0.5"></i>PDF</span>` : ''}
 
             <div class="flex flex-wrap items-center gap-2 pr-28 mb-2">
                 <h3 class="text-base font-bold text-slate-800 dark:text-white">${loan.bankName}</h3>
                 <span class="text-[10px] bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded-full font-medium">${loan.category}</span>
+                ${loan.interestRate ? `<span class="text-[10px] bg-orange-50 dark:bg-orange-900/20 text-orange-600 dark:text-orange-400 px-2 py-0.5 rounded-full font-medium border border-orange-200 dark:border-orange-800">%${loan.interestRate}/ay</span>` : ''}
                 ${hasEC ? `<span class="text-[10px] px-2 py-0.5 rounded-full font-bold border ${profit >= 0 ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800' : 'bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400 border-red-200 dark:border-red-800'}">${profit >= 0 ? 'Kârlı' : 'Zararlı'}</span>` : ''}
             </div>
-            <div class="flex justify-between items-center text-xs bg-slate-50 dark:bg-slate-700/30 px-3 py-2 rounded-lg border border-slate-100 dark:border-slate-600/50 mb-3">
-                <span class="text-slate-500 dark:text-slate-400">Sonraki: <strong class="${urgent ? 'text-red-600 dark:text-red-400' : 'text-slate-700 dark:text-slate-200'}">${loan.isEarlyClosed ? '-' : fmtDate(nd)}</strong></span>
-                <span class="text-indigo-600 dark:text-indigo-400 font-bold">Ödenen: ${paid}/${total}</span>
+
+            <!-- İlerleme Çubuğu -->
+            <div class="mb-3">
+                <div class="flex justify-between text-[10px] text-slate-400 mb-1">
+                    <span>${paid}/${total} taksit ödendi</span>
+                    <span>${progress}%</span>
+                </div>
+                <div class="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-1.5">
+                    <div class="h-1.5 rounded-full ${loan.isEarlyClosed ? 'bg-emerald-500' : progress > 75 ? 'bg-emerald-500' : progress > 40 ? 'bg-blue-500' : 'bg-indigo-500'}" style="width:${progress}%"></div>
+                </div>
             </div>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3">
+
+            <div class="flex justify-between items-center text-xs bg-slate-50 dark:bg-slate-700/30 px-3 py-2 rounded-lg border border-slate-100 dark:border-slate-600/50 mb-3">
+                <span class="text-slate-500 dark:text-slate-400">Sonraki: <strong class="${urgent ? 'text-red-600 dark:text-red-400' : 'text-slate-700 dark:text-slate-200'}">${loan.isEarlyClosed ? '-' : fmtDateShort(nd)}</strong></span>
+                <span class="text-slate-500 dark:text-slate-400">Bitiş: <strong class="text-slate-700 dark:text-slate-200">${(() => { const d = new Date(loan.loanDate || new Date()); d.setMonth(d.getMonth() + total); return fmtDateShort(d); })()}</strong></span>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-2 mb-3">
                 <div class="bg-white dark:bg-slate-800/50 p-2 rounded-lg border border-slate-100 dark:border-slate-700/50">
                     <div class="text-[10px] text-slate-400 uppercase mb-0.5">Çekilen</div>
                     <div class="font-bold text-slate-700 dark:text-slate-200 text-sm">${fmt(loanAmt)}</div>
@@ -1128,6 +1587,10 @@ const render = () => {
                     <div class="font-bold text-red-500 dark:text-red-400 text-sm">${fmt(remP)}</div>
                 </div>
                 <div class="bg-white dark:bg-slate-800/50 p-2 rounded-lg border border-slate-100 dark:border-slate-700/50">
+                    <div class="text-[10px] text-slate-400 uppercase mb-0.5">Faiz Maliyeti</div>
+                    <div class="font-bold text-orange-500 dark:text-orange-400 text-sm">${fmt(totalInt)}</div>
+                </div>
+                <div class="bg-white dark:bg-slate-800/50 p-2 rounded-lg border border-slate-100 dark:border-slate-700/50">
                     <div class="text-[10px] text-slate-400 uppercase mb-0.5">Erken Kapama (₺)</div>
                     <div class="flex items-center gap-1">
                         <input type="number" step="0.01" value="${ec || ''}" placeholder="0.00" ${loan.isEarlyClosed ? 'disabled' : ''} onchange="updateEarlyClose(${oi}, this.value)" class="w-full text-xs bg-transparent border-b border-slate-300 dark:border-slate-600 focus:border-indigo-500 outline-none font-bold text-slate-700 dark:text-white disabled:opacity-50 py-0.5">
@@ -1135,26 +1598,350 @@ const render = () => {
                     </div>
                 </div>
             </div>
+
             <div class="flex flex-wrap gap-2 pt-3 border-t border-slate-100 dark:border-slate-700/50">
                 ${!loan.isEarlyClosed ? `
                     <button onclick="undoInstallment(${oi})" class="w-8 h-8 bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 rounded-lg flex items-center justify-center transition-colors" title="Geri Al"><i class="fa-solid fa-rotate-left text-xs"></i></button>
                     <button onclick="payInstallment(${oi})" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-3 py-2 rounded-lg flex items-center gap-1.5 transition-colors shadow-sm shadow-indigo-600/20"><i class="fa-solid fa-check"></i> Taksit Öde</button>
                     <button onclick="openEditModal(${oi})" class="bg-amber-400 hover:bg-amber-500 text-white text-xs px-3 py-2 rounded-lg flex items-center gap-1.5 transition-colors"><i class="fa-solid fa-pen"></i> Düzenle</button>
-                ` : `<div class="text-xs text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-900/20 px-3 py-1.5 rounded-lg border border-emerald-100 dark:border-emerald-800"><i class="fa-solid fa-check-double"></i> Borç kapatıldı</div>`}
+                ` : `<div class="text-xs text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-900/20 px-3 py-1.5 rounded-lg border border-emerald-100 dark:border-emerald-800"><i class="fa-solid fa-check-double"></i> Borç kapatıldı ${loan.closedAt ? '• ' + fmtDateShort(loan.closedAt) : ''}</div>`}
                 <button onclick="openDetailModal(${oi})" class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-3 py-2 rounded-lg flex items-center gap-1.5 transition-colors"><i class="fa-solid fa-list-ul"></i> Detay</button>
-                <button onclick="deleteLoan(${oi})" class="bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 text-xs px-3 py-2 rounded-lg flex items-center gap-1.5 ml-auto border border-red-200 dark:border-red-800/50 transition-colors"><i class="fa-solid fa-trash"></i> Sil</button>
+                <button onclick="deleteLoan(${oi})" class="bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 text-xs px-3 py-2 rounded-lg flex items-center gap-1.5 ml-auto border border-red-200 dark:border-red-800/50 transition-colors"><i class="fa-solid fa-trash"></i></button>
             </div>
         `;
         list.appendChild(item);
     });
+
     document.getElementById('totalMonthlyPayment').textContent = fmt(totM);
     document.getElementById('totalRemainingDebt').textContent = fmt(totD);
+    document.getElementById('totalInterestCost').textContent = fmt(totInt);
     document.getElementById('totalProfit').textContent = fmt(totP);
     document.getElementById('loanCount').textContent = `${filtered.length} Adet`;
 };
 
 document.getElementById('filterBankName')?.addEventListener('input', render);
 document.getElementById('filterCategory')?.addEventListener('change', render);
+document.getElementById('filterStatus')?.addEventListener('change', render);
+
+// ================================================================
+// CHARTS - GRAFİKLER
+// ================================================================
+const isDark = () => document.documentElement.classList.contains('dark');
+const chartColors = {
+    'İhtiyaç': '#6366f1', 'Taşıt': '#f59e0b', 'Konut': '#10b981',
+    'Kredi Kartı': '#ef4444', 'Diğer': '#94a3b8'
+};
+
+const destroyChart = (key) => {
+    if (chartInstances[key]) { chartInstances[key].destroy(); delete chartInstances[key]; }
+};
+
+const renderCharts = () => {
+    if (!loans.length) {
+        ['debtPieChart','monthlyBarChart','debtProjectionChart'].forEach(id => {
+            const ctx = document.getElementById(id);
+            if (ctx) {
+                const key = id;
+                destroyChart(key);
+                ctx.parentElement.innerHTML = `<div class="flex items-center justify-center h-full text-slate-400 dark:text-slate-500 text-sm"><i class="fa-solid fa-chart-pie mr-2 opacity-50"></i>Kredi eklendikten sonra grafik görünür</div>`;
+            }
+        });
+        return;
+    }
+    renderDebtPieChart();
+    renderMonthlyBarChart();
+    renderDebtProjectionChart();
+    renderInterestBreakdown();
+};
+
+const renderDebtPieChart = () => {
+    const canvas = document.getElementById('debtPieChart');
+    if (!canvas) return;
+    destroyChart('pie');
+    const active = loans.filter(l => !l.isEarlyClosed);
+    const groups = {};
+    active.forEach(l => {
+        const cat = l.category || 'Diğer';
+        groups[cat] = (groups[cat] || 0) + calcRemainingPrincipal(l);
+    });
+    if (!Object.keys(groups).length) return;
+    const dark = isDark();
+    chartInstances['pie'] = new Chart(canvas, {
+        type: 'doughnut',
+        data: {
+            labels: Object.keys(groups),
+            datasets: [{
+                data: Object.values(groups),
+                backgroundColor: Object.keys(groups).map(k => chartColors[k] || '#94a3b8'),
+                borderWidth: 2,
+                borderColor: dark ? '#1e293b' : '#ffffff',
+                hoverOffset: 8
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom', labels: { color: dark ? '#94a3b8' : '#64748b', font: { size: 11, family: 'Inter' }, padding: 12 } },
+                tooltip: { callbacks: { label: (ctx) => ` ${ctx.label}: ${fmt(ctx.raw)}` } }
+            },
+            cutout: '60%'
+        }
+    });
+};
+
+const renderMonthlyBarChart = () => {
+    const canvas = document.getElementById('monthlyBarChart');
+    if (!canvas) return;
+    destroyChart('bar');
+    const active = loans.filter(l => !l.isEarlyClosed);
+    if (!active.length) return;
+    const dark = isDark();
+    const labels = active.map(l => l.bankName.length > 12 ? l.bankName.substring(0,12)+'…' : l.bankName);
+    const data = active.map(l => parseFloat(l.monthlyPayment) || 0);
+    const colors = active.map(l => chartColors[l.category] || '#94a3b8');
+    chartInstances['bar'] = new Chart(canvas, {
+        type: 'bar',
+        data: {
+            labels,
+            datasets: [{
+                label: 'Aylık Taksit',
+                data,
+                backgroundColor: colors.map(c => c + 'cc'),
+                borderColor: colors,
+                borderWidth: 1,
+                borderRadius: 6,
+                borderSkipped: false
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: { callbacks: { label: (ctx) => ` ${fmt(ctx.raw)}` } }
+            },
+            scales: {
+                x: { ticks: { color: dark ? '#94a3b8' : '#64748b', font: { size: 10, family: 'Inter' } }, grid: { display: false } },
+                y: { ticks: { color: dark ? '#94a3b8' : '#64748b', callback: v => fmt(v), font: { size: 10 } }, grid: { color: dark ? '#1e293b' : '#f1f5f9' } }
+            }
+        }
+    });
+};
+
+const renderDebtProjectionChart = () => {
+    const canvas = document.getElementById('debtProjectionChart');
+    if (!canvas) return;
+    destroyChart('proj');
+    const active = loans.filter(l => !l.isEarlyClosed);
+    if (!active.length) return;
+    const dark = isDark();
+    const months = 24;
+    const labels = [];
+    const totalData = [];
+    const dataByLoan = active.map(() => []);
+
+    for (let m = 0; m <= months; m++) {
+        const date = new Date();
+        date.setMonth(date.getMonth() + m);
+        labels.push(`${date.getMonth()+1}/${date.getFullYear()}`);
+        let total = 0;
+        active.forEach((loan, li) => {
+            const rem = Math.max(0, (loan.remainingInstallments || 0) - m);
+            const loanTotal = Math.max(1, loan.totalInstallments);
+            const loanAmt = parseFloat(loan.loanAmount) || 0;
+            let val;
+            if ((loan.interestRate || 0) > 0) {
+                const rate = loan.interestRate / 100;
+                const monthly = parseFloat(loan.monthlyPayment) || 0;
+                let balance = loanAmt;
+                const paidCount = loanTotal - loan.remainingInstallments + m;
+                for (let i = 0; i < Math.min(paidCount, loanTotal); i++) {
+                    const interest = balance * rate;
+                    const principal = monthly - interest;
+                    balance = Math.max(0, balance - principal);
+                }
+                val = balance;
+            } else {
+                val = (rem / loanTotal) * loanAmt;
+            }
+            dataByLoan[li].push(val);
+            total += val;
+        });
+        totalData.push(total);
+    }
+
+    const datasets = [
+        {
+            label: 'Toplam Borç',
+            data: totalData,
+            borderColor: '#6366f1',
+            backgroundColor: 'rgba(99,102,241,0.1)',
+            fill: true,
+            tension: 0.4,
+            borderWidth: 2.5,
+            pointRadius: 3,
+            pointHoverRadius: 6,
+        },
+        ...active.map((loan, li) => ({
+            label: loan.bankName,
+            data: dataByLoan[li],
+            borderColor: chartColors[loan.category] || '#94a3b8',
+            borderDash: [4, 4],
+            fill: false,
+            tension: 0.4,
+            borderWidth: 1.5,
+            pointRadius: 2,
+        }))
+    ];
+
+    chartInstances['proj'] = new Chart(canvas, {
+        type: 'line',
+        data: { labels, datasets },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+                legend: { position: 'bottom', labels: { color: dark ? '#94a3b8' : '#64748b', font: { size: 10, family: 'Inter' }, padding: 10, boxWidth: 16 } },
+                tooltip: { callbacks: { label: (ctx) => ` ${ctx.dataset.label}: ${fmt(ctx.raw)}` } }
+            },
+            scales: {
+                x: { ticks: { color: dark ? '#94a3b8' : '#64748b', font: { size: 9 }, maxTicksLimit: 8 }, grid: { color: dark ? '#1e293b' : '#f1f5f9' } },
+                y: { ticks: { color: dark ? '#94a3b8' : '#64748b', callback: v => fmt(v), font: { size: 9 } }, grid: { color: dark ? '#1e293b' : '#f1f5f9' } }
+            }
+        }
+    });
+};
+
+const renderInterestBreakdown = () => {
+    const container = document.getElementById('interestBreakdown');
+    if (!container) return;
+    const active = loans.filter(l => !l.isEarlyClosed);
+    if (!active.length) { container.innerHTML = '<p class="text-sm text-slate-400 text-center py-4">Aktif kredi bulunmuyor.</p>'; return; }
+    container.innerHTML = active.map(loan => {
+        const loanAmt = parseFloat(loan.loanAmount) || 0;
+        const totalInt = calcTotalInterest(loan);
+        const total = loanAmt + totalInt;
+        const pct = total > 0 ? Math.round((loanAmt / total) * 100) : 100;
+        const intPct = 100 - pct;
+        return `
+        <div class="space-y-1">
+            <div class="flex justify-between text-xs font-medium">
+                <span class="text-slate-700 dark:text-slate-200">${loan.bankName}</span>
+                <span class="text-orange-500 dark:text-orange-400">Faiz: ${fmt(totalInt)} (${intPct}%)</span>
+            </div>
+            <div class="flex rounded-full overflow-hidden h-4">
+                <div class="bg-indigo-500 dark:bg-indigo-600 flex items-center justify-center" style="width:${pct}%">
+                    <span class="text-[9px] text-white font-bold hidden sm:block">Anapara ${pct}%</span>
+                </div>
+                <div class="bg-orange-400 dark:bg-orange-500 flex items-center justify-center" style="width:${intPct}%">
+                    ${intPct > 10 ? `<span class="text-[9px] text-white font-bold">Faiz ${intPct}%</span>` : ''}
+                </div>
+            </div>
+            <div class="flex justify-between text-[10px] text-slate-400">
+                <span>Anapara: ${fmt(loanAmt)}</span>
+                <span>Toplam: ${fmt(total)}</span>
+            </div>
+        </div>`;
+    }).join('<div class="border-t border-slate-100 dark:border-slate-700 my-3"></div>');
+};
+
+// ================================================================
+// SIMULATOR - YENİ
+// ================================================================
+window.runSimulator = () => {
+    const extra = parseFloat(document.getElementById('simExtraPayment')?.value) || 0;
+    const container = document.getElementById('simResults');
+    if (!container) return;
+    const active = loans.filter(l => !l.isEarlyClosed && l.remainingInstallments > 0);
+    if (!active.length) { container.innerHTML = '<p class="text-xs text-slate-400 dark:text-slate-500 text-center py-4">Aktif kredi bulunmuyor.</p>'; return; }
+    if (!extra || extra <= 0) { container.innerHTML = '<p class="text-xs text-slate-400 dark:text-slate-500 text-center py-4">Ekstra ödeme miktarı girin.</p>'; return; }
+
+    const perLoan = extra / active.length;
+    container.innerHTML = active.map(loan => {
+        const rem = loan.remainingInstallments || 0;
+        const monthly = parseFloat(loan.monthlyPayment) || 0;
+        const loanAmt = parseFloat(loan.loanAmount) || 0;
+        const rate = (parseFloat(loan.interestRate) || 0) / 100;
+        const newMonthly = monthly + perLoan;
+
+        // Orijinal bitmesi
+        const origEnd = new Date();
+        origEnd.setMonth(origEnd.getMonth() + rem);
+
+        // Yeni hesap
+        let newMonths = rem;
+        if (rate > 0 && loanAmt > 0) {
+            let balance = calcRemainingPrincipal(loan);
+            newMonths = 0;
+            while (balance > 0.01 && newMonths < 600) {
+                const interest = balance * rate;
+                const principal = newMonthly - interest;
+                if (principal <= 0) { newMonths = rem; break; }
+                balance = Math.max(0, balance - principal);
+                newMonths++;
+            }
+        } else {
+            // Faiz yoksa lineer hesap
+            const origPerMonth = monthly;
+            if (newMonthly > 0 && rem > 0) {
+                const totalRem = rem * origPerMonth;
+                newMonths = Math.max(1, Math.ceil(totalRem / newMonthly));
+            }
+        }
+
+        const savedMonths = Math.max(0, rem - newMonths);
+        const savedAmount = savedMonths * monthly;
+        const newEnd = new Date();
+        newEnd.setMonth(newEnd.getMonth() + newMonths);
+
+        return `
+        <div class="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-700">
+            <div class="flex items-center justify-between mb-3">
+                <div>
+                    <div class="font-bold text-slate-700 dark:text-slate-200 text-sm">${loan.bankName}</div>
+                    <div class="text-[10px] text-slate-400">${loan.category}</div>
+                </div>
+                ${savedMonths > 0 ? `<span class="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 text-xs font-bold px-2 py-1 rounded-lg">-${savedMonths} ay erken</span>` : '<span class="bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 text-xs px-2 py-1 rounded-lg">Değişim yok</span>'}
+            </div>
+            <div class="grid grid-cols-2 gap-3 text-xs">
+                <div class="bg-white dark:bg-slate-800 p-2 rounded-lg border border-slate-100 dark:border-slate-700">
+                    <div class="text-[10px] text-slate-400 mb-0.5">Mevcut Durum</div>
+                    <div class="font-bold text-slate-700 dark:text-slate-200">${rem} ay kaldı</div>
+                    <div class="text-slate-400">${fmtDateShort(origEnd)}'de biter</div>
+                </div>
+                <div class="bg-emerald-50 dark:bg-emerald-900/20 p-2 rounded-lg border border-emerald-100 dark:border-emerald-800">
+                    <div class="text-[10px] text-emerald-600 dark:text-emerald-400 mb-0.5">+${fmt(perLoan)} ekstrayla</div>
+                    <div class="font-bold text-emerald-700 dark:text-emerald-300">${newMonths} ay kaldı</div>
+                    <div class="text-emerald-600 dark:text-emerald-400">${fmtDateShort(newEnd)}'de biter</div>
+                </div>
+            </div>
+            ${savedMonths > 0 ? `<div class="mt-2 p-2 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-100 dark:border-purple-800 flex items-center justify-between">
+                <span class="text-xs text-purple-600 dark:text-purple-400 font-medium"><i class="fa-solid fa-coins mr-1"></i>Tahmini Tasarruf</span>
+                <span class="text-xs font-bold text-purple-700 dark:text-purple-300">${fmt(savedAmount)}</span>
+            </div>` : ''}
+        </div>`;
+    }).join('');
+
+    // Toplam özet
+    const totalSaved = active.reduce((s, loan) => {
+        const rem = loan.remainingInstallments || 0;
+        const monthly = parseFloat(loan.monthlyPayment) || 0;
+        const newMonthly = monthly + extra / active.length;
+        const newMonths = Math.max(1, Math.ceil((rem * monthly) / newMonthly));
+        return s + Math.max(0, rem - newMonths) * monthly;
+    }, 0);
+    if (totalSaved > 0) {
+        container.innerHTML += `
+        <div class="p-4 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-xl border border-purple-200 dark:border-purple-800">
+            <div class="flex items-center justify-between">
+                <div>
+                    <div class="text-xs font-bold text-purple-700 dark:text-purple-300">Toplam Tahmini Tasarruf</div>
+                    <div class="text-[10px] text-purple-500 dark:text-purple-400">Aylık ${fmt(extra)} ekstra ödemeyle</div>
+                </div>
+                <div class="text-2xl font-black text-purple-600 dark:text-purple-400">${fmt(totalSaved)}</div>
+            </div>
+        </div>`;
+    }
+};
 
 // ================================================================
 // BUDGET
@@ -1163,42 +1950,56 @@ const renderBudgetLists = () => {
     const il = document.getElementById('incomeList');
     if (il) {
         il.innerHTML = '';
-        if (!incomes.length) { il.innerHTML = '<p class="text-xs text-slate-400 dark:text-slate-500">Kayıtlı gelir yok.</p>'; }
+        if (!incomes.length) { il.innerHTML = '<p class="text-xs text-slate-400 dark:text-slate-500 py-2">Kayıtlı gelir yok.</p>'; }
         incomes.forEach((it, i) => {
             const d = document.createElement('div');
-            d.className = 'flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-700/30 rounded-lg border border-slate-100 dark:border-slate-700 text-xs';
-            d.innerHTML = `<div><div class="font-bold text-slate-700 dark:text-slate-200">${it.name || 'Gelir'}</div><div class="text-slate-500 dark:text-slate-400"><span class="font-bold text-emerald-600 dark:text-emerald-400">+${fmt(it.amount)}</span> • Ayın ${it.day}. günü</div></div><button data-i="${i}" class="del-income text-red-500 px-2 py-1 rounded bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800">Sil</button>`;
+            d.className = 'flex items-center justify-between p-2.5 bg-emerald-50/60 dark:bg-emerald-900/10 rounded-xl border border-emerald-100 dark:border-emerald-800 text-xs';
+            d.innerHTML = `<div><div class="font-bold text-slate-700 dark:text-slate-200">${it.name || 'Gelir'}</div><div class="text-slate-500 dark:text-slate-400"><span class="font-bold text-emerald-600 dark:text-emerald-400">+${fmt(it.amount)}</span> • Ayın ${it.day}. günü</div></div><button data-i="${i}" class="del-income text-red-500 w-7 h-7 rounded-lg bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 flex items-center justify-center hover:bg-red-100 transition-colors"><i class="fa-solid fa-xmark text-xs"></i></button>`;
             il.appendChild(d);
         });
-        il.querySelectorAll('.del-income').forEach(b => b.addEventListener('click', async e => { incomes.splice(+e.currentTarget.dataset.i, 1); await saveState(); renderBudgetLists(); generateBudgetPlan(); }));
+        il.querySelectorAll('.del-income').forEach(b => b.addEventListener('click', async e => {
+            incomes.splice(+e.currentTarget.dataset.i, 1);
+            await saveState();
+            renderBudgetLists();
+            generateBudgetPlan();
+        }));
     }
+
     const ll = document.getElementById('loanExpenseList');
     if (ll) {
         ll.innerHTML = '';
         const now = new Date();
         const items = loans.filter(l => !l.isEarlyClosed && l.remainingInstallments > 0).map(l => {
             const nd = nextPayDate(l.loanDate, l.totalInstallments, l.remainingInstallments);
-            return nd.getFullYear() === now.getFullYear() && nd.getMonth() === now.getMonth() ? { name: l.bankName, day: nd.getDate(), amount: parseFloat(l.monthlyPayment) || 0 } : null;
+            return nd.getFullYear() === now.getFullYear() && nd.getMonth() === now.getMonth()
+                ? { name: l.bankName, day: nd.getDate(), amount: parseFloat(l.monthlyPayment) || 0 }
+                : null;
         }).filter(Boolean).sort((a, b) => a.day - b.day);
-        if (!items.length) { ll.innerHTML = '<p class="text-xs text-slate-400 dark:text-slate-500">Bu ay için taksit yok.</p>'; }
+        if (!items.length) { ll.innerHTML = '<p class="text-xs text-slate-400 dark:text-slate-500 py-2">Bu ay için taksit yok.</p>'; }
         items.forEach(it => {
             const d = document.createElement('div');
-            d.className = 'flex items-center justify-between p-2 bg-red-50/60 dark:bg-red-900/20 rounded-lg border border-red-100 dark:border-red-800 text-xs';
-            d.innerHTML = `<div><div class="font-bold text-slate-700 dark:text-slate-200">${it.name}</div><div class="text-slate-500 dark:text-slate-400">Ayın ${it.day}. günü • <span class="font-bold text-red-600 dark:text-red-400">-${fmt(it.amount)}</span></div></div>`;
+            d.className = 'flex items-center justify-between p-2.5 bg-red-50/60 dark:bg-red-900/10 rounded-xl border border-red-100 dark:border-red-800 text-xs';
+            d.innerHTML = `<div><div class="font-bold text-slate-700 dark:text-slate-200">${it.name}</div><div class="text-slate-500 dark:text-slate-400">Ayın ${it.day}. günü • <span class="font-bold text-red-600 dark:text-red-400">-${fmt(it.amount)}</span></div></div><i class="fa-solid fa-credit-card text-red-400 dark:text-red-500 text-xs"></i>`;
             ll.appendChild(d);
         });
     }
+
     const el = document.getElementById('expenseList');
     if (el) {
         el.innerHTML = '';
-        if (!otherExpenses.length) { el.innerHTML = '<p class="text-xs text-slate-400 dark:text-slate-500">Kayıtlı gider yok.</p>'; }
+        if (!otherExpenses.length) { el.innerHTML = '<p class="text-xs text-slate-400 dark:text-slate-500 py-2">Kayıtlı gider yok.</p>'; }
         otherExpenses.forEach((it, i) => {
             const d = document.createElement('div');
-            d.className = 'flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-700/30 rounded-lg border border-slate-100 dark:border-slate-700 text-xs';
-            d.innerHTML = `<div><div class="font-bold text-slate-700 dark:text-slate-200">${it.name || 'Gider'}</div><div class="text-slate-500 dark:text-slate-400"><span class="font-bold text-red-600 dark:text-red-400">-${fmt(it.amount)}</span> • Ayın ${it.day}. günü</div></div><button data-i="${i}" class="del-expense text-red-500 px-2 py-1 rounded bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800">Sil</button>`;
+            d.className = 'flex items-center justify-between p-2.5 bg-red-50/60 dark:bg-red-900/10 rounded-xl border border-red-100 dark:border-red-800 text-xs';
+            d.innerHTML = `<div><div class="font-bold text-slate-700 dark:text-slate-200">${it.name || 'Gider'}</div><div class="text-slate-500 dark:text-slate-400"><span class="font-bold text-red-600 dark:text-red-400">-${fmt(it.amount)}</span> • Ayın ${it.day}. günü</div></div><button data-i="${i}" class="del-expense text-red-500 w-7 h-7 rounded-lg bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 flex items-center justify-center hover:bg-red-100 transition-colors"><i class="fa-solid fa-xmark text-xs"></i></button>`;
             el.appendChild(d);
         });
-        el.querySelectorAll('.del-expense').forEach(b => b.addEventListener('click', async e => { otherExpenses.splice(+e.currentTarget.dataset.i, 1); await saveState(); renderBudgetLists(); generateBudgetPlan(); }));
+        el.querySelectorAll('.del-expense').forEach(b => b.addEventListener('click', async e => {
+            otherExpenses.splice(+e.currentTarget.dataset.i, 1);
+            await saveState();
+            renderBudgetLists();
+            generateBudgetPlan();
+        }));
     }
 };
 
@@ -1212,13 +2013,30 @@ const generateBudgetPlan = () => {
     const incB = Array(dim + 2).fill(0), expB = Array(dim + 2).fill(0);
     const incI = Array.from({ length: dim + 2 }, () => []);
     const expI = Array.from({ length: dim + 2 }, () => []);
-    incomes.forEach(it => { const d = Math.min(Math.max(1, +it.day || 1), dim); const a = parseFloat(it.amount) || 0; incB[d] += a; incI[d].push({ label: it.name || 'Gelir', amount: a }); });
-    otherExpenses.forEach(it => { const d = Math.min(Math.max(1, +it.day || 1), dim); const a = parseFloat(it.amount) || 0; expB[d] += a; expI[d].push({ label: it.name || 'Gider', amount: a }); });
+
+    incomes.forEach(it => {
+        const d = Math.min(Math.max(1, +it.day || 1), dim);
+        const a = parseFloat(it.amount) || 0;
+        incB[d] += a;
+        incI[d].push({ label: it.name || 'Gelir', amount: a });
+    });
+    otherExpenses.forEach(it => {
+        const d = Math.min(Math.max(1, +it.day || 1), dim);
+        const a = parseFloat(it.amount) || 0;
+        expB[d] += a;
+        expI[d].push({ label: it.name || 'Gider', amount: a });
+    });
     loans.forEach(loan => {
         if (loan.isEarlyClosed || loan.remainingInstallments <= 0) return;
         const nd = nextPayDate(loan.loanDate, loan.totalInstallments, loan.remainingInstallments);
-        if (nd.getFullYear() === y && nd.getMonth() === m) { const d = nd.getDate(); const a = parseFloat(loan.monthlyPayment) || 0; expB[d] += a; expI[d].push({ label: `Kredi: ${loan.bankName}`, amount: a }); }
+        if (nd.getFullYear() === y && nd.getMonth() === m) {
+            const d = nd.getDate();
+            const a = parseFloat(loan.monthlyPayment) || 0;
+            expB[d] += a;
+            expI[d].push({ label: `💳 ${loan.bankName}`, amount: a });
+        }
     });
+
     const totInc = incB.reduce((a, b) => a + b, 0);
     const totExp = expB.reduce((a, b) => a + b, 0);
     const rem = totInc - totExp;
@@ -1226,6 +2044,7 @@ const generateBudgetPlan = () => {
     document.getElementById('planTotalExpense').textContent = fmt(totExp);
     const rb = document.getElementById('planRemainingBudget');
     if (rb) { rb.textContent = fmt(rem); rb.className = `text-sm font-bold ${rem >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`; }
+
     let balance = 0, hasAny = false;
     for (let d = 1; d <= dim; d++) {
         if (!incB[d] && !expB[d]) continue;
@@ -1237,13 +2056,22 @@ const generateBudgetPlan = () => {
         box.innerHTML = `
             <div class="flex items-center justify-between mb-2">
                 <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 rounded-lg flex items-center justify-center ${risky ? 'bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-300' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'}"><i class="fa-solid ${risky ? 'fa-triangle-exclamation' : 'fa-calendar-day'} text-xs"></i></div>
+                    <div class="w-8 h-8 rounded-lg flex items-center justify-center ${risky ? 'bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-300' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'}">
+                        <i class="fa-solid ${risky ? 'fa-triangle-exclamation' : 'fa-calendar-day'} text-xs"></i>
+                    </div>
                     <div>
                         <div class="text-xs font-bold text-slate-700 dark:text-slate-200">${d}.${m + 1}.${y}</div>
-                        <div class="text-[11px] text-slate-500 dark:text-slate-400"><span class="text-emerald-600 dark:text-emerald-400 font-bold">+${fmt(incB[d])}</span> <span class="mx-1">•</span> <span class="text-red-600 dark:text-red-400 font-bold">-${fmt(expB[d])}</span></div>
+                        <div class="text-[11px] text-slate-500 dark:text-slate-400">
+                            ${incB[d] > 0 ? `<span class="text-emerald-600 dark:text-emerald-400 font-bold">+${fmt(incB[d])}</span>` : ''}
+                            ${incB[d] > 0 && expB[d] > 0 ? '<span class="mx-1">•</span>' : ''}
+                            ${expB[d] > 0 ? `<span class="text-red-600 dark:text-red-400 font-bold">-${fmt(expB[d])}</span>` : ''}
+                        </div>
                     </div>
                 </div>
-                <div class="text-right"><div class="text-[10px] text-slate-400 dark:text-slate-500">Bakiye</div><div class="font-bold text-sm ${risky ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}">${fmt(balance)}</div></div>
+                <div class="text-right">
+                    <div class="text-[10px] text-slate-400 dark:text-slate-500">Bakiye</div>
+                    <div class="font-bold text-sm ${risky ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}">${fmt(balance)}</div>
+                </div>
             </div>
             <div class="flex flex-wrap gap-1">
                 ${incI[d].map(it => `<span class="text-[11px] px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">${it.label} +${fmt(it.amount)}</span>`).join('')}
@@ -1251,7 +2079,7 @@ const generateBudgetPlan = () => {
             </div>`;
         container.appendChild(box);
     }
-    if (!hasAny) container.innerHTML = '<p class="text-sm text-slate-400 dark:text-slate-500 text-center py-8">Bu ay için gelir veya gider bulunmuyor.</p>';
+    if (!hasAny) container.innerHTML = '<p class="text-sm text-slate-400 dark:text-slate-500 text-center py-8">Bu ay için gelir veya gider bulunmuyor.<br><span class="text-xs">Sol panelden ekleyebilirsiniz.</span></p>';
 };
 
 const updateBudgetUI = () => { renderBudgetLists(); generateBudgetPlan(); };
@@ -1263,8 +2091,12 @@ document.getElementById('incomeForm')?.addEventListener('submit', async (e) => {
     const day = parseInt(document.getElementById('incomeDay').value);
     if (!amount || isNaN(day) || day < 1 || day > 31) { showConfirm('Hata', 'Geçerli tutar ve gün (1-31) giriniz.', () => {}, 'danger'); return; }
     incomes.push({ name: name || 'Gelir', amount, day });
-    await saveState(); e.target.reset(); renderBudgetLists(); generateBudgetPlan();
+    await saveState();
+    e.target.reset();
+    renderBudgetLists();
+    generateBudgetPlan();
 });
+
 document.getElementById('expenseForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const name = document.getElementById('expenseName').value.trim();
@@ -1272,60 +2104,92 @@ document.getElementById('expenseForm')?.addEventListener('submit', async (e) => 
     const day = parseInt(document.getElementById('expenseDay').value);
     if (!amount || isNaN(day) || day < 1 || day > 31) { showConfirm('Hata', 'Geçerli tutar ve gün (1-31) giriniz.', () => {}, 'danger'); return; }
     otherExpenses.push({ name: name || 'Gider', amount, day });
-    await saveState(); e.target.reset(); renderBudgetLists(); generateBudgetPlan();
+    await saveState();
+    e.target.reset();
+    renderBudgetLists();
+    generateBudgetPlan();
 });
+
 document.getElementById('btnGeneratePlan')?.addEventListener('click', generateBudgetPlan);
 
 // ================================================================
 // RECOMMENDATIONS
 // ================================================================
 const getBudget = () => { const v = parseFloat(document.getElementById('budgetInput')?.value); return isFinite(v) ? v : 0; };
+
 const calculateSmartRecommendations = () => {
     const budget = getBudget();
     const resEl = document.getElementById('recommendationResults');
-    const noRecEl = document.getElementById('noRecommendation');
-    const noBudgetEl = document.getElementById('noBudget');
-    hideEl('noRecommendation'); hideEl('noBudget');
-    if (resEl) { resEl.classList.add('hidden'); resEl.style.display = ''; }
+    hideEl('noRecommendation');
+    hideEl('noBudget');
+    if (resEl) resEl.classList.add('hidden');
+
     if (budget <= 0) { showEl('noBudget'); return; }
+
     const active = loans.filter(l => !l.isEarlyClosed).map(loan => {
         const total = Math.max(1, loan.totalInstallments);
         const rem = loan.remainingInstallments || 0;
         const monthly = parseFloat(loan.monthlyPayment) || 0;
-        const loanAmt = parseFloat(loan.loanAmount) || 0;
         const ec = parseFloat(loan.earlyCloseAmount) || 0;
-        const remP = (rem / total) * loanAmt;
+        const remP = calcRemainingPrincipal(loan);
         const cost = ec > 0 ? ec : remP;
         const profit = (rem * monthly) - cost;
         return { ...loan, cost, profit, relief: monthly, oi: loans.indexOf(loan) };
     });
+
+    // Kâr senaryosu
     const ps = [...active].sort((a, b) => b.profit - a.profit);
     const pp = { sel: [], cost: 0, profit: 0 };
     let r1 = budget;
-    ps.forEach(l => { if (l.cost > 0 && l.cost <= r1 && l.profit > 0) { pp.sel.push(l); pp.cost += l.cost; pp.profit += l.profit; r1 -= l.cost; } });
+    ps.forEach(l => {
+        if (l.cost > 0 && l.cost <= r1 && l.profit > 0) {
+            pp.sel.push(l); pp.cost += l.cost; pp.profit += l.profit; r1 -= l.cost;
+        }
+    });
+
+    // Aylık rahatlama senaryosu
     const rs = [...active].sort((a, b) => (b.cost > 0 ? b.relief / b.cost : 0) - (a.cost > 0 ? a.relief / a.cost : 0));
     const rp = { sel: [], cost: 0, relief: 0 };
     let r2 = budget;
-    rs.forEach(l => { if (l.cost > 0 && l.cost <= r2) { rp.sel.push(l); rp.cost += l.cost; rp.relief += l.relief; r2 -= l.cost; } });
+    rs.forEach(l => {
+        if (l.cost > 0 && l.cost <= r2) {
+            rp.sel.push(l); rp.cost += l.cost; rp.relief += l.relief; r2 -= l.cost;
+        }
+    });
+
     const renderList = (plan, listId, type) => {
         const c = document.getElementById(listId); if (!c) return;
         c.innerHTML = '';
-        if (!plan.sel.length) { c.innerHTML = '<li class="text-xs text-slate-400 dark:text-slate-500 italic">Uygun kredi yok.</li>'; return; }
+        if (!plan.sel.length) { c.innerHTML = '<li class="text-xs text-slate-400 dark:text-slate-500 italic p-2">Uygun kredi bulunamadı.</li>'; return; }
         plan.sel.forEach(loan => {
             const li = document.createElement('li');
             li.className = 'bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-100 dark:border-slate-700 flex items-center justify-between gap-2';
-            li.innerHTML = `<div class="flex-1 min-w-0"><div class="font-bold text-slate-700 dark:text-slate-200 text-sm truncate">${loan.bankName}</div><div class="text-[10px] text-slate-400 dark:text-slate-500">Maliyet: ${fmt(loan.cost)}</div></div><div class="flex items-center gap-2 shrink-0"><span class="font-bold text-xs ${type === 'profit' ? 'text-emerald-600 dark:text-emerald-400' : 'text-blue-600 dark:text-blue-400'}">${type === 'profit' ? `+${fmt(loan.profit)}` : `-${fmt(loan.relief)}/Ay`}</span><button onclick="earlyCloseLoan(${loan.oi})" class="bg-red-500 hover:bg-red-600 text-white w-7 h-7 flex items-center justify-center rounded-lg transition-colors" title="Erken Kapat"><i class="fa-solid fa-power-off text-xs"></i></button></div>`;
+            li.innerHTML = `
+                <div class="flex-1 min-w-0">
+                    <div class="font-bold text-slate-700 dark:text-slate-200 text-sm truncate">${loan.bankName}</div>
+                    <div class="text-[10px] text-slate-400 dark:text-slate-500">${loan.category} • Maliyet: ${fmt(loan.cost)}</div>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                    <span class="font-bold text-xs ${type === 'profit' ? 'text-emerald-600 dark:text-emerald-400' : 'text-blue-600 dark:text-blue-400'}">
+                        ${type === 'profit' ? `+${fmt(loan.profit)} kâr` : `-${fmt(loan.relief)}/Ay`}
+                    </span>
+                    <button onclick="earlyCloseLoan(${loan.oi})" class="bg-red-500 hover:bg-red-600 text-white w-8 h-8 flex items-center justify-center rounded-lg transition-colors" title="Erken Kapat">
+                        <i class="fa-solid fa-power-off text-xs"></i>
+                    </button>
+                </div>`;
             c.appendChild(li);
         });
     };
+
     renderList(pp, 'profitList', 'profit');
     document.getElementById('profitUsedBudget').textContent = fmt(pp.cost);
     document.getElementById('profitTotalGain').textContent = fmt(pp.profit);
     renderList(rp, 'reliefList', 'relief');
     document.getElementById('reliefUsedBudget').textContent = fmt(rp.cost);
     document.getElementById('reliefTotalGain').textContent = fmt(rp.relief) + '/Ay';
+
     if (!pp.sel.length && !rp.sel.length) { showEl('noRecommendation'); }
-    else { if (resEl) { resEl.classList.remove('hidden'); resEl.style.display = 'grid'; } }
+    else { if (resEl) resEl.classList.remove('hidden'); }
 };
 
 // ================================================================
@@ -1338,9 +2202,7 @@ const closePdfModal = () => hideModal('pdfModal');
 
 const resetPdfModal = () => {
     document.getElementById('pdfStep1').classList.remove('hidden');
-    document.getElementById('pdfStep2').classList.add('hidden');
-    document.getElementById('pdfStep3').classList.add('hidden');
-    document.getElementById('pdfStep4').classList.add('hidden');
+    ['pdfStep2','pdfStep3','pdfStep4'].forEach(id => document.getElementById(id).classList.add('hidden'));
     document.getElementById('pdfSaveBtn').classList.add('hidden');
     document.getElementById('pdfInstallmentTable').classList.add('hidden');
     document.getElementById('pdfFileInput').value = '';
@@ -1349,13 +2211,13 @@ const resetPdfModal = () => {
 
 const pdfDropZone = document.getElementById('pdfDropZone');
 if (pdfDropZone) {
-    pdfDropZone.addEventListener('dragover', (e) => { e.preventDefault(); pdfDropZone.classList.add('border-indigo-400','bg-indigo-50','dark:bg-indigo-900/10'); });
-    pdfDropZone.addEventListener('dragleave', () => { pdfDropZone.classList.remove('border-indigo-400','bg-indigo-50','dark:bg-indigo-900/10'); });
+    pdfDropZone.addEventListener('dragover', (e) => { e.preventDefault(); pdfDropZone.classList.add('border-indigo-400','bg-indigo-50'); });
+    pdfDropZone.addEventListener('dragleave', () => { pdfDropZone.classList.remove('border-indigo-400','bg-indigo-50'); });
     pdfDropZone.addEventListener('drop', (e) => {
         e.preventDefault();
-        pdfDropZone.classList.remove('border-indigo-400','bg-indigo-50','dark:bg-indigo-900/10');
+        pdfDropZone.classList.remove('border-indigo-400','bg-indigo-50');
         const file = e.dataTransfer.files[0];
-        if (file && file.type === 'application/pdf') processPdf(file);
+        if (file?.type === 'application/pdf') processPdf(file);
         else showConfirm('Hata', 'Lütfen bir PDF dosyası seçin.', () => {}, 'danger');
     });
 }
@@ -1370,7 +2232,7 @@ async function processPdf(file) {
     document.getElementById('pdfStep2').classList.remove('hidden');
     document.getElementById('pdfProgressText').textContent = 'PDF açılıyor...';
     try {
-        if (typeof pdfjsLib === 'undefined') throw new Error('PDF kütüphanesi yüklenemedi. Sayfayı yenileyip tekrar deneyin.');
+        if (typeof pdfjsLib === 'undefined') throw new Error('PDF kütüphanesi yüklenemedi.');
         const arrayBuffer = await file.arrayBuffer();
         document.getElementById('pdfProgressText').textContent = 'Metin çıkarılıyor...';
         const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
@@ -1379,8 +2241,7 @@ async function processPdf(file) {
             document.getElementById('pdfProgressText').textContent = `Sayfa ${i}/${pdf.numPages} işleniyor...`;
             const page = await pdf.getPage(i);
             const content = await page.getTextContent();
-            const pageText = content.items.map(item => item.str).join(' ');
-            fullText += pageText + '\n';
+            fullText += content.items.map(item => item.str).join(' ') + '\n';
         }
         document.getElementById('pdfProgressText').textContent = 'Veriler analiz ediliyor...';
         const parsed = parsePdfText(fullText, file.name);
@@ -1391,11 +2252,12 @@ async function processPdf(file) {
         document.getElementById('pdfCategory').value = parsed.category || 'İhtiyaç';
         document.getElementById('pdfLoanAmount').value = parsed.loanAmount || '';
         document.getElementById('pdfMonthlyPayment').value = parsed.monthlyPayment || '';
+        document.getElementById('pdfInterestRate').value = parsed.interestRate || '';
         document.getElementById('pdfTotalInstallments').value = parsed.totalInstallments || '';
         document.getElementById('pdfPaidInstallments').value = parsed.paidInstallments || 0;
         document.getElementById('pdfLoanDate').value = parsed.loanDate || '';
         document.getElementById('pdfRawText').value = fullText.substring(0, 3000);
-        if (parsed.installments && parsed.installments.length > 0) showInstallmentTable(parsed.installments);
+        if (parsed.installments?.length > 0) showInstallmentTable(parsed.installments);
         parsedPdfData = parsed;
     } catch (err) {
         console.error('PDF error:', err);
@@ -1406,7 +2268,7 @@ async function processPdf(file) {
 }
 
 function parsePdfText(text, fileName) {
-    const result = { bankName: '', category: 'İhtiyaç', loanAmount: 0, monthlyPayment: 0, totalInstallments: 0, paidInstallments: 0, loanDate: '', installments: [] };
+    const result = { bankName: '', category: 'İhtiyaç', loanAmount: 0, monthlyPayment: 0, interestRate: 0, totalInstallments: 0, paidInstallments: 0, loanDate: '', installments: [] };
     const t = text.replace(/\s+/g, ' ').trim();
 
     const bankPatterns = [
@@ -1414,8 +2276,8 @@ function parsePdfText(text, fileName) {
         { p: /iş\s*bank/i, n: 'İş Bankası' }, { p: /halk\s*bank/i, n: 'Halkbank' },
         { p: /vakıf/i, n: 'Vakıfbank' }, { p: /akbank/i, n: 'Akbank' },
         { p: /yapı\s*kredi/i, n: 'Yapı Kredi' }, { p: /qnb|finansbank/i, n: 'QNB Finansbank' },
-        { p: /teb/i, n: 'TEB' }, { p: /enpara/i, n: 'Enpara' },
-        { p: /denizbank/i, n: 'Denizbank' }, { p: /hsbc/i, n: 'HSBC' },
+        { p: /teb/i, n: 'TEB' }, { p: /denizbank/i, n: 'Denizbank' },
+        { p: /enpara/i, n: 'Enpara' }, { p: /hsbc/i, n: 'HSBC' },
         { p: /ing\s*bank/i, n: 'ING Bank' }, { p: /kuveyt/i, n: 'Kuveyt Türk' },
     ];
     for (const bp of bankPatterns) { if (bp.p.test(t)) { result.bankName = bp.n; break; } }
@@ -1435,6 +2297,9 @@ function parsePdfText(text, fileName) {
 
     const countPatterns = [/taksit\s*sayısı[\s:]*([0-9]+)/i, /([0-9]+)\s*ay\s*vadeli/i, /vade[\s:]*([0-9]+)/i, /toplam\s*([0-9]+)\s*taksit/i];
     for (const p of countPatterns) { const m = t.match(p); if (m) { result.totalInstallments = parseInt(m[1]); break; } }
+
+    const ratePatterns = [/aylık[\s:]*%?\s*([0-9.,]+)\s*faiz/i, /faiz\s*oranı[\s:]*%?\s*([0-9.,]+)/i, /akdi\s*faiz[\s:]*%?\s*([0-9.,]+)/i];
+    for (const p of ratePatterns) { const m = t.match(p); if (m) { result.interestRate = parseFloat(m[1].replace(',','.')); break; } }
 
     const datePattern = /(\d{2})[./](\d{2})[./](\d{4})/g;
     const dates = [];
@@ -1509,15 +2374,15 @@ function showInstallmentTable(installments) {
         const tr = document.createElement('tr');
         tr.className = isPaid ? 'bg-emerald-50/50 dark:bg-emerald-900/10' : (isNext ? 'bg-blue-50/50 dark:bg-blue-900/10' : '');
         tr.innerHTML = `
-            <td class="px-3 py-1.5 text-slate-500 dark:text-slate-400">${inst.no}</td>
+            <td class="px-3 py-1.5 text-slate-500">${inst.no}</td>
             <td class="px-3 py-1.5 text-slate-700 dark:text-slate-200 font-medium">${fmtDate(inst.date)}</td>
             <td class="px-3 py-1.5 text-right font-bold text-slate-700 dark:text-slate-200">${fmt(inst.total)}</td>
-            <td class="px-3 py-1.5 text-right text-slate-500 dark:text-slate-400">${fmt(inst.principal)}</td>
-            <td class="px-3 py-1.5 text-right text-slate-500 dark:text-slate-400">${fmt(inst.interest)}</td>
+            <td class="px-3 py-1.5 text-right text-slate-500">${fmt(inst.principal)}</td>
+            <td class="px-3 py-1.5 text-right text-slate-500">${fmt(inst.interest)}</td>
             <td class="px-3 py-1.5 text-center">
-                ${isPaid ? '<span class="text-[10px] bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded font-bold">Ödendi</span>'
-                : isNext ? '<span class="text-[10px] bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-1.5 py-0.5 rounded font-bold">Sıradaki</span>'
-                : '<span class="text-[10px] bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 px-1.5 py-0.5 rounded">Bekliyor</span>'}
+                ${isPaid ? '<span class="text-[10px] bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 px-1.5 py-0.5 rounded font-bold">Ödendi</span>'
+                : isNext ? '<span class="text-[10px] bg-blue-100 dark:bg-blue-900/30 text-blue-600 px-1.5 py-0.5 rounded font-bold">Sıradaki</span>'
+                : '<span class="text-[10px] bg-slate-100 dark:bg-slate-700 text-slate-500 px-1.5 py-0.5 rounded">Bekliyor</span>'}
             </td>`;
         tbody.appendChild(tr);
     });
@@ -1527,6 +2392,7 @@ async function savePdfLoan() {
     const bankName = document.getElementById('pdfBankName').value.trim();
     const loanAmount = parseFloat(document.getElementById('pdfLoanAmount').value) || 0;
     const monthlyPayment = parseFloat(document.getElementById('pdfMonthlyPayment').value) || 0;
+    const interestRate = parseFloat(document.getElementById('pdfInterestRate').value) || 0;
     const totalInstallments = parseInt(document.getElementById('pdfTotalInstallments').value) || 0;
     const paidInstallments = parseInt(document.getElementById('pdfPaidInstallments').value) || 0;
     const loanDate = document.getElementById('pdfLoanDate').value;
@@ -1537,8 +2403,8 @@ async function savePdfLoan() {
 
     const remainingInstallments = Math.max(0, totalInstallments - paidInstallments);
     loans.push({
-        bankName, category, loanAmount, monthlyPayment, totalInstallments, remainingInstallments,
-        loanDate: loanDate || new Date().toISOString().split('T')[0],
+        bankName, category, loanAmount, monthlyPayment, interestRate, totalInstallments,
+        remainingInstallments, loanDate: loanDate || new Date().toISOString().split('T')[0],
         earlyCloseAmount: 0, paymentHistory: [],
         installmentPlan: parsedPdfData?.installments || [],
         importedFromPdf: true,
@@ -1556,8 +2422,8 @@ async function savePdfLoan() {
 function updateNotifButton() {
     const btn = document.getElementById('notifBtn');
     if (!btn) return;
-    if (!('Notification' in window)) { btn.innerHTML = '<i class="fa-solid fa-bell-slash text-sm text-slate-400"></i>'; btn.title = 'Bildirimler desteklenmiyor'; return; }
-    if (Notification.permission === 'granted') { btn.innerHTML = '<i class="fa-solid fa-bell text-sm text-emerald-500"></i>'; btn.title = 'Bildirimler Açık ✓'; }
+    if (!('Notification' in window)) { btn.innerHTML = '<i class="fa-solid fa-bell-slash text-sm text-slate-400"></i>'; return; }
+    if (Notification.permission === 'granted')  { btn.innerHTML = '<i class="fa-solid fa-bell text-sm text-emerald-500"></i>'; btn.title = 'Bildirimler Açık ✓'; }
     else if (Notification.permission === 'denied') { btn.innerHTML = '<i class="fa-solid fa-bell-slash text-sm text-red-500"></i>'; btn.title = 'Bildirimler Kapalı'; }
     else { btn.innerHTML = '<i class="fa-solid fa-bell text-sm"></i>'; btn.title = 'Bildirimleri Açmak İçin Tıkla'; }
 }
@@ -1565,21 +2431,13 @@ function updateNotifButton() {
 async function handleNotifClick() {
     if (!('Notification' in window)) { showConfirm('Desteklenmiyor', 'Bu tarayıcı bildirimleri desteklemiyor.', () => {}, 'danger'); return; }
     if (Notification.permission === 'denied') { showConfirm('İzin Gerekli', 'Bildirim izni reddedilmiş.\nTarayıcı adres çubuğundaki kilit ikonundan izin verin.', () => {}, 'danger'); return; }
-    if (Notification.permission === 'granted') { showConfirm('Bildirimler Açık', 'Bildirimler zaten açık!', () => {}, 'success'); return; }
+    if (Notification.permission === 'granted') { checkPaymentsNow(); showConfirm('Bildirimler Açık', 'Bildirimler zaten açık! Yaklaşan ödemeler kontrol edildi.', () => {}, 'success'); return; }
     const permission = await Notification.requestPermission();
     updateNotifButton();
     if (permission === 'granted') {
-        await scheduleNotificationCheck();
+        checkPaymentsNow();
         showConfirm('Başarılı!', 'Bildirimler açıldı!\n\n• 7 gün önce\n• 3 gün önce\n• 1 gün önce\n• Ödeme günü hatırlatma alacaksınız.', () => {}, 'success');
-    } else { showConfirm('Reddedildi', 'Bildirim izni verilmedi.', () => {}, 'danger'); }
-}
-
-async function scheduleNotificationCheck() {
-    if (Notification.permission !== 'granted') return;
-    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-        navigator.serviceWorker.controller.postMessage({ type: 'SCHEDULE_CHECK', loans });
     }
-    checkPaymentsNow();
 }
 
 function checkPaymentsNow() {
@@ -1595,12 +2453,13 @@ function checkPaymentsNow() {
         let title = '', body = '', show = false;
         if (diffDays === 7)  { title = '📅 7 Gün Kaldı';      body = `${loan.bankName} taksiti ${amount} — 7 gün sonra!`; show = true; }
         if (diffDays === 3)  { title = '⚠️ 3 Gün Kaldı';      body = `${loan.bankName} taksiti ${amount} — 3 gün sonra!`; show = true; }
-        if (diffDays === 1)  { title = '🚨 Yarın Ödeme Var!';  body = `${loan.bankName}: ${amount} — YARIN!`;              show = true; }
-        if (diffDays === 0)  { title = '🔴 BUGÜN Ödeme Günü!'; body = `${loan.bankName}: ${amount} — BUGÜN öde!`;          show = true; }
+        if (diffDays === 1)  { title = '🚨 Yarın Ödeme Var!';  body = `${loan.bankName}: ${amount} — YARIN!`; show = true; }
+        if (diffDays === 0)  { title = '🔴 BUGÜN Ödeme Günü!'; body = `${loan.bankName}: ${amount} — BUGÜN öde!`; show = true; }
         if (show) {
-            try { new Notification(title, { body, icon: './icon.svg', badge: './icon.svg', tag: key, vibrate: [300, 100, 300] }); localStorage.setItem(key, '1'); } catch(e) { console.warn(e); }
+            try { new Notification(title, { body, icon: './icon.svg', badge: './icon.svg', tag: key }); localStorage.setItem(key, '1'); } catch(e) {}
         }
     });
+    // Eski notif key'lerini temizle
     const keys = Object.keys(localStorage).filter(k => k.startsWith('notif_'));
     if (keys.length > 200) keys.slice(0, 100).forEach(k => localStorage.removeItem(k));
 }
@@ -1615,35 +2474,41 @@ setInterval(checkPaymentsNow, 60 * 60 * 1000);
     const ld = document.getElementById('loanDate');
     if (ld) ld.valueAsDate = new Date();
 
-    const local = loadFromLocal();
-    if (local) {
-        loans = local.loans || [];
-        incomes = local.incomes || [];
-        otherExpenses = local.otherExpenses || [];
-        render();
-        updateBudgetUI();
-    } else {
-        render();
+    // Auth kontrolü
+    const { data: { session } } = await sb.auth.getSession();
+    if (session?.user) {
+        currentUserId = session.user.id;
+        isAnonymous = false;
+        hideModal('loginModal');
+        await initAppData();
+        updateUserInfoBar();
     }
+    // Login modalı açık kalır, kullanıcı seçim yapacak
 
-    const cloud = await loadFromCloud();
-    if (cloud) {
-        loans = cloud.loans || [];
-        incomes = cloud.incomes || [];
-        otherExpenses = cloud.otherExpenses || [];
-        render();
-        updateBudgetUI();
-    }
+    sb.auth.onAuthStateChange(async (event, session) => {
+        if (event === 'SIGNED_IN' && session?.user) {
+            currentUserId = session.user.id;
+            isAnonymous = false;
+            hideModal('loginModal');
+            await initAppData();
+            updateUserInfoBar();
+        } else if (event === 'SIGNED_OUT') {
+            currentUserId = null;
+            isAnonymous = false;
+            loans = []; incomes = []; otherExpenses = [];
+            showModal('loginModal');
+        }
+    });
 
     setTimeout(() => {
         updateNotifButton();
-        if (Notification.permission === 'granted') scheduleNotificationCheck();
+        if (Notification.permission === 'granted') checkPaymentsNow();
     }, 2000);
 })();
 
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js?v=8').catch(e => console.warn('SW:', e));
+        navigator.serviceWorker.register('./sw.js?v=9').catch(e => console.warn('SW:', e));
     });
 }
 </script>
