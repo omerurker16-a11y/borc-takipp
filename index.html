@@ -35,6 +35,14 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
+    <!-- PDF.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        if (typeof pdfjsLib !== 'undefined') {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        }
+    </script>
+
     <style>
         * { font-family: 'Inter', sans-serif; }
         body { -webkit-tap-highlight-color: transparent; }
@@ -50,41 +58,29 @@
 </head>
 <body class="bg-slate-50 dark:bg-slate-900 min-h-screen text-slate-800 dark:text-slate-100 transition-colors duration-200 pb-24">
 
+<!-- ==================== MODALS ==================== -->
+
 <!-- SETTINGS MODAL -->
 <div id="settingsModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden z-[60] items-center justify-center p-4">
     <div class="bg-white dark:bg-slate-800 w-full max-w-sm shadow-2xl rounded-2xl border border-slate-100 dark:border-slate-700">
         <div class="p-6">
             <h3 class="text-lg font-bold text-slate-800 dark:text-white border-b border-slate-100 dark:border-slate-700 pb-3 mb-4 flex items-center gap-2">
-                <span class="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 p-1.5 rounded-lg">
-                    <i class="fa-solid fa-gear text-xs"></i>
-                </span>
+                <span class="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 p-1.5 rounded-lg"><i class="fa-solid fa-gear text-xs"></i></span>
                 Ayarlar ve Yedekleme
             </h3>
             <div class="space-y-3">
                 <button onclick="backupData()" class="w-full bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 text-blue-600 dark:text-blue-400 p-4 rounded-xl flex items-center gap-3 transition-colors border border-blue-100 dark:border-blue-800">
-                    <div class="bg-blue-100 dark:bg-blue-800 p-2 rounded-full w-10 h-10 flex items-center justify-center">
-                        <i class="fa-solid fa-cloud-arrow-down"></i>
-                    </div>
-                    <div class="text-left">
-                        <div class="font-bold text-sm">Verileri Yedekle</div>
-                        <div class="text-xs opacity-75">Tüm verileri dosyaya kaydet</div>
-                    </div>
+                    <div class="bg-blue-100 dark:bg-blue-800 p-2 rounded-full w-10 h-10 flex items-center justify-center"><i class="fa-solid fa-cloud-arrow-down"></i></div>
+                    <div class="text-left"><div class="font-bold text-sm">Verileri Yedekle</div><div class="text-xs opacity-75">Tüm verileri dosyaya kaydet</div></div>
                 </button>
                 <button onclick="document.getElementById('restoreInput').click()" class="w-full bg-emerald-50 dark:bg-emerald-900/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 p-4 rounded-xl flex items-center gap-3 transition-colors border border-emerald-100 dark:border-emerald-800">
-                    <div class="bg-emerald-100 dark:bg-emerald-800 p-2 rounded-full w-10 h-10 flex items-center justify-center">
-                        <i class="fa-solid fa-cloud-arrow-up"></i>
-                    </div>
-                    <div class="text-left">
-                        <div class="font-bold text-sm">Verileri Geri Yükle</div>
-                        <div class="text-xs opacity-75">Dosyadan verileri içe aktar</div>
-                    </div>
+                    <div class="bg-emerald-100 dark:bg-emerald-800 p-2 rounded-full w-10 h-10 flex items-center justify-center"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+                    <div class="text-left"><div class="font-bold text-sm">Verileri Geri Yükle</div><div class="text-xs opacity-75">Dosyadan verileri içe aktar</div></div>
                 </button>
                 <input type="file" id="restoreInput" accept=".json" class="hidden" onchange="restoreData(this)">
             </div>
             <div class="mt-6 flex justify-end">
-                <button onclick="toggleSettingsModal()" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 py-2.5 px-5 rounded-xl text-sm font-bold transition-colors">
-                    Kapat
-                </button>
+                <button onclick="toggleSettingsModal()" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 py-2.5 px-5 rounded-xl text-sm font-bold transition-colors">Kapat</button>
             </div>
         </div>
     </div>
@@ -95,9 +91,7 @@
     <div class="bg-white dark:bg-slate-800 w-full max-w-sm shadow-2xl rounded-2xl border border-slate-100 dark:border-slate-700">
         <div class="p-6">
             <h3 class="text-lg font-bold text-slate-800 dark:text-white border-b border-slate-100 dark:border-slate-700 pb-3 mb-4 flex items-center gap-2">
-                <span class="bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 p-1.5 rounded-lg">
-                    <i class="fa-solid fa-pen text-xs"></i>
-                </span>
+                <span class="bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 p-1.5 rounded-lg"><i class="fa-solid fa-pen text-xs"></i></span>
                 Kredi Düzenle
             </h3>
             <form id="editForm" class="space-y-4">
@@ -150,9 +144,7 @@
     <div class="bg-white dark:bg-slate-800 w-full max-w-md shadow-2xl rounded-2xl border border-slate-100 dark:border-slate-700 max-h-[90vh] overflow-y-auto">
         <div class="p-6">
             <h3 class="text-lg font-bold text-slate-800 dark:text-white border-b border-slate-100 dark:border-slate-700 pb-3 mb-4 flex items-center gap-2">
-                <span class="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 p-1.5 rounded-lg">
-                    <i class="fa-solid fa-list-ul text-xs"></i>
-                </span>
+                <span class="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 p-1.5 rounded-lg"><i class="fa-solid fa-list-ul text-xs"></i></span>
                 Kredi Detayı
             </h3>
             <div id="detailContent" class="space-y-3"></div>
@@ -180,7 +172,148 @@
     </div>
 </div>
 
-<!-- NAVBAR -->
+<!-- PDF MODAL -->
+<div id="pdfModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm hidden z-[60] items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-800 w-full max-w-2xl shadow-2xl rounded-2xl border border-slate-100 dark:border-slate-700 max-h-[90vh] overflow-y-auto">
+        <div class="p-6">
+            <h3 class="text-lg font-bold text-slate-800 dark:text-white border-b border-slate-100 dark:border-slate-700 pb-3 mb-4 flex items-center gap-2">
+                <span class="bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 p-1.5 rounded-lg"><i class="fa-solid fa-file-pdf text-xs"></i></span>
+                PDF Ödeme Planı Yükle
+            </h3>
+
+            <!-- Adım 1: Yükleme -->
+            <div id="pdfStep1">
+                <div class="border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-2xl p-8 text-center hover:border-indigo-400 dark:hover:border-indigo-500 transition-colors cursor-pointer" id="pdfDropZone" onclick="document.getElementById('pdfFileInput').click()">
+                    <div class="w-16 h-16 bg-orange-50 dark:bg-orange-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fa-solid fa-file-pdf text-3xl text-orange-500"></i>
+                    </div>
+                    <p class="text-slate-600 dark:text-slate-300 font-bold mb-1">PDF dosyasını buraya sürükle</p>
+                    <p class="text-slate-400 dark:text-slate-500 text-sm">veya tıklayarak seç</p>
+                    <p class="text-xs text-slate-400 dark:text-slate-500 mt-3">Banka ödeme planı PDF'leri desteklenir</p>
+                </div>
+                <input type="file" id="pdfFileInput" accept=".pdf" class="hidden" onchange="handlePdfUpload(this)">
+                <div class="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800">
+                    <p class="text-xs text-blue-700 dark:text-blue-300 font-bold mb-2">💡 Desteklenen Bankalar:</p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="text-xs bg-white dark:bg-slate-800 px-2 py-1 rounded-lg border border-blue-200 dark:border-blue-800 text-slate-600 dark:text-slate-300">Ziraat Bankası</span>
+                        <span class="text-xs bg-white dark:bg-slate-800 px-2 py-1 rounded-lg border border-blue-200 dark:border-blue-800 text-slate-600 dark:text-slate-300">Garanti BBVA</span>
+                        <span class="text-xs bg-white dark:bg-slate-800 px-2 py-1 rounded-lg border border-blue-200 dark:border-blue-800 text-slate-600 dark:text-slate-300">İş Bankası</span>
+                        <span class="text-xs bg-white dark:bg-slate-800 px-2 py-1 rounded-lg border border-blue-200 dark:border-blue-800 text-slate-600 dark:text-slate-300">Halkbank</span>
+                        <span class="text-xs bg-white dark:bg-slate-800 px-2 py-1 rounded-lg border border-blue-200 dark:border-blue-800 text-slate-600 dark:text-slate-300">Vakıfbank</span>
+                        <span class="text-xs bg-white dark:bg-slate-800 px-2 py-1 rounded-lg border border-blue-200 dark:border-blue-800 text-slate-600 dark:text-slate-300">Akbank</span>
+                        <span class="text-xs bg-white dark:bg-slate-800 px-2 py-1 rounded-lg border border-blue-200 dark:border-blue-800 text-slate-600 dark:text-slate-300">Yapı Kredi</span>
+                        <span class="text-xs bg-white dark:bg-slate-800 px-2 py-1 rounded-lg border border-blue-200 dark:border-blue-800 text-slate-600 dark:text-slate-300">QNB Finansbank</span>
+                        <span class="text-xs bg-white dark:bg-slate-800 px-2 py-1 rounded-lg border border-blue-200 dark:border-blue-800 text-slate-600 dark:text-slate-300">TEB</span>
+                        <span class="text-xs bg-white dark:bg-slate-800 px-2 py-1 rounded-lg border border-blue-200 dark:border-blue-800 text-slate-600 dark:text-slate-300">Denizbank</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Adım 2: İşleniyor -->
+            <div id="pdfStep2" class="hidden text-center py-8">
+                <div class="w-16 h-16 bg-indigo-50 dark:bg-indigo-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fa-solid fa-circle-notch text-3xl text-indigo-500 animate-spin"></i>
+                </div>
+                <p class="text-slate-700 dark:text-slate-200 font-bold">PDF okunuyor...</p>
+                <p class="text-slate-400 dark:text-slate-500 text-sm mt-1" id="pdfProgressText">Metin çıkarılıyor...</p>
+            </div>
+
+            <!-- Adım 3: Sonuç -->
+            <div id="pdfStep3" class="hidden">
+                <div class="mb-4 p-3 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border border-emerald-100 dark:border-emerald-800 flex items-center gap-2">
+                    <i class="fa-solid fa-circle-check text-emerald-500"></i>
+                    <span class="text-sm font-bold text-emerald-700 dark:text-emerald-300">PDF okundu! Bilgileri kontrol edip kaydedin.</span>
+                </div>
+                <form id="pdfResultForm" class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Banka / Kredi Adı *</label>
+                            <input type="text" id="pdfBankName" required class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:text-white text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Kategori *</label>
+                            <select id="pdfCategory" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:text-white text-sm">
+                                <option value="İhtiyaç">İhtiyaç Kredisi</option>
+                                <option value="Taşıt">Taşıt Kredisi</option>
+                                <option value="Konut">Konut Kredisi</option>
+                                <option value="Kredi Kartı">Kredi Kartı</option>
+                                <option value="Diğer">Diğer</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Çekilen Tutar (₺)</label>
+                            <input type="number" step="0.01" id="pdfLoanAmount" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:text-white text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Aylık Taksit (₺)</label>
+                            <input type="number" step="0.01" id="pdfMonthlyPayment" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:text-white text-sm">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-4">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Toplam Taksit</label>
+                            <input type="number" id="pdfTotalInstallments" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:text-white text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Ödenen Taksit</label>
+                            <input type="number" id="pdfPaidInstallments" value="0" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:text-white text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1">Kullanım Tarihi</label>
+                            <input type="date" id="pdfLoanDate" class="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:text-white text-sm">
+                        </div>
+                    </div>
+
+                    <!-- Taksit Tablosu -->
+                    <div id="pdfInstallmentTable" class="hidden">
+                        <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-2">Bulunan Taksit Planı</label>
+                        <div class="bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden max-h-52 overflow-y-auto">
+                            <table class="w-full text-xs">
+                                <thead class="bg-slate-100 dark:bg-slate-800 sticky top-0">
+                                    <tr>
+                                        <th class="text-left px-3 py-2 text-slate-600 dark:text-slate-300 font-bold">#</th>
+                                        <th class="text-left px-3 py-2 text-slate-600 dark:text-slate-300 font-bold">Tarih</th>
+                                        <th class="text-right px-3 py-2 text-slate-600 dark:text-slate-300 font-bold">Taksit</th>
+                                        <th class="text-right px-3 py-2 text-slate-600 dark:text-slate-300 font-bold">Anapara</th>
+                                        <th class="text-right px-3 py-2 text-slate-600 dark:text-slate-300 font-bold">Faiz</th>
+                                        <th class="text-center px-3 py-2 text-slate-600 dark:text-slate-300 font-bold">Durum</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pdfTableBody" class="divide-y divide-slate-100 dark:divide-slate-700/50"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <details class="mt-2">
+                        <summary class="text-xs text-slate-400 cursor-pointer hover:text-slate-600 dark:hover:text-slate-300">Ham PDF metni (hata ayıklama için)</summary>
+                        <textarea id="pdfRawText" rows="5" readonly class="mt-2 w-full px-3 py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-500 dark:text-slate-400 font-mono resize-none"></textarea>
+                    </details>
+                </form>
+            </div>
+
+            <!-- Adım 4: Hata -->
+            <div id="pdfStep4" class="hidden text-center py-8">
+                <div class="w-16 h-16 bg-red-50 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fa-solid fa-triangle-exclamation text-3xl text-red-500"></i>
+                </div>
+                <p class="text-slate-700 dark:text-slate-200 font-bold mb-2">PDF okunamadı</p>
+                <p class="text-slate-400 dark:text-slate-500 text-sm" id="pdfErrorText">Bilinmeyen hata</p>
+                <button onclick="resetPdfModal()" class="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm font-bold transition-colors">Tekrar Dene</button>
+            </div>
+
+            <div class="flex gap-3 mt-6 pt-4 border-t border-slate-100 dark:border-slate-700">
+                <button onclick="closePdfModal()" class="flex-1 py-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 rounded-xl font-medium text-sm transition-colors">Kapat</button>
+                <button id="pdfSaveBtn" onclick="savePdfLoan()" class="hidden flex-1 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-medium text-sm transition-colors shadow-lg shadow-indigo-600/20">
+                    <i class="fa-solid fa-check mr-2"></i> Krediye Ekle
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== NAVBAR ==================== -->
 <nav class="bg-white/95 dark:bg-slate-900/95 shadow-sm border-b border-slate-200 dark:border-slate-800 sticky top-0 z-50 backdrop-blur-md transition-colors duration-300">
     <div class="container mx-auto px-4 py-3 flex justify-between items-center">
         <div class="flex items-center gap-3">
@@ -197,9 +330,7 @@
                 <i class="fa-solid fa-cloud text-xs"></i>
                 <span id="cloudStatusText">...</span>
             </div>
-            <button id="notifBtn" onclick="handleNotifClick()"
-                class="w-9 h-9 flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 transition-colors"
-                title="Bildirimleri Aç">
+            <button id="notifBtn" onclick="handleNotifClick()" class="w-9 h-9 flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 transition-colors" title="Bildirimleri Aç">
                 <i class="fa-solid fa-bell text-sm"></i>
             </button>
             <button onclick="toggleSettingsModal()" class="w-9 h-9 flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 transition-colors">
@@ -212,7 +343,7 @@
     </div>
 </nav>
 
-<!-- MAIN -->
+<!-- ==================== MAIN ==================== -->
 <div class="container mx-auto px-4 py-6">
 
     <!-- LOANS SCREEN -->
@@ -279,22 +410,36 @@
     <div id="addScreen" class="hidden animate-fade-in">
         <div class="max-w-xl mx-auto">
             <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700">
-                <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center justify-between mb-4">
                     <h2 class="text-xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
-                        <span class="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 p-2 rounded-lg">
-                            <i class="fa-solid fa-plus text-sm"></i>
-                        </span>
+                        <span class="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 p-2 rounded-lg"><i class="fa-solid fa-plus text-sm"></i></span>
                         Yeni Kredi Ekle
                     </h2>
                     <button onclick="switchScreen('loans')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
                         <i class="fa-solid fa-xmark text-xl"></i>
                     </button>
                 </div>
+
+                <!-- PDF ile otomatik doldur -->
+                <div class="mb-5 p-4 bg-orange-50 dark:bg-orange-900/20 rounded-xl border border-orange-100 dark:border-orange-800">
+                    <p class="text-sm font-bold text-orange-700 dark:text-orange-300 mb-1 flex items-center gap-2">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> Otomatik Doldur
+                    </p>
+                    <p class="text-xs text-orange-600 dark:text-orange-400 mb-3">Bankanızın ödeme planı PDF'ini yükleyin, bilgiler otomatik dolsun.</p>
+                    <button onclick="openPdfModal()" class="w-full bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-file-pdf"></i> PDF'den Otomatik Doldur
+                    </button>
+                </div>
+
+                <div class="relative mb-5">
+                    <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-200 dark:border-slate-700"></div></div>
+                    <div class="relative flex justify-center"><span class="bg-white dark:bg-slate-800 px-3 text-xs text-slate-400">veya manuel girin</span></div>
+                </div>
+
                 <form id="loanForm" class="space-y-5">
                     <div>
                         <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">Kredi Adı / Banka *</label>
-                        <input type="text" id="bankName" placeholder="Örn: Ziraat Bankası İhtiyaç" required
-                            class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:text-white text-sm">
+                        <input type="text" id="bankName" placeholder="Örn: Ziraat Bankası İhtiyaç" required class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:text-white text-sm">
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">Kategori *</label>
@@ -309,25 +454,21 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">Çekilen Tutar (₺) *</label>
-                            <input type="number" id="loanAmount" step="0.01" placeholder="0.00" required
-                                class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:text-white text-sm">
+                            <input type="number" id="loanAmount" step="0.01" placeholder="0.00" required class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:text-white text-sm">
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">Aylık Taksit (₺) *</label>
-                            <input type="number" id="monthlyPayment" step="0.01" placeholder="0.00" required
-                                class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:text-white text-sm">
+                            <input type="number" id="monthlyPayment" step="0.01" placeholder="0.00" required class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:text-white text-sm">
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">Toplam Taksit *</label>
-                            <input type="number" id="totalInstallments" min="1" placeholder="12" required
-                                class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:text-white text-sm">
+                            <input type="number" id="totalInstallments" min="1" placeholder="12" required class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:text-white text-sm">
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">Kullanım Tarihi *</label>
-                            <input type="date" id="loanDate" required
-                                class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:text-white text-sm">
+                            <input type="date" id="loanDate" required class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 dark:text-white text-sm">
                         </div>
                     </div>
                     <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl border border-blue-100 dark:border-blue-800/50 hidden" id="paymentPreview">
@@ -426,9 +567,7 @@
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                 <div>
                     <h3 class="text-xl font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
-                        <span class="bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 p-2 rounded-lg">
-                            <i class="fa-solid fa-wand-magic-sparkles"></i>
-                        </span>
+                        <span class="bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 p-2 rounded-lg"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
                         Akıllı Ödeme Önerileri
                     </h3>
                     <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Bütçenize en uygun erken kapama stratejilerini keşfedin.</p>
@@ -436,59 +575,33 @@
                 <div class="flex gap-2 w-full md:w-auto">
                     <div class="relative flex-1 md:w-56">
                         <span class="absolute inset-y-0 left-3 flex items-center text-slate-400 text-sm">₺</span>
-                        <input id="budgetInput" type="number" step="0.01" placeholder="Bütçe girin"
-                            class="pl-8 w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/30 dark:text-white text-sm font-bold">
+                        <input id="budgetInput" type="number" step="0.01" placeholder="Bütçe girin" class="pl-8 w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/30 dark:text-white text-sm font-bold">
                     </div>
-                    <button onclick="calculateSmartRecommendations()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-3 rounded-xl text-sm font-bold transition-all active:scale-95 whitespace-nowrap">
-                        Analiz Et
-                    </button>
+                    <button onclick="calculateSmartRecommendations()" class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-3 rounded-xl text-sm font-bold transition-all active:scale-95 whitespace-nowrap">Analiz Et</button>
                 </div>
             </div>
 
             <div id="recommendationResults" class="hidden grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="border border-emerald-100 dark:border-emerald-900/30 bg-emerald-50/50 dark:bg-emerald-900/10 rounded-2xl p-5">
                     <div class="flex items-center gap-3 mb-5">
-                        <div class="bg-white dark:bg-emerald-900/50 p-2.5 rounded-xl shadow-sm">
-                            <i class="fa-solid fa-piggy-bank text-emerald-600 dark:text-emerald-400 text-lg"></i>
-                        </div>
-                        <div>
-                            <h4 class="font-bold text-emerald-900 dark:text-emerald-300">En Kârlı Senaryo</h4>
-                            <p class="text-xs text-emerald-700 dark:text-emerald-500">Maksimum faiz tasarrufu</p>
-                        </div>
+                        <div class="bg-white dark:bg-emerald-900/50 p-2.5 rounded-xl shadow-sm"><i class="fa-solid fa-piggy-bank text-emerald-600 dark:text-emerald-400 text-lg"></i></div>
+                        <div><h4 class="font-bold text-emerald-900 dark:text-emerald-300">En Kârlı Senaryo</h4><p class="text-xs text-emerald-700 dark:text-emerald-500">Maksimum faiz tasarrufu</p></div>
                     </div>
                     <ul id="profitList" class="space-y-2 mb-5"></ul>
                     <div class="bg-white/80 dark:bg-slate-800/80 p-4 rounded-xl border border-emerald-100 dark:border-emerald-900/30">
-                        <div class="flex justify-between text-sm mb-2">
-                            <span class="text-slate-500 dark:text-slate-400">Gerekli Bütçe</span>
-                            <span class="font-bold text-slate-700 dark:text-slate-200" id="profitUsedBudget">₺0</span>
-                        </div>
-                        <div class="flex justify-between items-center pt-2 border-t border-slate-100 dark:border-slate-700/50">
-                            <span class="text-emerald-600 dark:text-emerald-400 font-bold text-sm">Toplam Kâr</span>
-                            <span class="font-black text-lg text-emerald-600 dark:text-emerald-400" id="profitTotalGain">₺0</span>
-                        </div>
+                        <div class="flex justify-between text-sm mb-2"><span class="text-slate-500 dark:text-slate-400">Gerekli Bütçe</span><span class="font-bold text-slate-700 dark:text-slate-200" id="profitUsedBudget">₺0</span></div>
+                        <div class="flex justify-between items-center pt-2 border-t border-slate-100 dark:border-slate-700/50"><span class="text-emerald-600 dark:text-emerald-400 font-bold text-sm">Toplam Kâr</span><span class="font-black text-lg text-emerald-600 dark:text-emerald-400" id="profitTotalGain">₺0</span></div>
                     </div>
                 </div>
-
                 <div class="border border-blue-100 dark:border-blue-900/30 bg-blue-50/50 dark:bg-blue-900/10 rounded-2xl p-5">
                     <div class="flex items-center gap-3 mb-5">
-                        <div class="bg-white dark:bg-blue-900/50 p-2.5 rounded-xl shadow-sm">
-                            <i class="fa-solid fa-hand-holding-dollar text-blue-600 dark:text-blue-400 text-lg"></i>
-                        </div>
-                        <div>
-                            <h4 class="font-bold text-blue-900 dark:text-blue-300">Aylık Rahatlama</h4>
-                            <p class="text-xs text-blue-700 dark:text-blue-500">Aylık yükü en çok azaltan plan</p>
-                        </div>
+                        <div class="bg-white dark:bg-blue-900/50 p-2.5 rounded-xl shadow-sm"><i class="fa-solid fa-hand-holding-dollar text-blue-600 dark:text-blue-400 text-lg"></i></div>
+                        <div><h4 class="font-bold text-blue-900 dark:text-blue-300">Aylık Rahatlama</h4><p class="text-xs text-blue-700 dark:text-blue-500">Aylık yükü en çok azaltan plan</p></div>
                     </div>
                     <ul id="reliefList" class="space-y-2 mb-5"></ul>
                     <div class="bg-white/80 dark:bg-slate-800/80 p-4 rounded-xl border border-blue-100 dark:border-blue-900/30">
-                        <div class="flex justify-between text-sm mb-2">
-                            <span class="text-slate-500 dark:text-slate-400">Gerekli Bütçe</span>
-                            <span class="font-bold text-slate-700 dark:text-slate-200" id="reliefUsedBudget">₺0</span>
-                        </div>
-                        <div class="flex justify-between items-center pt-2 border-t border-slate-100 dark:border-slate-700/50">
-                            <span class="text-blue-600 dark:text-blue-400 font-bold text-sm">Aylık Kazanç</span>
-                            <span class="font-black text-lg text-blue-600 dark:text-blue-400" id="reliefTotalGain">₺0</span>
-                        </div>
+                        <div class="flex justify-between text-sm mb-2"><span class="text-slate-500 dark:text-slate-400">Gerekli Bütçe</span><span class="font-bold text-slate-700 dark:text-slate-200" id="reliefUsedBudget">₺0</span></div>
+                        <div class="flex justify-between items-center pt-2 border-t border-slate-100 dark:border-slate-700/50"><span class="text-blue-600 dark:text-blue-400 font-bold text-sm">Aylık Kazanç</span><span class="font-black text-lg text-blue-600 dark:text-blue-400" id="reliefTotalGain">₺0</span></div>
                     </div>
                 </div>
             </div>
@@ -509,24 +622,25 @@
 <div class="fixed bottom-0 left-0 w-full bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 z-50">
     <div class="flex justify-around items-center h-16 max-w-lg mx-auto">
         <button onclick="switchScreen('loans')" id="navLoans" class="flex flex-col items-center justify-center w-full h-full gap-1 transition-all text-indigo-600">
-            <i class="fa-solid fa-list-ul text-lg"></i>
-            <span class="text-[10px] font-bold">Borçlar</span>
+            <i class="fa-solid fa-list-ul text-lg"></i><span class="text-[10px] font-bold">Borçlar</span>
         </button>
         <div class="w-px h-8 bg-slate-100 dark:bg-slate-800"></div>
         <button onclick="switchScreen('recommendations')" id="navRecs" class="flex flex-col items-center justify-center w-full h-full gap-1 transition-all text-slate-400 dark:text-slate-500">
-            <i class="fa-solid fa-wand-magic-sparkles text-lg"></i>
-            <span class="text-[10px] font-bold">Öneriler</span>
+            <i class="fa-solid fa-wand-magic-sparkles text-lg"></i><span class="text-[10px] font-bold">Öneriler</span>
         </button>
         <div class="w-px h-8 bg-slate-100 dark:bg-slate-800"></div>
         <button onclick="switchScreen('budget')" id="navBudget" class="flex flex-col items-center justify-center w-full h-full gap-1 transition-all text-slate-400 dark:text-slate-500">
-            <i class="fa-solid fa-wallet text-lg"></i>
-            <span class="text-[10px] font-bold">Bütçe</span>
+            <i class="fa-solid fa-wallet text-lg"></i><span class="text-[10px] font-bold">Bütçe</span>
         </button>
     </div>
 </div>
 
+<!-- ==================== SCRIPTS ==================== -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+// ================================================================
+// SUPABASE
+// ================================================================
 const SUPABASE_URL = "https://ejeapbjlyqrucidbarhg.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVqZWFwYmpseXFydWNpZGJhcmhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE2MTA5NDIsImV4cCI6MjA5NzE4Njk0Mn0.b-1xu-TMknnsTv7ijqp2hQKTE1V9yLEfHN3yNJnKD4g";
 const SAVE_ID = "00000000-0000-0000-0000-000000000001";
@@ -538,7 +652,7 @@ function setCloudStatus(type, text) {
     if (!el || !wrap) return;
     el.textContent = text;
     const base = 'text-xs px-2 py-1 rounded-lg flex items-center gap-1 ';
-    if (type === 'ok')  wrap.className = base + 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400';
+    if (type === 'ok') wrap.className = base + 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400';
     else if (type === 'err') wrap.className = base + 'bg-red-50 dark:bg-red-900/20 text-red-500 dark:text-red-400';
     else wrap.className = base + 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400';
 }
@@ -577,14 +691,14 @@ async function loadFromCloud() {
 }
 
 function loadFromLocal() {
-    try {
-        const raw = localStorage.getItem('btBackup');
-        return raw ? JSON.parse(raw) : null;
-    } catch(e) { return null; }
+    try { const r = localStorage.getItem('btBackup'); return r ? JSON.parse(r) : null; } catch(e) { return null; }
 }
 </script>
 
 <script>
+// ================================================================
+// STATE & UTILS
+// ================================================================
 let loans = [], incomes = [], otherExpenses = [];
 
 const fmt = (n) => new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(n || 0);
@@ -601,7 +715,9 @@ const nextPayDate = (loanDateStr, total, remaining) => {
 };
 const saveState = async () => { await saveToCloud({ loans, incomes, otherExpenses }); };
 
+// ================================================================
 // DARK MODE
+// ================================================================
 const updateDarkIcon = (isDark) => {
     const el = document.getElementById('darkModeIcon');
     if (el) el.className = isDark ? 'fa-solid fa-sun text-sm' : 'fa-solid fa-moon text-sm';
@@ -615,15 +731,13 @@ const toggleDarkMode = () => {
 };
 updateDarkIcon(document.documentElement.classList.contains('dark'));
 
+// ================================================================
 // SCREEN SWITCH
+// ================================================================
 window.switchScreen = (s) => {
-    ['loansScreen','addScreen','recommendationsScreen','budgetScreen'].forEach(id => {
-        document.getElementById(id)?.classList.add('hidden');
-    });
+    ['loansScreen','addScreen','recommendationsScreen','budgetScreen'].forEach(id => document.getElementById(id)?.classList.add('hidden'));
     const base = 'flex flex-col items-center justify-center w-full h-full gap-1 transition-all ';
-    document.getElementById('navLoans').className = base + 'text-slate-400 dark:text-slate-500';
-    document.getElementById('navRecs').className  = base + 'text-slate-400 dark:text-slate-500';
-    document.getElementById('navBudget').className = base + 'text-slate-400 dark:text-slate-500';
+    ['navLoans','navRecs','navBudget'].forEach(id => { const el = document.getElementById(id); if (el) el.className = base + 'text-slate-400 dark:text-slate-500'; });
 
     if (s === 'loans') {
         document.getElementById('loansScreen').classList.remove('hidden');
@@ -641,35 +755,36 @@ window.switchScreen = (s) => {
     }
 };
 
+// ================================================================
 // MODAL HELPERS
+// ================================================================
 const showModal = (id) => { const m = document.getElementById(id); if (m) { m.classList.remove('hidden'); m.classList.add('flex'); } };
 const hideModal = (id) => { const m = document.getElementById(id); if (m) { m.classList.add('hidden'); m.classList.remove('flex'); } };
 const showEl = (id) => document.getElementById(id)?.classList.remove('hidden');
 const hideEl = (id) => document.getElementById(id)?.classList.add('hidden');
 
-['settingsModal','editModal','detailModal','confirmModal'].forEach(id => {
+['settingsModal','editModal','detailModal','confirmModal','pdfModal'].forEach(id => {
     document.getElementById(id)?.addEventListener('click', (e) => { if (e.target.id === id) hideModal(id); });
 });
 
+// ================================================================
 // SETTINGS
+// ================================================================
 const toggleSettingsModal = () => {
     const m = document.getElementById('settingsModal');
-    if (!m) return;
-    m.classList.contains('hidden') ? showModal('settingsModal') : hideModal('settingsModal');
+    m?.classList.contains('hidden') ? showModal('settingsModal') : hideModal('settingsModal');
 };
 const backupData = () => {
     const blob = new Blob([JSON.stringify({ loans, incomes, otherExpenses }, null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = `borc_yedek_${new Date().toISOString().slice(0,10)}.json`;
-    a.click();
-    URL.revokeObjectURL(a.href);
+    a.click(); URL.revokeObjectURL(a.href);
     hideModal('settingsModal');
     showConfirm('Başarılı', 'Yedek dosyası indirildi.', () => {}, 'success');
 };
 const restoreData = (input) => {
-    const file = input.files[0];
-    if (!file) return;
+    const file = input.files[0]; if (!file) return;
     const reader = new FileReader();
     reader.onload = async (e) => {
         try {
@@ -684,11 +799,12 @@ const restoreData = (input) => {
             }, 'danger');
         } catch { showConfirm('Hata', 'Geçersiz yedek dosyası!', () => {}, 'danger'); }
     };
-    reader.readAsText(file);
-    input.value = '';
+    reader.readAsText(file); input.value = '';
 };
 
+// ================================================================
 // CONFIRM MODAL
+// ================================================================
 let confirmCb = null;
 const showConfirm = (title, msg, cb, type = 'info') => {
     document.getElementById('confirmTitle').textContent = title;
@@ -710,7 +826,9 @@ const showConfirm = (title, msg, cb, type = 'info') => {
 document.getElementById('btnConfirm').addEventListener('click', () => { if (confirmCb) confirmCb(); hideModal('confirmModal'); confirmCb = null; });
 document.getElementById('btnCancel').addEventListener('click', () => { hideModal('confirmModal'); confirmCb = null; });
 
+// ================================================================
 // EDIT MODAL
+// ================================================================
 window.openEditModal = (idx) => {
     const loan = loans[idx]; if (!loan) return;
     document.getElementById('editIndex').value = idx;
@@ -736,7 +854,9 @@ document.getElementById('editForm').addEventListener('submit', async (e) => {
     await saveState(); hideModal('editModal'); render();
 });
 
+// ================================================================
 // DETAIL MODAL
+// ================================================================
 window.openDetailModal = (idx) => {
     const loan = loans[idx]; if (!loan) return;
     const total = Math.max(1, loan.totalInstallments || 1);
@@ -744,11 +864,11 @@ window.openDetailModal = (idx) => {
     const monthly = parseFloat(loan.monthlyPayment) || 0;
     const loanAmt = parseFloat(loan.loanAmount) || 0;
     const paid = total - (loan.isEarlyClosed ? (loan.savedInstallments || 0) : rem);
-    const totalPaid = paid * monthly;
     const remP = loan.isEarlyClosed ? 0 : (rem / total) * loanAmt;
     const ec = parseFloat(loan.earlyCloseAmount) || 0;
     const profit = ec > 0 ? (rem * monthly) - ec : 0;
     const nd = loan.isEarlyClosed ? null : nextPayDate(loan.loanDate, total, rem);
+
     document.getElementById('detailContent').innerHTML = `
         <div class="grid grid-cols-2 gap-2 text-sm">
             <div class="col-span-2 bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl">
@@ -781,7 +901,7 @@ window.openDetailModal = (idx) => {
             </div>
             <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl">
                 <div class="text-[10px] text-slate-400 uppercase mb-0.5">Toplam Ödenen</div>
-                <div class="font-bold text-slate-700 dark:text-slate-200">${fmt(totalPaid)}</div>
+                <div class="font-bold text-slate-700 dark:text-slate-200">${fmt(paid * monthly)}</div>
             </div>
             <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-xl">
                 <div class="text-[10px] text-slate-400 uppercase mb-0.5">Kalan Anapara</div>
@@ -800,10 +920,41 @@ window.openDetailModal = (idx) => {
                 <div class="font-bold text-lg ${profit >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-500'}">${profit >= 0 ? '+' : ''}${fmt(profit)}</div>
                 <div class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Erken kapama tutarı: ${fmt(ec)}</div>
             </div>` : ''}
+            ${loan.importedFromPdf ? `<div class="col-span-2 bg-orange-50 dark:bg-orange-900/20 p-2 rounded-xl border border-orange-100 dark:border-orange-800 flex items-center gap-2">
+                <i class="fa-solid fa-file-pdf text-orange-500 text-xs"></i>
+                <span class="text-xs text-orange-600 dark:text-orange-400 font-medium">PDF'den içe aktarıldı</span>
+            </div>` : ''}
         </div>
+        ${loan.installmentPlan?.length ? `
+        <div class="mt-4">
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-2">Taksit Planı (PDF'den)</div>
+            <div class="bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden max-h-48 overflow-y-auto">
+                <table class="w-full text-xs">
+                    <thead class="bg-slate-100 dark:bg-slate-800 sticky top-0">
+                        <tr>
+                            <th class="text-left px-2 py-1.5 text-slate-600 dark:text-slate-300">#</th>
+                            <th class="text-left px-2 py-1.5 text-slate-600 dark:text-slate-300">Tarih</th>
+                            <th class="text-right px-2 py-1.5 text-slate-600 dark:text-slate-300">Taksit</th>
+                            <th class="text-center px-2 py-1.5 text-slate-600 dark:text-slate-300">Durum</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${loan.installmentPlan.map((inst, i) => {
+                            const isPaid = new Date(inst.date) < new Date();
+                            return `<tr class="${isPaid ? 'bg-emerald-50/50 dark:bg-emerald-900/10' : ''}">
+                                <td class="px-2 py-1 text-slate-400">${inst.no || i+1}</td>
+                                <td class="px-2 py-1 text-slate-600 dark:text-slate-300">${fmtDate(inst.date)}</td>
+                                <td class="px-2 py-1 text-right font-bold text-slate-700 dark:text-slate-200">${fmt(inst.total)}</td>
+                                <td class="px-2 py-1 text-center">${isPaid ? '<span class="text-[10px] text-emerald-600 font-bold">✓</span>' : '<span class="text-[10px] text-slate-400">-</span>'}</td>
+                            </tr>`;
+                        }).join('')}
+                    </tbody>
+                </table>
+            </div>
+        </div>` : ''}
         ${loan.paymentHistory?.length ? `
         <div class="mt-4">
-            <div class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-2">Son Ödemeler</div>
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-wide mb-2">Manuel Ödeme Geçmişi</div>
             ${loan.paymentHistory.slice(-5).reverse().map(h => `
                 <div class="flex justify-between text-xs p-2 bg-slate-50 dark:bg-slate-900/50 rounded-lg mb-1 border border-slate-100 dark:border-slate-700">
                     <span class="text-slate-500 dark:text-slate-400">${fmtDate(h.date)}</span>
@@ -815,7 +966,9 @@ window.openDetailModal = (idx) => {
 };
 window.closeDetailModal = () => hideModal('detailModal');
 
+// ================================================================
 // LOAN FORM PREVIEW
+// ================================================================
 const updatePreview = () => {
     const m = parseFloat(document.getElementById('monthlyPayment')?.value) || 0;
     const t = parseInt(document.getElementById('totalInstallments')?.value) || 0;
@@ -833,7 +986,9 @@ document.getElementById('loanAmount')?.addEventListener('input', updatePreview);
 document.getElementById('monthlyPayment')?.addEventListener('input', updatePreview);
 document.getElementById('totalInstallments')?.addEventListener('input', updatePreview);
 
+// ================================================================
 // ADD LOAN
+// ================================================================
 document.getElementById('loanForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const bankName = document.getElementById('bankName').value.trim();
@@ -858,7 +1013,9 @@ document.getElementById('loanForm')?.addEventListener('submit', async (e) => {
     else { await proceed(); }
 });
 
+// ================================================================
 // LOAN ACTIONS
+// ================================================================
 window.updateEarlyClose = async (idx, val) => {
     if (!loans[idx]) return;
     loans[idx].earlyCloseAmount = parseFloat(val) || 0;
@@ -903,7 +1060,9 @@ window.undoInstallment = (idx) => {
     }, 'danger');
 };
 
+// ================================================================
 // RENDER
+// ================================================================
 const render = () => {
     const list = document.getElementById('loanList');
     const empty = document.getElementById('emptyState');
@@ -944,6 +1103,8 @@ const render = () => {
         item.innerHTML = `
             ${loan.isEarlyClosed ? `<span class="absolute top-4 right-4 bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 text-[10px] font-bold px-2 py-1 rounded-md border border-emerald-200 dark:border-emerald-800">KAPATILDI</span>` : ''}
             ${urgent && !loan.isEarlyClosed ? `<span class="absolute top-4 right-4 bg-red-100 dark:bg-red-900/50 text-red-600 dark:text-red-300 text-[10px] font-bold px-2 py-1 rounded-md animate-pulse border border-red-200 dark:border-red-800"><i class="fa-solid fa-bell mr-1"></i>${diffDays === 0 ? 'BUGÜN!' : diffDays + ' GÜN!'}</span>` : ''}
+            ${loan.importedFromPdf ? `<span class="absolute top-4 ${loan.isEarlyClosed || urgent ? 'right-24' : 'right-4'} bg-orange-100 dark:bg-orange-900/30 text-orange-600 dark:text-orange-400 text-[10px] font-bold px-1.5 py-0.5 rounded border border-orange-200 dark:border-orange-800"><i class="fa-solid fa-file-pdf mr-0.5"></i>PDF</span>` : ''}
+
             <div class="flex flex-wrap items-center gap-2 pr-28 mb-2">
                 <h3 class="text-base font-bold text-slate-800 dark:text-white">${loan.bankName}</h3>
                 <span class="text-[10px] bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded-full font-medium">${loan.category}</span>
@@ -969,32 +1130,19 @@ const render = () => {
                 <div class="bg-white dark:bg-slate-800/50 p-2 rounded-lg border border-slate-100 dark:border-slate-700/50">
                     <div class="text-[10px] text-slate-400 uppercase mb-0.5">Erken Kapama (₺)</div>
                     <div class="flex items-center gap-1">
-                        <input type="number" step="0.01" value="${ec || ''}" placeholder="0.00"
-                            ${loan.isEarlyClosed ? 'disabled' : ''}
-                            onchange="updateEarlyClose(${oi}, this.value)"
-                            class="w-full text-xs bg-transparent border-b border-slate-300 dark:border-slate-600 focus:border-indigo-500 outline-none font-bold text-slate-700 dark:text-white disabled:opacity-50 py-0.5">
+                        <input type="number" step="0.01" value="${ec || ''}" placeholder="0.00" ${loan.isEarlyClosed ? 'disabled' : ''} onchange="updateEarlyClose(${oi}, this.value)" class="w-full text-xs bg-transparent border-b border-slate-300 dark:border-slate-600 focus:border-indigo-500 outline-none font-bold text-slate-700 dark:text-white disabled:opacity-50 py-0.5">
                         ${!loan.isEarlyClosed && hasEC ? `<button onclick="earlyCloseLoan(${oi})" class="text-emerald-500 hover:text-emerald-600 shrink-0" title="Erken Kapat"><i class="fa-solid fa-circle-check text-lg"></i></button>` : ''}
                     </div>
                 </div>
             </div>
             <div class="flex flex-wrap gap-2 pt-3 border-t border-slate-100 dark:border-slate-700/50">
                 ${!loan.isEarlyClosed ? `
-                    <button onclick="undoInstallment(${oi})" class="w-8 h-8 bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 rounded-lg flex items-center justify-center transition-colors" title="Geri Al">
-                        <i class="fa-solid fa-rotate-left text-xs"></i>
-                    </button>
-                    <button onclick="payInstallment(${oi})" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-3 py-2 rounded-lg flex items-center gap-1.5 transition-colors shadow-sm shadow-indigo-600/20">
-                        <i class="fa-solid fa-check"></i> Taksit Öde
-                    </button>
-                    <button onclick="openEditModal(${oi})" class="bg-amber-400 hover:bg-amber-500 text-white text-xs px-3 py-2 rounded-lg flex items-center gap-1.5 transition-colors">
-                        <i class="fa-solid fa-pen"></i> Düzenle
-                    </button>
+                    <button onclick="undoInstallment(${oi})" class="w-8 h-8 bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 rounded-lg flex items-center justify-center transition-colors" title="Geri Al"><i class="fa-solid fa-rotate-left text-xs"></i></button>
+                    <button onclick="payInstallment(${oi})" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-3 py-2 rounded-lg flex items-center gap-1.5 transition-colors shadow-sm shadow-indigo-600/20"><i class="fa-solid fa-check"></i> Taksit Öde</button>
+                    <button onclick="openEditModal(${oi})" class="bg-amber-400 hover:bg-amber-500 text-white text-xs px-3 py-2 rounded-lg flex items-center gap-1.5 transition-colors"><i class="fa-solid fa-pen"></i> Düzenle</button>
                 ` : `<div class="text-xs text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-900/20 px-3 py-1.5 rounded-lg border border-emerald-100 dark:border-emerald-800"><i class="fa-solid fa-check-double"></i> Borç kapatıldı</div>`}
-                <button onclick="openDetailModal(${oi})" class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-3 py-2 rounded-lg flex items-center gap-1.5 transition-colors">
-                    <i class="fa-solid fa-list-ul"></i> Detay
-                </button>
-                <button onclick="deleteLoan(${oi})" class="bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 text-xs px-3 py-2 rounded-lg flex items-center gap-1.5 ml-auto border border-red-200 dark:border-red-800/50 transition-colors">
-                    <i class="fa-solid fa-trash"></i> Sil
-                </button>
+                <button onclick="openDetailModal(${oi})" class="bg-blue-500 hover:bg-blue-600 text-white text-xs px-3 py-2 rounded-lg flex items-center gap-1.5 transition-colors"><i class="fa-solid fa-list-ul"></i> Detay</button>
+                <button onclick="deleteLoan(${oi})" class="bg-red-100 hover:bg-red-200 dark:bg-red-900/30 dark:hover:bg-red-900/50 text-red-600 dark:text-red-400 text-xs px-3 py-2 rounded-lg flex items-center gap-1.5 ml-auto border border-red-200 dark:border-red-800/50 transition-colors"><i class="fa-solid fa-trash"></i> Sil</button>
             </div>
         `;
         list.appendChild(item);
@@ -1008,7 +1156,9 @@ const render = () => {
 document.getElementById('filterBankName')?.addEventListener('input', render);
 document.getElementById('filterCategory')?.addEventListener('change', render);
 
+// ================================================================
 // BUDGET
+// ================================================================
 const renderBudgetLists = () => {
     const il = document.getElementById('incomeList');
     if (il) {
@@ -1062,7 +1212,6 @@ const generateBudgetPlan = () => {
     const incB = Array(dim + 2).fill(0), expB = Array(dim + 2).fill(0);
     const incI = Array.from({ length: dim + 2 }, () => []);
     const expI = Array.from({ length: dim + 2 }, () => []);
-
     incomes.forEach(it => { const d = Math.min(Math.max(1, +it.day || 1), dim); const a = parseFloat(it.amount) || 0; incB[d] += a; incI[d].push({ label: it.name || 'Gelir', amount: a }); });
     otherExpenses.forEach(it => { const d = Math.min(Math.max(1, +it.day || 1), dim); const a = parseFloat(it.amount) || 0; expB[d] += a; expI[d].push({ label: it.name || 'Gider', amount: a }); });
     loans.forEach(loan => {
@@ -1070,7 +1219,6 @@ const generateBudgetPlan = () => {
         const nd = nextPayDate(loan.loanDate, loan.totalInstallments, loan.remainingInstallments);
         if (nd.getFullYear() === y && nd.getMonth() === m) { const d = nd.getDate(); const a = parseFloat(loan.monthlyPayment) || 0; expB[d] += a; expI[d].push({ label: `Kredi: ${loan.bankName}`, amount: a }); }
     });
-
     const totInc = incB.reduce((a, b) => a + b, 0);
     const totExp = expB.reduce((a, b) => a + b, 0);
     const rem = totInc - totExp;
@@ -1078,7 +1226,6 @@ const generateBudgetPlan = () => {
     document.getElementById('planTotalExpense').textContent = fmt(totExp);
     const rb = document.getElementById('planRemainingBudget');
     if (rb) { rb.textContent = fmt(rem); rb.className = `text-sm font-bold ${rem >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`; }
-
     let balance = 0, hasAny = false;
     for (let d = 1; d <= dim; d++) {
         if (!incB[d] && !expB[d]) continue;
@@ -1090,22 +1237,13 @@ const generateBudgetPlan = () => {
         box.innerHTML = `
             <div class="flex items-center justify-between mb-2">
                 <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 rounded-lg flex items-center justify-center ${risky ? 'bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-300' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'}">
-                        <i class="fa-solid ${risky ? 'fa-triangle-exclamation' : 'fa-calendar-day'} text-xs"></i>
-                    </div>
+                    <div class="w-8 h-8 rounded-lg flex items-center justify-center ${risky ? 'bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-300' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'}"><i class="fa-solid ${risky ? 'fa-triangle-exclamation' : 'fa-calendar-day'} text-xs"></i></div>
                     <div>
                         <div class="text-xs font-bold text-slate-700 dark:text-slate-200">${d}.${m + 1}.${y}</div>
-                        <div class="text-[11px] text-slate-500 dark:text-slate-400">
-                            <span class="text-emerald-600 dark:text-emerald-400 font-bold">+${fmt(incB[d])}</span>
-                            <span class="mx-1">•</span>
-                            <span class="text-red-600 dark:text-red-400 font-bold">-${fmt(expB[d])}</span>
-                        </div>
+                        <div class="text-[11px] text-slate-500 dark:text-slate-400"><span class="text-emerald-600 dark:text-emerald-400 font-bold">+${fmt(incB[d])}</span> <span class="mx-1">•</span> <span class="text-red-600 dark:text-red-400 font-bold">-${fmt(expB[d])}</span></div>
                     </div>
                 </div>
-                <div class="text-right">
-                    <div class="text-[10px] text-slate-400 dark:text-slate-500">Bakiye</div>
-                    <div class="font-bold text-sm ${risky ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}">${fmt(balance)}</div>
-                </div>
+                <div class="text-right"><div class="text-[10px] text-slate-400 dark:text-slate-500">Bakiye</div><div class="font-bold text-sm ${risky ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}">${fmt(balance)}</div></div>
             </div>
             <div class="flex flex-wrap gap-1">
                 ${incI[d].map(it => `<span class="text-[11px] px-2 py-0.5 rounded bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">${it.label} +${fmt(it.amount)}</span>`).join('')}
@@ -1127,7 +1265,6 @@ document.getElementById('incomeForm')?.addEventListener('submit', async (e) => {
     incomes.push({ name: name || 'Gelir', amount, day });
     await saveState(); e.target.reset(); renderBudgetLists(); generateBudgetPlan();
 });
-
 document.getElementById('expenseForm')?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const name = document.getElementById('expenseName').value.trim();
@@ -1137,10 +1274,11 @@ document.getElementById('expenseForm')?.addEventListener('submit', async (e) => 
     otherExpenses.push({ name: name || 'Gider', amount, day });
     await saveState(); e.target.reset(); renderBudgetLists(); generateBudgetPlan();
 });
-
 document.getElementById('btnGeneratePlan')?.addEventListener('click', generateBudgetPlan);
 
+// ================================================================
 // RECOMMENDATIONS
+// ================================================================
 const getBudget = () => { const v = parseFloat(document.getElementById('budgetInput')?.value); return isFinite(v) ? v : 0; };
 const calculateSmartRecommendations = () => {
     const budget = getBudget();
@@ -1150,7 +1288,6 @@ const calculateSmartRecommendations = () => {
     hideEl('noRecommendation'); hideEl('noBudget');
     if (resEl) { resEl.classList.add('hidden'); resEl.style.display = ''; }
     if (budget <= 0) { showEl('noBudget'); return; }
-
     const active = loans.filter(l => !l.isEarlyClosed).map(loan => {
         const total = Math.max(1, loan.totalInstallments);
         const rem = loan.remainingInstallments || 0;
@@ -1162,17 +1299,14 @@ const calculateSmartRecommendations = () => {
         const profit = (rem * monthly) - cost;
         return { ...loan, cost, profit, relief: monthly, oi: loans.indexOf(loan) };
     });
-
     const ps = [...active].sort((a, b) => b.profit - a.profit);
     const pp = { sel: [], cost: 0, profit: 0 };
     let r1 = budget;
     ps.forEach(l => { if (l.cost > 0 && l.cost <= r1 && l.profit > 0) { pp.sel.push(l); pp.cost += l.cost; pp.profit += l.profit; r1 -= l.cost; } });
-
     const rs = [...active].sort((a, b) => (b.cost > 0 ? b.relief / b.cost : 0) - (a.cost > 0 ? a.relief / a.cost : 0));
     const rp = { sel: [], cost: 0, relief: 0 };
     let r2 = budget;
     rs.forEach(l => { if (l.cost > 0 && l.cost <= r2) { rp.sel.push(l); rp.cost += l.cost; rp.relief += l.relief; r2 -= l.cost; } });
-
     const renderList = (plan, listId, type) => {
         const c = document.getElementById(listId); if (!c) return;
         c.innerHTML = '';
@@ -1184,17 +1318,237 @@ const calculateSmartRecommendations = () => {
             c.appendChild(li);
         });
     };
-
     renderList(pp, 'profitList', 'profit');
     document.getElementById('profitUsedBudget').textContent = fmt(pp.cost);
     document.getElementById('profitTotalGain').textContent = fmt(pp.profit);
     renderList(rp, 'reliefList', 'relief');
     document.getElementById('reliefUsedBudget').textContent = fmt(rp.cost);
     document.getElementById('reliefTotalGain').textContent = fmt(rp.relief) + '/Ay';
-
     if (!pp.sel.length && !rp.sel.length) { showEl('noRecommendation'); }
     else { if (resEl) { resEl.classList.remove('hidden'); resEl.style.display = 'grid'; } }
 };
+
+// ================================================================
+// PDF SİSTEMİ
+// ================================================================
+let parsedPdfData = null;
+
+const openPdfModal = () => { showModal('pdfModal'); resetPdfModal(); };
+const closePdfModal = () => hideModal('pdfModal');
+
+const resetPdfModal = () => {
+    document.getElementById('pdfStep1').classList.remove('hidden');
+    document.getElementById('pdfStep2').classList.add('hidden');
+    document.getElementById('pdfStep3').classList.add('hidden');
+    document.getElementById('pdfStep4').classList.add('hidden');
+    document.getElementById('pdfSaveBtn').classList.add('hidden');
+    document.getElementById('pdfInstallmentTable').classList.add('hidden');
+    document.getElementById('pdfFileInput').value = '';
+    parsedPdfData = null;
+};
+
+const pdfDropZone = document.getElementById('pdfDropZone');
+if (pdfDropZone) {
+    pdfDropZone.addEventListener('dragover', (e) => { e.preventDefault(); pdfDropZone.classList.add('border-indigo-400','bg-indigo-50','dark:bg-indigo-900/10'); });
+    pdfDropZone.addEventListener('dragleave', () => { pdfDropZone.classList.remove('border-indigo-400','bg-indigo-50','dark:bg-indigo-900/10'); });
+    pdfDropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        pdfDropZone.classList.remove('border-indigo-400','bg-indigo-50','dark:bg-indigo-900/10');
+        const file = e.dataTransfer.files[0];
+        if (file && file.type === 'application/pdf') processPdf(file);
+        else showConfirm('Hata', 'Lütfen bir PDF dosyası seçin.', () => {}, 'danger');
+    });
+}
+
+async function handlePdfUpload(input) {
+    const file = input.files[0]; if (!file) return;
+    await processPdf(file);
+}
+
+async function processPdf(file) {
+    document.getElementById('pdfStep1').classList.add('hidden');
+    document.getElementById('pdfStep2').classList.remove('hidden');
+    document.getElementById('pdfProgressText').textContent = 'PDF açılıyor...';
+    try {
+        if (typeof pdfjsLib === 'undefined') throw new Error('PDF kütüphanesi yüklenemedi. Sayfayı yenileyip tekrar deneyin.');
+        const arrayBuffer = await file.arrayBuffer();
+        document.getElementById('pdfProgressText').textContent = 'Metin çıkarılıyor...';
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        let fullText = '';
+        for (let i = 1; i <= pdf.numPages; i++) {
+            document.getElementById('pdfProgressText').textContent = `Sayfa ${i}/${pdf.numPages} işleniyor...`;
+            const page = await pdf.getPage(i);
+            const content = await page.getTextContent();
+            const pageText = content.items.map(item => item.str).join(' ');
+            fullText += pageText + '\n';
+        }
+        document.getElementById('pdfProgressText').textContent = 'Veriler analiz ediliyor...';
+        const parsed = parsePdfText(fullText, file.name);
+        document.getElementById('pdfStep2').classList.add('hidden');
+        document.getElementById('pdfStep3').classList.remove('hidden');
+        document.getElementById('pdfSaveBtn').classList.remove('hidden');
+        document.getElementById('pdfBankName').value = parsed.bankName || '';
+        document.getElementById('pdfCategory').value = parsed.category || 'İhtiyaç';
+        document.getElementById('pdfLoanAmount').value = parsed.loanAmount || '';
+        document.getElementById('pdfMonthlyPayment').value = parsed.monthlyPayment || '';
+        document.getElementById('pdfTotalInstallments').value = parsed.totalInstallments || '';
+        document.getElementById('pdfPaidInstallments').value = parsed.paidInstallments || 0;
+        document.getElementById('pdfLoanDate').value = parsed.loanDate || '';
+        document.getElementById('pdfRawText').value = fullText.substring(0, 3000);
+        if (parsed.installments && parsed.installments.length > 0) showInstallmentTable(parsed.installments);
+        parsedPdfData = parsed;
+    } catch (err) {
+        console.error('PDF error:', err);
+        document.getElementById('pdfStep2').classList.add('hidden');
+        document.getElementById('pdfStep4').classList.remove('hidden');
+        document.getElementById('pdfErrorText').textContent = err.message || 'PDF okunamadı.';
+    }
+}
+
+function parsePdfText(text, fileName) {
+    const result = { bankName: '', category: 'İhtiyaç', loanAmount: 0, monthlyPayment: 0, totalInstallments: 0, paidInstallments: 0, loanDate: '', installments: [] };
+    const t = text.replace(/\s+/g, ' ').trim();
+
+    const bankPatterns = [
+        { p: /ziraat/i, n: 'Ziraat Bankası' }, { p: /garanti/i, n: 'Garanti BBVA' },
+        { p: /iş\s*bank/i, n: 'İş Bankası' }, { p: /halk\s*bank/i, n: 'Halkbank' },
+        { p: /vakıf/i, n: 'Vakıfbank' }, { p: /akbank/i, n: 'Akbank' },
+        { p: /yapı\s*kredi/i, n: 'Yapı Kredi' }, { p: /qnb|finansbank/i, n: 'QNB Finansbank' },
+        { p: /teb/i, n: 'TEB' }, { p: /enpara/i, n: 'Enpara' },
+        { p: /denizbank/i, n: 'Denizbank' }, { p: /hsbc/i, n: 'HSBC' },
+        { p: /ing\s*bank/i, n: 'ING Bank' }, { p: /kuveyt/i, n: 'Kuveyt Türk' },
+    ];
+    for (const bp of bankPatterns) { if (bp.p.test(t)) { result.bankName = bp.n; break; } }
+    if (!result.bankName && fileName) result.bankName = fileName.replace(/[_-]/g, ' ').replace('.pdf', '').substring(0, 40);
+
+    if (/taşıt|araç|otomobil/i.test(t)) result.category = 'Taşıt';
+    else if (/konut|mortgage|ev kredisi/i.test(t)) result.category = 'Konut';
+    else if (/kredi kartı|kart borcu/i.test(t)) result.category = 'Kredi Kartı';
+
+    const parseTL = (s) => { if (!s) return 0; return parseFloat(s.replace(/\./g, '').replace(',', '.')) || 0; };
+
+    const amountPatterns = [/kredi\s*tutarı[\s:]*([0-9.,]+)/i, /ana\s*para[\s:]*([0-9.,]+)/i, /kullandırılan\s*tutar[\s:]*([0-9.,]+)/i, /anapara[\s:]*([0-9.,]+)/i, /toplam\s*kredi[\s:]*([0-9.,]+)/i];
+    for (const p of amountPatterns) { const m = t.match(p); if (m) { result.loanAmount = parseTL(m[1]); break; } }
+
+    const installPatterns = [/aylık\s*taksit[\s:]*([0-9.,]+)/i, /taksit\s*tutarı[\s:]*([0-9.,]+)/i, /aylık\s*ödeme[\s:]*([0-9.,]+)/i];
+    for (const p of installPatterns) { const m = t.match(p); if (m) { result.monthlyPayment = parseTL(m[1]); break; } }
+
+    const countPatterns = [/taksit\s*sayısı[\s:]*([0-9]+)/i, /([0-9]+)\s*ay\s*vadeli/i, /vade[\s:]*([0-9]+)/i, /toplam\s*([0-9]+)\s*taksit/i];
+    for (const p of countPatterns) { const m = t.match(p); if (m) { result.totalInstallments = parseInt(m[1]); break; } }
+
+    const datePattern = /(\d{2})[./](\d{2})[./](\d{4})/g;
+    const dates = [];
+    let dm;
+    while ((dm = datePattern.exec(t)) !== null) {
+        const [, d, mo, y] = dm;
+        const ds = `${y}-${mo.padStart(2,'0')}-${d.padStart(2,'0')}`;
+        const dObj = new Date(ds);
+        if (!isNaN(dObj) && dObj.getFullYear() >= 2015 && dObj.getFullYear() <= 2040) dates.push({ str: ds, obj: dObj });
+    }
+    if (dates.length > 0) { dates.sort((a, b) => a.obj - b.obj); result.loanDate = dates[0].str; }
+
+    result.installments = parseInstallmentTable(t, parseTL);
+
+    if (result.installments.length > 0) {
+        if (!result.totalInstallments) result.totalInstallments = result.installments.length;
+        if (!result.monthlyPayment) {
+            const amounts = result.installments.map(i => i.total).filter(a => a > 0);
+            if (amounts.length) result.monthlyPayment = Math.round((amounts.reduce((a, b) => a + b, 0) / amounts.length) * 100) / 100;
+        }
+        if (!result.loanDate && result.installments[0]?.date) {
+            const fd = new Date(result.installments[0].date);
+            fd.setMonth(fd.getMonth() - 1);
+            result.loanDate = fd.toISOString().split('T')[0];
+        }
+        const now = new Date();
+        result.paidInstallments = result.installments.filter(i => i.dateObj && i.dateObj < now).length;
+    }
+    return result;
+}
+
+function parseInstallmentTable(text, parseTL) {
+    const installments = [];
+    const patterns = [
+        /(\d{1,3})\s+(\d{2}[./]\d{2}[./]\d{4})\s+([0-9.,]+)\s+([0-9.,]+)\s+([0-9.,]+)/g,
+        /(\d{2}[./]\d{2}[./]\d{4})\s+([0-9.,]+)\s+([0-9.,]+)\s+([0-9.,]+)/g,
+    ];
+    for (const pattern of patterns) {
+        let match; pattern.lastIndex = 0;
+        while ((match = pattern.exec(text)) !== null) {
+            try {
+                let no, dateStr, total, principal, interest;
+                if (match.length === 6) { [, no, dateStr, total, principal, interest] = match; }
+                else { [, dateStr, total, principal, interest] = match; no = installments.length + 1; }
+                const [d, mo, y] = dateStr.replace(/\//g, '.').split('.');
+                const isoDate = `${y}-${mo.padStart(2,'0')}-${d.padStart(2,'0')}`;
+                const dateObj = new Date(isoDate);
+                if (isNaN(dateObj) || dateObj.getFullYear() < 2015 || dateObj.getFullYear() > 2040) continue;
+                const tTotal = parseTL(total);
+                if (tTotal > 0 && tTotal < 10000000) {
+                    installments.push({ no: parseInt(no) || installments.length + 1, date: isoDate, dateObj, total: tTotal, principal: parseTL(principal), interest: parseTL(interest) });
+                }
+            } catch(e) { continue; }
+        }
+        if (installments.length > 0) break;
+    }
+    const unique = installments.filter((item, idx, self) => idx === self.findIndex(t => t.date === item.date && Math.abs(t.total - item.total) < 1));
+    return unique.sort((a, b) => a.dateObj - b.dateObj);
+}
+
+function showInstallmentTable(installments) {
+    const tableDiv = document.getElementById('pdfInstallmentTable');
+    const tbody = document.getElementById('pdfTableBody');
+    if (!tableDiv || !tbody) return;
+    tableDiv.classList.remove('hidden');
+    tbody.innerHTML = '';
+    const now = new Date();
+    const nextIdx = installments.findIndex(x => x.dateObj >= now);
+    installments.forEach((inst, i) => {
+        const isPaid = inst.dateObj < now;
+        const isNext = i === nextIdx;
+        const tr = document.createElement('tr');
+        tr.className = isPaid ? 'bg-emerald-50/50 dark:bg-emerald-900/10' : (isNext ? 'bg-blue-50/50 dark:bg-blue-900/10' : '');
+        tr.innerHTML = `
+            <td class="px-3 py-1.5 text-slate-500 dark:text-slate-400">${inst.no}</td>
+            <td class="px-3 py-1.5 text-slate-700 dark:text-slate-200 font-medium">${fmtDate(inst.date)}</td>
+            <td class="px-3 py-1.5 text-right font-bold text-slate-700 dark:text-slate-200">${fmt(inst.total)}</td>
+            <td class="px-3 py-1.5 text-right text-slate-500 dark:text-slate-400">${fmt(inst.principal)}</td>
+            <td class="px-3 py-1.5 text-right text-slate-500 dark:text-slate-400">${fmt(inst.interest)}</td>
+            <td class="px-3 py-1.5 text-center">
+                ${isPaid ? '<span class="text-[10px] bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded font-bold">Ödendi</span>'
+                : isNext ? '<span class="text-[10px] bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 px-1.5 py-0.5 rounded font-bold">Sıradaki</span>'
+                : '<span class="text-[10px] bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 px-1.5 py-0.5 rounded">Bekliyor</span>'}
+            </td>`;
+        tbody.appendChild(tr);
+    });
+}
+
+async function savePdfLoan() {
+    const bankName = document.getElementById('pdfBankName').value.trim();
+    const loanAmount = parseFloat(document.getElementById('pdfLoanAmount').value) || 0;
+    const monthlyPayment = parseFloat(document.getElementById('pdfMonthlyPayment').value) || 0;
+    const totalInstallments = parseInt(document.getElementById('pdfTotalInstallments').value) || 0;
+    const paidInstallments = parseInt(document.getElementById('pdfPaidInstallments').value) || 0;
+    const loanDate = document.getElementById('pdfLoanDate').value;
+    const category = document.getElementById('pdfCategory').value;
+
+    if (!bankName) { showConfirm('Hata', 'Lütfen kredi adını girin.', () => {}, 'danger'); return; }
+    if (!totalInstallments || totalInstallments < 1) { showConfirm('Hata', 'Toplam taksit sayısı gerekli.', () => {}, 'danger'); return; }
+
+    const remainingInstallments = Math.max(0, totalInstallments - paidInstallments);
+    loans.push({
+        bankName, category, loanAmount, monthlyPayment, totalInstallments, remainingInstallments,
+        loanDate: loanDate || new Date().toISOString().split('T')[0],
+        earlyCloseAmount: 0, paymentHistory: [],
+        installmentPlan: parsedPdfData?.installments || [],
+        importedFromPdf: true,
+    });
+    await saveState();
+    closePdfModal();
+    render();
+    switchScreen('loans');
+    showConfirm('Başarılı!', `"${bankName}" kredisi eklendi!\n\nToplam: ${totalInstallments} taksit\nÖdenen: ${paidInstallments}\nKalan: ${remainingInstallments}`, () => {}, 'success');
+}
 
 // ================================================================
 // BİLDİRİM SİSTEMİ
@@ -1202,59 +1556,28 @@ const calculateSmartRecommendations = () => {
 function updateNotifButton() {
     const btn = document.getElementById('notifBtn');
     if (!btn) return;
-    if (!('Notification' in window)) {
-        btn.innerHTML = '<i class="fa-solid fa-bell-slash text-sm text-slate-400"></i>';
-        btn.title = 'Bildirimler desteklenmiyor';
-        return;
-    }
-    if (Notification.permission === 'granted') {
-        btn.innerHTML = '<i class="fa-solid fa-bell text-sm text-emerald-500"></i>';
-        btn.title = 'Bildirimler Açık ✓';
-    } else if (Notification.permission === 'denied') {
-        btn.innerHTML = '<i class="fa-solid fa-bell-slash text-sm text-red-500"></i>';
-        btn.title = 'Bildirimler Kapalı - Tarayıcı ayarlarından açın';
-    } else {
-        btn.innerHTML = '<i class="fa-solid fa-bell text-sm"></i>';
-        btn.title = 'Bildirimleri Açmak İçin Tıkla';
-    }
+    if (!('Notification' in window)) { btn.innerHTML = '<i class="fa-solid fa-bell-slash text-sm text-slate-400"></i>'; btn.title = 'Bildirimler desteklenmiyor'; return; }
+    if (Notification.permission === 'granted') { btn.innerHTML = '<i class="fa-solid fa-bell text-sm text-emerald-500"></i>'; btn.title = 'Bildirimler Açık ✓'; }
+    else if (Notification.permission === 'denied') { btn.innerHTML = '<i class="fa-solid fa-bell-slash text-sm text-red-500"></i>'; btn.title = 'Bildirimler Kapalı'; }
+    else { btn.innerHTML = '<i class="fa-solid fa-bell text-sm"></i>'; btn.title = 'Bildirimleri Açmak İçin Tıkla'; }
 }
 
 async function handleNotifClick() {
-    if (!('Notification' in window)) {
-        showConfirm('Desteklenmiyor', 'Bu tarayıcı bildirimleri desteklemiyor.', () => {}, 'danger');
-        return;
-    }
-    if (Notification.permission === 'denied') {
-        showConfirm('İzin Gerekli',
-            'Bildirim izni reddedilmiş.\n\nTarayıcı adres çubuğundaki kilit/bilgi ikonuna tıklayıp bildirim iznini "İzin Ver" yapın, sonra sayfayı yenileyin.',
-            () => {}, 'danger');
-        return;
-    }
-    if (Notification.permission === 'granted') {
-        showConfirm('Bildirimler Açık', 'Bildirimler zaten açık! Ödeme günlerinde otomatik hatırlatma alacaksınız.', () => {}, 'success');
-        return;
-    }
+    if (!('Notification' in window)) { showConfirm('Desteklenmiyor', 'Bu tarayıcı bildirimleri desteklemiyor.', () => {}, 'danger'); return; }
+    if (Notification.permission === 'denied') { showConfirm('İzin Gerekli', 'Bildirim izni reddedilmiş.\nTarayıcı adres çubuğundaki kilit ikonundan izin verin.', () => {}, 'danger'); return; }
+    if (Notification.permission === 'granted') { showConfirm('Bildirimler Açık', 'Bildirimler zaten açık!', () => {}, 'success'); return; }
     const permission = await Notification.requestPermission();
+    updateNotifButton();
     if (permission === 'granted') {
-        updateNotifButton();
         await scheduleNotificationCheck();
-        showConfirm('Başarılı!', 'Bildirimler açıldı! Ödeme günlerinde hatırlatma alacaksınız:\n\n• 7 gün önce\n• 3 gün önce\n• 1 gün önce\n• Ödeme günü', () => {}, 'success');
-    } else {
-        updateNotifButton();
-        showConfirm('Reddedildi', 'Bildirim izni verilmedi.', () => {}, 'danger');
-    }
+        showConfirm('Başarılı!', 'Bildirimler açıldı!\n\n• 7 gün önce\n• 3 gün önce\n• 1 gün önce\n• Ödeme günü hatırlatma alacaksınız.', () => {}, 'success');
+    } else { showConfirm('Reddedildi', 'Bildirim izni verilmedi.', () => {}, 'danger'); }
 }
 
 async function scheduleNotificationCheck() {
     if (Notification.permission !== 'granted') return;
     if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
         navigator.serviceWorker.controller.postMessage({ type: 'SCHEDULE_CHECK', loans });
-    }
-    if ('periodicSync' in (navigator.serviceWorker || {})) {
-        try {
-            const sw = await navigator.serviceWorker.ready;
-            await sw.periodicSync.register('payment-check', { minInterval: 24 * 60 * 60 * 1000 });
-        } catch(e) { console.log('Periodic sync:', e); }
     }
     checkPaymentsNow();
 }
@@ -1269,24 +1592,15 @@ function checkPaymentsNow() {
         const amount = fmt(loan.monthlyPayment);
         const key = `notif_${loan.bankName}_${diffDays}_${nd.toDateString()}`;
         if (localStorage.getItem(key)) return;
-
         let title = '', body = '', show = false;
         if (diffDays === 7)  { title = '📅 7 Gün Kaldı';      body = `${loan.bankName} taksiti ${amount} — 7 gün sonra!`; show = true; }
         if (diffDays === 3)  { title = '⚠️ 3 Gün Kaldı';      body = `${loan.bankName} taksiti ${amount} — 3 gün sonra!`; show = true; }
-        if (diffDays === 1)  { title = '🚨 Yarın Ödeme Var!';  body = `${loan.bankName}: ${amount} — YARIN son gün!`;      show = true; }
+        if (diffDays === 1)  { title = '🚨 Yarın Ödeme Var!';  body = `${loan.bankName}: ${amount} — YARIN!`;              show = true; }
         if (diffDays === 0)  { title = '🔴 BUGÜN Ödeme Günü!'; body = `${loan.bankName}: ${amount} — BUGÜN öde!`;          show = true; }
-
         if (show) {
-            try {
-                new Notification(title, { body, icon: './icon.svg', badge: './icon.svg', tag: key, vibrate: [300, 100, 300] });
-                localStorage.setItem(key, '1');
-            } catch(e) { console.warn('Notification error:', e); }
+            try { new Notification(title, { body, icon: './icon.svg', badge: './icon.svg', tag: key, vibrate: [300, 100, 300] }); localStorage.setItem(key, '1'); } catch(e) { console.warn(e); }
         }
     });
-    cleanOldNotifKeys();
-}
-
-function cleanOldNotifKeys() {
     const keys = Object.keys(localStorage).filter(k => k.startsWith('notif_'));
     if (keys.length > 200) keys.slice(0, 100).forEach(k => localStorage.removeItem(k));
 }
@@ -1321,12 +1635,9 @@ setInterval(checkPaymentsNow, 60 * 60 * 1000);
         updateBudgetUI();
     }
 
-    // Bildirim sistemini başlat
     setTimeout(() => {
         updateNotifButton();
-        if (Notification.permission === 'granted') {
-            scheduleNotificationCheck();
-        }
+        if (Notification.permission === 'granted') scheduleNotificationCheck();
     }, 2000);
 })();
 
